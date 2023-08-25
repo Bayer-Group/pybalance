@@ -73,7 +73,9 @@ def infer_matching_headers(
 
 
 def _make_quantile_function(q):
-    f = lambda x: x.quantile(q)
+    def f(x):
+        return x.quantile(q)
+
     if q == 0:
         name = "min"
     elif q == 1:
@@ -304,9 +306,8 @@ Populations:
         aggregations = aggregations + [_make_quantile_function(q) for q in quantiles]
         agg = dict((c, aggregations) for c in self.headers["numeric"])
         agg = self.data.reset_index().groupby(self.population_col).agg(agg).T
-        counts = self.data.reset_index().groupby(self.population_col).count()["index"]
         agg.columns = [c for c in agg.columns]
-        agg = agg.round(decimals=1)
+        agg = agg.round(decimals=2)
 
         if not long_format:
             agg = agg.unstack(level=-1)

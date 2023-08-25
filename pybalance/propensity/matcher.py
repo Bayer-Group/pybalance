@@ -1,6 +1,6 @@
 import time
 import copy
-from typing import Optional, List, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -9,10 +9,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import optimize
-from scipy.stats import loguniform, randint
+from scipy.stats import loguniform
 
 from sklearn.base import BaseEstimator
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.model_selection import ParameterSampler
 from sklearn import preprocessing

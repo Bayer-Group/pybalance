@@ -1,7 +1,6 @@
 """
 Some helpful functions for plotting distribution.
 """
-import re
 from collections import defaultdict
 from typing import List, Optional
 import itertools
@@ -442,8 +441,9 @@ def plot_per_feature_loss(
     records = pd.concat(records)
 
     # Plot results
-    fig = plt.figure(figsize=(len(indices.keys()) / 2, 6))
-    ax = sns.barplot(data=records, x="feature", y="mismatch", **default_params)
+    figsize = default_params.pop("figsize", (len(indices.keys()) / 2, 6))
+    fig = plt.figure(figsize=figsize)
+    sns.barplot(data=records, x="feature", y="mismatch", ax=fig.gca(), **default_params)
 
     plt.grid(axis="y")
     handles, labels = fig.gca().get_legend_handles_labels()

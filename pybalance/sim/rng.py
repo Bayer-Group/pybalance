@@ -1,7 +1,9 @@
 # generate simulated data
+import os
 import numpy as np
 from scipy.stats import truncnorm, uniform
 import pandas as pd
+from pybalance.utils import MatchingData
 
 
 def generate_truncated_distributions(rng, mn, mx, size):
@@ -40,7 +42,10 @@ def multivariate_truncnorm(mu, cov, mn, mx, size):
     for a really long time, you have probably set parameters for which
     most samples get rejected.
     """
-    rng = lambda x: np.random.multivariate_normal(mu, cov, size=x)
+
+    def rng(x):
+        return np.random.multivariate_normal(mu, cov, size=x)
+
     return generate_truncated_distributions(rng, mn, mx, size)
 
 
@@ -66,8 +71,8 @@ def correlate_vars(x, y, cor):
     return y
 
 
-def generate_random_six_feature_data_rct(
-    size, mu_h=150, std_h=20, cor_hw=-0.8, cor_ag=0.8, seed=42
+def generate_random_feature_data_rct(
+    size, mu_h=150, std_h=20, cor_hw=-0.8, cor_ag=0.8, p_binary=[], seed=42
 ):
     np.random.seed(seed)
 
@@ -107,12 +112,14 @@ def generate_random_six_feature_data_rct(
             "population": ["target"] * size,
         }
     )
+    for i, p in enumerate(p_binary):
+        data.loc[:, f"binary_{i}"] = np.array(np.random.rand(size) < p).astype(int)
 
     return data
 
 
-def generate_random_six_feature_data_rwd(
-    size, mu_w=90, std_w=20, cor_hw=0.8, cor_ag=-0.8, seed=43
+def generate_random_feature_data_rwd(
+    size, mu_w=90, std_w=20, cor_hw=0.8, cor_ag=-0.8, p_binary=[], seed=43
 ):
     np.random.seed(seed)
 
@@ -153,4 +160,35 @@ def generate_random_six_feature_data_rwd(
         }
     )
 
+    for i, p in enumerate(p_binary):
+        data.loc[:, f"binary_{i}"] = np.array(np.random.rand(size) < p).astype(int)
+
     return data
+
+
+def generate_toy_dataset(n_pool=10000, n_target=1000, seed=45):
+    """
+    Generate a toy matching dataset with n_pool patients in the pool and
+    n_target patients in the target population. For finer control, see
+    generate_random_feature_data_rwd and generate_random_feature_data_rct.
+    """
+    pool = generate_random_feature_data_rwd(
+        n_pool, cor_hw=0.5, cor_ag=-0.5, p_binary=[0.1, 0.3, 0.5, 0.8], seed=seed
+    )
+    target = generate_random_feature_data_rct(
+        n_target, std_h=20, cor_ag=0.5, p_binary=[0.3, 0.5, 0.3, 0.5], seed=seed + 1
+    )
+    feature_data = pd.concat([pool, target])
+    feature_data.loc[:, "patient_id"] = list(range(len(feature_data)))
+    return MatchingData(feature_data)
+
+
+def load_paper_dataset():
+    """
+    Load the simulated matching dataset presented in the pybalance paper.
+    """
+    filepath = "pool250000-target25000-normal0-lognormal0-binary4.parquet"
+    resource = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "data", filepath
+    )
+    return MatchingData(resource)

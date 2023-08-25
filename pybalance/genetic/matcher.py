@@ -1,10 +1,8 @@
-from collections import Counter, deque
+from collections import deque
 import numpy as np
 import pandas as pd
 from typing import Union
-from scipy.spatial import distance
 import time
-import copy
 
 import logging
 
@@ -327,7 +325,7 @@ class GeneticMatcher:
         mutated_populations = self.candidate_populations[
             mutaters
         ]  # N x candidate_population_size
-        weights = torch.ones(
+        torch.ones(
             n_swap,
         )
 

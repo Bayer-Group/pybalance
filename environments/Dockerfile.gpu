@@ -2,7 +2,7 @@ FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04 AS build-env
 WORKDIR /build
 
 RUN apt-get update \
-  && apt-get install -y python3-pip python3-dev curl unzip vim \
+  && apt-get install -y python3-pip python3-dev curl unzip vim htop \
   && pip3 install --upgrade pip
 
 # AWS S3 CLI
@@ -28,6 +28,7 @@ FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 WORKDIR /pybalance/
 COPY --from=build-env /usr/bin/python3 /usr/bin/python3
 RUN ln -s /usr/bin/python3 python
+COPY --from=build-env /usr/bin /usr/bin
 COPY --from=build-env /usr/local /usr/local
 COPY --from=build-env /usr/lib /usr/lib
 COPY --from=build-env /lib /lib

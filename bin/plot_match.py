@@ -5,16 +5,14 @@ import boto3
 import re
 import uuid
 
-from pybalance.utils import BalanceCalculator, BetaBalance, MatchingData
+from pybalance.utils import MatchingData
 from pybalance.visualization import (
     plot_numeric_features,
     plot_binary_features,
-    plot_per_feature_loss,
     plot_categoric_features,
 )
 from pybalance.utils.matching_data import (
     _load_matching_data,
-    split_target_pool,
 )
 
 import logging
@@ -158,11 +156,11 @@ def write_summary_tables(match, match_path):
 def write_summary_plots(match, match_path, feature_weights=None):
     logger.info(f"Writing summary plots for match {match_path} ...")
 
-    logger.info(f"Plotting 1d marginals ...")
+    logger.info("Plotting 1d marginals ...")
     fig = plot_numeric_features(match)
     save_mpl_fig(fig, re.sub(".csv|.parquet", "_1d_marginals.png", match_path))
 
-    logger.info(f"Plotting binary features ...")
+    logger.info("Plotting binary features ...")
     fig = plot_binary_features(match, max_features=50)
     save_mpl_fig(fig, re.sub(".csv|.parquet", "_binary_features.png", match_path))
 
@@ -174,14 +172,14 @@ def write_summary_plots(match, match_path, feature_weights=None):
             feature_weights.weight > 1
         ].feature.tolist()
         if len(high_priority_features) > 0:
-            logger.info(f"Plotting high weight binary features ...")
+            logger.info("Plotting high weight binary features ...")
             fig = plot_binary_features(match, include_only=high_priority_features)
             save_mpl_fig(
                 fig,
                 re.sub(".csv|.parquet", "_high_weight_binary_features.png", match_path),
             )
 
-    logger.info(f"Plotting categoric features ...")
+    logger.info("Plotting categoric features ...")
     fig = plot_categoric_features(match)
     save_mpl_fig(fig, re.sub(".csv|.parquet", "_categoric_features.png", match_path))
 

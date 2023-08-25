@@ -89,7 +89,7 @@ Genetic Matcher
 
 Constraint Satisfaction Matcher
 --------------------------------------
-.. autoclass:: pybalance.cs.ConstraintSatisfactionMatcher
+.. autoclass:: pybalance.lp.ConstraintSatisfactionMatcher
     :members:
 
 
@@ -107,3 +107,10 @@ Visualization
 .. autofunction:: pybalance.visualization.plot_joint_numeric_categoric_distributions
 
 .. autofunction:: pybalance.visualization.plot_per_feature_loss
+
+
+Simulation
+================
+.. autofunction:: pybalance.sim.generate_toy_dataset
+
+.. autofunction:: pybalance.sim.load_paper_dataset

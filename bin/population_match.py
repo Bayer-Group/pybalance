@@ -1,9 +1,6 @@
 from typing import Dict
 import pandas as pd
-import numpy as np
 import argparse
-import sys
-import time
 import copy
 import os
 import boto3
@@ -14,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 from pybalance.genetic import GeneticMatcher, get_global_defaults
-from pybalance.cs.matcher import ConstraintSatisfactionMatcher
+from pybalance.lp.matcher import ConstraintSatisfactionMatcher
 from pybalance.propensity import (
     PropensityScoreMatcher,
     plot_propensity_score_match_distributions,
@@ -91,7 +88,7 @@ def duplicate_target(matching_data, n=1):
     )
 
 
-def ga_train(matching_data, bc, args):
+def ea_train(matching_data, bc, args):
     params = get_global_defaults(n_candidate_populations=args.n_candidate_populations)
     override_default_params = {
         "n_generations": 100000,
@@ -135,11 +132,11 @@ def ga_train(matching_data, bc, args):
     return match
 
 
-def cs_train(matching_data, bc, args):
+def lp_train(matching_data, bc, args):
     params = {
         "objective": args.objective,
         "time_limit": args.time_limit,
-        "parallel_solve": True,
+        "num_workers": args.num_workers,
         "verbose": True,
         "match_size": args.match_size,
         "ps_hinting": args.ps_hinting,
@@ -215,14 +212,14 @@ def parse_command_line():
         "--solver",
         action="store",
         default="PS",
-        choices=["GA", "CS", "PS"],
+        choices=["EA", "LP", "PS"],
         help="Solver to use for matching.",
     )
 
-    default_methods = {"GA": None, "PS": "greedy", "CS": "SAT_solver"}
+    default_methods = {"EA": None, "PS": "greedy", "LP": "SAT_solver"}
     valid_methods = {
-        "GA": [None],
-        "CS": ["SAT_solver"],
+        "EA": [None],
+        "LP": ["SAT_solver"],
         "PS": ["greedy", "greedy_prio", "linear_sum_assignment"],
     }
     parser.add_argument(
@@ -246,6 +243,14 @@ def parse_command_line():
         action="store",
         default=10,
         help="For objective functions that bin numeric variables, how many bins to use.",
+    )
+
+    parser.add_argument(
+        "--num-workers",
+        action="store",
+        type=int,
+        default=4,
+        help="Number of workers to use for CS solver.",
     )
 
     parser.add_argument(
@@ -300,7 +305,7 @@ def parse_command_line():
 
     args = parser.parse_args()
 
-    if args.solver == "CS" and args.objective in ["max_beta", "max_gamma"]:
+    if args.solver == "LP" and args.objective in ["max_beta", "max_gamma"]:
         raise ValueError(
             f"CS solver can only be used with linear objective functions, whereas chosen objective {args.objective} is nonlinear."
         )
@@ -313,10 +318,10 @@ def parse_command_line():
         if args.method not in valid_methods[args.solver]:
             raise ValueError(f"Unknown method {args.method} for solver {args.sovler}")
 
-    if args.seed is not None and args.solver not in ["CS", "GA"]:
+    if args.seed is not None and args.solver not in ["LP", "EA"]:
         raise ValueError(f"Seed not valid for solver {args.solver}")
 
-    if args.solver == "GA" and args.n_candidate_populations is None:
+    if args.solver == "EA" and args.n_candidate_populations is None:
         logger.warn("N_CANDIDATE_POPULATIONS not specified. Using 2**10 ...")
         args.n_candidate_populations = 2**10
 
@@ -352,7 +357,10 @@ def save_match(match, output):
 
 
 def get_balance_calculator(
-    matching_data: MatchingData, objective: str, feature_weights: Dict[str, float]
+    matching_data: MatchingData,
+    objective: str,
+    feature_weights: Dict[str, float],
+    n_bins: int = 10,
 ) -> BaseBalanceCalculator:
     if "beta" in objective:
         # For these objectives, n_bins is not defined
@@ -361,15 +369,15 @@ def get_balance_calculator(
         )
     elif objective in ["gamma", "gamma_squared"]:
         bc = BalanceCalculator(
-            matching_data, objective, feature_weights=feature_weights, n_bins=10
+            matching_data, objective, feature_weights=feature_weights, n_bins=n_bins
         )
     else:
         # For these objectives, weights are not defined.
-        bc = BalanceCalculator(matching_data, objective, n_bins=10)
+        bc = BalanceCalculator(matching_data, objective, n_bins=n_bins)
     return bc
 
 
-SOLVERS = {"GA": ga_train, "CS": cs_train, "PS": ps_train}
+SOLVERS = {"EA": ea_train, "LP": lp_train, "PS": ps_train}
 
 
 def main(args):
@@ -380,7 +388,9 @@ def main(args):
     matching_data = MatchingData(data=data, population_col="population")
     matching_data = duplicate_target(matching_data, n=args.n_to_one_matching)
 
-    bc = get_balance_calculator(matching_data, args.objective, feature_weights)
+    bc = get_balance_calculator(
+        matching_data, args.objective, feature_weights, args.n_bins
+    )
 
     match = solver(matching_data, bc, args)
     if match is None:

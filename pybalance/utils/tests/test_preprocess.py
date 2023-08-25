@@ -1,8 +1,5 @@
 import pandas as pd
 import numpy as np
-import re
-import yaml
-import pytest
 
 from pybalance.utils.preprocess import (
     FloatEncoder,
@@ -11,7 +8,7 @@ from pybalance.utils.preprocess import (
     DecisionTreeEncoder,
     ChainPreprocessor,
 )
-from pybalance.datasets import load_toy_data
+from pybalance.sim import generate_toy_dataset
 from pybalance.utils import MatchingData, MatchingHeaders
 
 
@@ -124,7 +121,7 @@ def test_categoric_drop():
     )
     m = MatchingData(data)
     pp = CategoricOneHotEncoder(drop="first")
-    m_out = pp.fit_transform(m)
+    pp.fit_transform(m)
     assert pp.get_feature_names_out("gender") == ["gender_Male"]
     assert pp.get_feature_names_out("country") == [
         "country_2",
@@ -151,7 +148,7 @@ def test_numeric_bins_encoder_feature_names():
     # names.
 
     # Start from basic dataset
-    m = load_toy_data()
+    m = generate_toy_dataset()
     data = m.data
 
     # Add features that might confuse the regexp
@@ -167,7 +164,7 @@ def test_numeric_bins_encoder_feature_names():
 
     N = 15
     pp_numeric = NumericBinsEncoder(n_bins=N, cumulative=False, encode="onehot")
-    m_out = pp_numeric.fit_transform(m)
+    pp_numeric.fit_transform(m)
 
     for feature_name_in in m.headers.numeric:
         mapped_cols = pp_numeric.get_feature_names_out(feature_name_in)
@@ -182,7 +179,7 @@ def test_numeric_bins_encoder_feature_names_order():
     # is a prerequisite for generating the cumulative bins.
 
     # Start from basic dataset
-    m = load_toy_data()
+    m = generate_toy_dataset()
     data = m.data
 
     # add a feature that might confuse the order of bins
@@ -206,7 +203,7 @@ def test_numeric_bins_encoder_onehot_cumulative():
     # Test the cumulative bins are generated correctly.
 
     # Start from basic dataset
-    m = load_toy_data()
+    m = generate_toy_dataset()
     data = m.data
 
     # add a feature that might confuse the order of bins
@@ -245,7 +242,7 @@ def test_numeric_bins_encoder_onehot_cumulative2():
 
 
 def test_decision_tree_encoder():
-    m = load_toy_data()
+    m = generate_toy_dataset()
     pp_float = DecisionTreeEncoder(max_leaf_nodes=3)
     m_out = pp_float.fit_transform(m)
     assert len(m_out.headers.all) == 3
@@ -256,7 +253,7 @@ def test_decision_tree_encoder():
 
 
 def test_chain_preprocessor_output_names():
-    m = load_toy_data()
+    m = generate_toy_dataset()
     pp_n = NumericBinsEncoder(encode="onehot", n_bins=6)
     pp_c = CategoricOneHotEncoder(drop=None)
     pp = ChainPreprocessor([pp_c, pp_n])
@@ -264,6 +261,10 @@ def test_chain_preprocessor_output_names():
 
     expected = {
         "gender": ["gender_0.0", "gender_1.0"],
+        "binary_0": ["binary_0_0", "binary_0_1"],
+        "binary_1": ["binary_1_0", "binary_1_1"],
+        "binary_2": ["binary_2_0", "binary_2_1"],
+        "binary_3": ["binary_3_0", "binary_3_1"],
         "country": [
             "country_0",
             "country_1",
@@ -298,6 +299,6 @@ def test_chain_preprocessor_output_names():
 
 def test_feature_names_out():
     pp = NumericBinsEncoder(cumulative=True, n_bins=5)
-    m = load_toy_data()
+    m = generate_toy_dataset()
     pp.fit_transform(m)
     assert set(pp.get_feature_names_out()) == set(pp.output_headers["all"])

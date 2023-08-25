@@ -9,20 +9,18 @@ from pybalance.utils import (
     GammaPreprocessor,
     split_target_pool,
 )
-from pybalance.datasets import load_toy_data
+from pybalance.sim import generate_toy_dataset
 from pybalance.utils.balance_calculators import (
     _get_batch_size,
     map_input_output_weights,
 )
-import yaml
 import pytest
-import torch
 
 
 def test_batcher():
     # Test that we get same result for balance with and without batching
 
-    matching_data = load_toy_data()
+    matching_data = generate_toy_dataset()
 
     # Without batching
     fc1 = BalanceCalculator(matching_data, "gamma", n_bins=20)
@@ -115,10 +113,10 @@ def test_beta1():
 
 
 def test_map_feature_weights():
-    m = load_toy_data()
+    m = generate_toy_dataset()
     n_bins = 12
     pp = GammaPreprocessor(cumulative=True, n_bins=n_bins)
-    m_out = pp.fit_transform(m)
+    pp.fit_transform(m)
 
     input_weights = {"age": 10, "weight": 1, "height": 2}
     output_weights = map_input_output_weights(pp, weights=input_weights)
@@ -201,7 +199,7 @@ def test_beta_is_standardized_mean_difference():
     # tests that our way of computing SMD matches with a more direct approach;
     # this also tests alignment between get_feature_names_out and
     # per_feature_loss.
-    m = load_toy_data()
+    m = generate_toy_dataset()
     fc = BetaBalance(m)
     per_feature_loss = fc.per_feature_loss(m.get_population("pool"))
 
@@ -216,7 +214,7 @@ def test_beta_is_standardized_mean_difference():
 
 
 def test_gamma_is_area_between_cdfs():
-    m = load_toy_data()
+    m = generate_toy_dataset()
     m = MatchingData(m.data, headers={"numeric": m.headers["numeric"], "categoric": []})
 
     fc = GammaBalance(m, n_bins=10, standardize_difference=False)

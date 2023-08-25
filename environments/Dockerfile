@@ -3,7 +3,7 @@ WORKDIR /build
 
 RUN apt-get update
 RUN apt-get install -y libglpk-dev
-RUN apt-get install -y curl unzip gcc vim
+RUN apt-get install -y curl unzip gcc vim htop
 RUN pip3 install --upgrade pip
 
 # AWS S3 CLI

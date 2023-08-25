@@ -1,11 +1,9 @@
-from abc import ABC, abstractmethod
 from typing import Dict, Union, Optional
 from collections import defaultdict
 
 import pandas as pd
 import numpy as np
 import torch
-import sys
 
 from pybalance.utils import (
     MatchingData,
@@ -212,6 +210,7 @@ class BaseBalanceCalculator:
         # however: when slicing for the candidate populations, this can blow up
         # the memory footprint. Use the BatchedBalanceCalculator to stay within
         # memory limits.
+        data = data.astype(np.float32)
         data = torch.tensor(
             data, dtype=torch.float32, device=self.device, requires_grad=False
         )
@@ -369,10 +368,9 @@ class BetaXBalance(BaseBalanceCalculator):
         matching_data: MatchingData,
         feature_weights: Optional[Dict[str, float]] = None,
         device: Optional[str] = None,
-        encode: str = "onehot-dense",
         drop: str = "first",
         standardize_difference: bool = True,
-        max_cross_terms=None,
+        max_cross_terms="auto",
     ):
         pp_x = BetaXPreprocessor(
             drop=drop,
@@ -382,6 +380,36 @@ class BetaXBalance(BaseBalanceCalculator):
             matching_data=matching_data,
             preprocessor=pp_x,
             order=1,
+            standardize_difference=standardize_difference,
+            device=device,
+        )
+
+
+class BetaXSquaredBalance(BaseBalanceCalculator):
+    """
+    Same as BetaXBalance, except that per-feature balances are averages in a
+    mean square fashion.
+    """
+
+    name = "beta_x_squared"
+
+    def __init__(
+        self,
+        matching_data: MatchingData,
+        feature_weights: Optional[Dict[str, float]] = None,
+        device: Optional[str] = None,
+        drop: str = "first",
+        standardize_difference: bool = True,
+        max_cross_terms="auto",
+    ):
+        pp_x = BetaXPreprocessor(
+            drop=drop,
+            max_cross_terms=max_cross_terms,
+        )
+        super(BetaXSquaredBalance, self).__init__(
+            matching_data=matching_data,
+            preprocessor=pp_x,
+            order=2,
             standardize_difference=standardize_difference,
             device=device,
         )
@@ -515,7 +543,7 @@ class GammaXBalance(BaseBalanceCalculator):
         cumulative: bool = True,
         drop: str = "first",
         standardize_difference: bool = True,
-        max_cross_terms=None,
+        max_cross_terms="auto",
     ):
         pp_x = GammaXPreprocessor(
             n_bins=n_bins,
@@ -656,6 +684,7 @@ BALANCE_CALCULATORS = {
     BaseBalanceCalculator.name: BaseBalanceCalculator,
     BetaBalance.name: BetaBalance,
     BetaXBalance.name: BetaXBalance,
+    BetaXSquaredBalance.name: BetaXSquaredBalance,
     BetaMaxBalance.name: BetaMaxBalance,
     BetaSquaredBalance.name: BetaSquaredBalance,
     GammaBalance.name: GammaBalance,

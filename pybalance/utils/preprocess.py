@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Union, Optional, Tuple
+from typing import List, Union, Optional, Tuple
 
-from collections import defaultdict
 import pandas as pd
 import numpy as np
-import re
 import copy
 
 from sklearn.preprocessing import (
@@ -13,7 +11,6 @@ from sklearn.preprocessing import (
     OneHotEncoder,
     StandardScaler,
 )
-from sklearn.compose import ColumnTransformer
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 import matplotlib.pyplot as plt
@@ -424,9 +421,7 @@ class CrossTermsPreprocessor(BaseMatchingPreprocessor):
         reasonable number of cross terms.
     """
 
-    def __init__(
-        self, subtract_mean: bool = True, max_cross_terms: Union[str, int] = "auto"
-    ):
+    def __init__(self, max_cross_terms: Union[str, int] = "auto"):
         self.max_cross_terms = max_cross_terms
         if isinstance(self.max_cross_terms, str) and self.max_cross_terms != "auto":
             raise ValueError(
@@ -443,6 +438,8 @@ class CrossTermsPreprocessor(BaseMatchingPreprocessor):
         self.feature_pairs = self._get_most_correlated_pairs(
             matching_data[matching_data.headers["all"]]
         )
+        for x, y in self.feature_pairs:
+            logger.info(f"Added cross term {x} * {y} to matching features.")
 
     def _get_most_correlated_pairs(self, data: pd.DataFrame) -> Tuple[str]:
         # Caller should have removed all non-feature columns
@@ -653,8 +650,9 @@ class BetaXPreprocessor(ChainPreprocessor):
         max_cross_terms: Optional[int] = None,
     ):
         pp_categoric = CategoricOneHotEncoder(drop=drop)
-        pp_cross_terms = CrossTermsPreprocessor(max_cross_terms)
-        preprocessors = [pp_cross_terms, pp_categoric]
+        pp_basic = FloatEncoder()
+        pp_cross_terms = CrossTermsPreprocessor(max_cross_terms=max_cross_terms)
+        preprocessors = [pp_basic, pp_cross_terms, pp_categoric]
         super(BetaXPreprocessor, self).__init__(preprocessors=preprocessors)
 
 
@@ -674,9 +672,10 @@ class GammaXPreprocessor(ChainPreprocessor):
         max_cross_terms: Optional[int] = None,
     ):
         pp_categoric = CategoricOneHotEncoder(drop=drop)
-        pp_cross_terms = CrossTermsPreprocessor(max_cross_terms)
+        pp_basic = FloatEncoder()
+        pp_cross_terms = CrossTermsPreprocessor(max_cross_terms=max_cross_terms)
         pp_numeric = NumericBinsEncoder(
             n_bins=n_bins, encode=encode, cumulative=cumulative
         )
-        preprocessors = [pp_cross_terms, pp_categoric, pp_numeric]
+        preprocessors = [pp_basic, pp_cross_terms, pp_categoric, pp_numeric]
         super(GammaXPreprocessor, self).__init__(preprocessors=preprocessors)

@@ -1,11 +1,9 @@
 from pybalance.utils import *
-
-import pybalance.datasets
 import pybalance.genetic
 import pybalance.propensity
 import pybalance.sim
 import pybalance.visualization
-import pybalance.cs
+import pybalance.lp
 
 __version__ = "0.1.0"
 

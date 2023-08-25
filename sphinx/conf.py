@@ -14,7 +14,6 @@
 #
 
 import os
-import sys
 
 
 DOCS_DIR = os.path.split(__file__)[0]

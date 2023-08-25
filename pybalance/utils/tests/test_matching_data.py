@@ -3,7 +3,7 @@ import numpy as np
 import copy
 import pytest
 
-from pybalance.datasets import load_toy_data
+from pybalance.sim import generate_toy_dataset
 from pybalance.utils import (
     MatchingData,
     MatchingHeaders,
@@ -50,7 +50,7 @@ def _make_fake_matching_data(
 
 
 def test_split_target_pool():
-    m = load_toy_data()
+    m = generate_toy_dataset()
 
     # test we can correctly infer the populations based on size
     target, pool = split_target_pool(m)
@@ -105,13 +105,13 @@ def test_split_target_pool3():
 
 def test_split_target_pool4():
     # Test can split when two populations present and only one name passed
-    m = load_toy_data()
+    m = generate_toy_dataset()
     target, pool = split_target_pool(m, target_name="pool")
     assert target[m.population_col].unique()[0] == "pool"
 
 
 def test_get_population():
-    m = load_toy_data()
+    m = generate_toy_dataset()
 
     # Check we can lookup populations by name
     pool = m.get_population("pool")
@@ -124,12 +124,17 @@ def test_get_population():
 
 
 def test_describe():
-    m = load_toy_data()
-    summary = m.describe()
-    assert np.all(
-        summary["pool"]["age"].values
-        == np.array([55.4, 13.1, 18.1, 46.7, 57.3, 66.1, 75.0])
-    )
+    m = generate_toy_dataset()
+    quantiles = [0, 0.25, 0.5, 0.75, 1]
+    summary = m.describe(aggregations=[], quantiles=quantiles)
+    target, pool = split_target_pool(m)
+    for c in m.headers["numeric"]:
+        assert np.allclose(
+            summary["pool"][c].values, pool[c].quantile(quantiles), atol=1e-2
+        )
+        assert np.allclose(
+            summary["target"][c].values, target[c].quantile(quantiles), atol=1e-2
+        )
 
 
 def test_infer_matching_headers():
@@ -182,14 +187,14 @@ def test_matching_data_append2():
     new_data = copy.deepcopy(data)
     new_data.loc[:, "adfadsf"] = 1
     matching_data = MatchingData(new_data)
-    with pytest.raises(ValueError) as e_info:
+    with pytest.raises(ValueError):
         matching_data.append(data)
 
 
 def test_matching_data_copy():
     # check there are no side effects when making changes on a copy
 
-    m1 = load_toy_data()
+    m1 = generate_toy_dataset()
     m2 = m1.copy()
 
     pool1 = m1.get_population("pool")

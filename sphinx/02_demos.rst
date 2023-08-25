@@ -6,5 +6,5 @@ Demos
 
    demos/matching_data.ipynb
    demos/ps_matcher.ipynb
-   demos/ga_matcher.ipynb
-   demos/cs_matcher.ipynb
+   demos/ea_matcher.ipynb
+   demos/lp_matcher.ipynb

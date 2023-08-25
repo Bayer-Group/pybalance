@@ -1,7 +1,4 @@
 import numpy as np
-from scipy import optimize
-from scipy.spatial import distance
-import torch
 
 import logging
 

@@ -3,7 +3,7 @@ WORKDIR /build
 
 RUN apt-get update
 RUN apt-get install -y libglpk-dev
-RUN apt-get install -y curl unzip gcc vim
+RUN apt-get install -y curl unzip gcc vim htop
 RUN pip3 install --upgrade pip
 
 # AWS S3 CLI
@@ -28,6 +28,7 @@ RUN apt-get install -y git
 FROM python:3.8-slim-buster
 WORKDIR /pybalance/
 COPY --from=build-env /usr/local /usr/local
+COPY --from=build-env /usr/bin /usr/bin
 COPY --from=build-env /usr/local/bin/aws /usr/local/bin/
 COPY --from=build-env /usr/local/aws-cli /usr/local/aws-cli
 
