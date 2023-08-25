@@ -1,0 +1,55 @@
+name: Deploy Pages
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.8' # install the python version needed
+    - name: install deps
+      run: |
+        apt-get update && apt-get install -y wget gcc
+        pip install -r environments/requirements.txt
+        pip install -r environments/requirements_dev.txt
+        wget https://github.com/jgm/pandoc/releases/download/2.17.1/pandoc-2.17.1-linux-amd64.tar.gz
+        tar xzvf pandoc-2.17.1-linux-amd64.tar.gz
+    - name: build docs
+      run: |
+        PYTHONPATH=. PATH=${PATH}:./pandoc-2.17.1/bin/ sphinx-build -b html sphinx docs
+    - uses: actions/upload-artifact@master
+      with:
+        name: page
+        path: docs
+        if-no-files-found: error
+
+  deploy:
+    runs-on: [ self-hosted, Linux, external-k8s ]
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+
+    steps:
+    - uses: actions/download-artifact@master
+      with:
+        name: page
+        path: .
+    - uses: actions/configure-pages@v1
+    - uses: actions/upload-pages-artifact@v1
+      with:
+        path: .
+    - id: deployment
+      uses: actions/deploy-pages@main

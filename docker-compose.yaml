@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+
+  jupyter:
+    image: pybal:dev
+    command: jupyter-notebook --ip 0.0.0.0 --port 8080 --no-browser --allow-root
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/pybalance/
+      - ${HOME}/data/:/data/
+
+  test:
+    image: pybal:dev
+    command: pytest
+    volumes:
+      - .:/pybalance/

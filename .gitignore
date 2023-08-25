@@ -1,0 +1,16 @@
+__pycache__/
+*pyc
+*ipynb
+site/
+build/
+dist/
+*.egg-info
+*.bbl
+*.aux
+*.log
+*.blg
+.DS_Store
+notebooks/*
+mlruns/*
+docs/*
+.devcontainer/*

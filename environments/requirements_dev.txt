@@ -1,0 +1,11 @@
+# These dependencies are often useful to have available when developing,
+# but are not strictly speaking required to run the software.
+jupyter
+jupyterlab
+notebook
+ipython
+recommonmark
+sphinx_rtd_theme
+nbsphinx
+black
+mypy
