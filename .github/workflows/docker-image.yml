@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
 
   linting:
-    runs-on: [ self-hosted, Linux, external-k8s ]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
 
   base_image:
     name: Base Image for standard environment
-    runs-on: [ self-hosted, Linux, external-k8s ]
+    runs-on: ubuntu-latest
     needs: linting
 
     steps:
@@ -57,7 +57,7 @@ jobs:
 
   base_image_gpu:
     name: Base Image for GPU environment
-    runs-on: [ self-hosted, Linux, external-k8s ]
+    runs-on: ubuntu-latest
     needs: linting
 
     steps:
