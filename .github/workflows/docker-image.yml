@@ -34,7 +34,7 @@ jobs:
         run: echo "DOCKER_TAG=$(echo "${{ github.ref_name }}" | sed -E 's/[^[:alnum:].-]+/-/g' | sed -E 's/^[^[:alnum:]]+//')" >> $GITHUB_ENV
       -
         name: docker
-        run: docker build -t ${DOCKER_TAG} -f environments/environments/Dockerfile .
+        run: docker build -t ${DOCKER_TAG} -f environments/Dockerfile .
       -
         name: Pytest
         run: docker run ${DOCKER_TAG} pytest
@@ -60,7 +60,7 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_APIKEY }}
       -
         name: docker
-        run: docker build -t ${DOCKER_TAG} -f environments/environments/Dockerfile.gpu .
+        run: docker build -t ${DOCKER_TAG} -f environments/Dockerfile.gpu .
       -
         name: Pytest
         run: docker run ${DOCKER_TAG} pytest
