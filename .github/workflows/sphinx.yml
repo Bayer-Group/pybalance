@@ -29,11 +29,10 @@ jobs:
     - name: build docs
       run: |
         PYTHONPATH=. PATH=${PATH}:./pandoc-2.17.1/bin/ sphinx-build -b html sphinx docs
-    - uses: actions/upload-artifact@master
+    - uses: actions/upload-artifact@v4
       with:
         name: page
         path: docs
-        if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest
