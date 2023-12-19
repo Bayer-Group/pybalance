@@ -33,23 +33,8 @@ jobs:
         name: Create tag name 🆔
         run: echo "DOCKER_TAG=$(echo "${{ github.ref_name }}" | sed -E 's/[^[:alnum:].-]+/-/g' | sed -E 's/^[^[:alnum:]]+//')" >> $GITHUB_ENV
       -
-        name: Login to JFrog 🐸
-        uses: docker/login-action@v2
-        with:
-          registry: ieg-docker-dev-k8s.artifactory.bayer.com
-          username: ${{ secrets.ARTIFACTORY_USERNAME }}
-          password: ${{ secrets.ARTIFACTORY_APIKEY }}
-      -
-        name: Build & push Docker image 🐳
-        uses: mr-smithers-excellent/docker-build-push@v5
-        with:
-          image: pybalance
-          registry: ieg-docker-dev-k8s.artifactory.bayer.com
-          username: ${{ secrets.ARTIFACTORY_USERNAME }}
-          password: ${{ secrets.ARTIFACTORY_APIKEY }}
-          tags: ${{ env.DOCKER_TAG }}
-          directory: .
-          dockerfile: environments/Dockerfile
+        name: docker
+        run: docker build -t ${DOCKER_TAG} -f environments/environments/Dockerfile .
       -
         name: Pytest
         run: docker run ieg-docker-dev-k8s.artifactory.bayer.com/pybalance:${DOCKER_TAG} pytest
