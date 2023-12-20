@@ -8,7 +8,7 @@ permissions:
 on:
   push:
     branches:
-      - main
+      - pagestest
 
 jobs:
   build:
@@ -29,26 +29,9 @@ jobs:
     - name: build docs
       run: |
         PYTHONPATH=. PATH=${PATH}:./pandoc-2.17.1/bin/ sphinx-build -b html sphinx docs
-    - uses: actions/upload-artifact@v4
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        name: page
-        path: docs
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: github-pages
-      url: ${{steps.deployment.outputs.page_url}}
-
-    steps:
-    - uses: actions/download-artifact@master
-      with:
-        name: page
-        path: .
-    - uses: actions/configure-pages@v1
-    - uses: actions/upload-pages-artifact@v1
-      with:
-        path: .
-    - id: deployment
-      uses: actions/deploy-pages@main
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
