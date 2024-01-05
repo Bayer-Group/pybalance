@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Propensity Score Matcher &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=f6245a2f"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Genetic Matcher" href="ea_matcher.html" />
+    <link rel="prev" title="Matching Data" href="matching_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Population Matching
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="matching_data.html">Matching Data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Propensity Score Matcher</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ea_matcher.html">Genetic Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lp_matcher.html">Constraint Satisfaction Matcher</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Population Matching</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
+      <li class="breadcrumb-item active">Propensity Score Matcher</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/demos/ps_matcher.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Propensity-Score-Matcher">
+<h1>Propensity Score Matcher<a class="headerlink" href="#Propensity-Score-Matcher" title="Permalink to this heading"></a></h1>
+<p>In this notebook, we show the basic usage of the PropensityScoreMatcher. Unlike the GeneticMatcher and ConstraintSatisfactionMatcher, the PropensityScoreMatcher does not directly optimize a particular balance score. Instead, the PropensityScoreMatcher uses the given objective as a measure of “correctness” of the propensity score model. The matcher tries a (possibly large) number of potential models and returns the model with the best score according to the given metric.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)-4s</span><span class="s2"> [</span><span class="si">%(filename)s</span><span class="s2">:</span><span class="si">%(lineno)d</span><span class="s2">] </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">pybalance.utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pybalance.sim</span> <span class="kn">import</span> <span class="n">generate_toy_dataset</span>
+<span class="kn">from</span> <span class="nn">pybalance.propensity</span> <span class="kn">import</span> <span class="n">PropensityScoreMatcher</span><span class="p">,</span> <span class="n">plot_propensity_score_match_distributions</span>
+<span class="kn">from</span> <span class="nn">pybalance.visualization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">plot_numeric_features</span><span class="p">,</span>
+    <span class="n">plot_categoric_features</span><span class="p">,</span>
+    <span class="n">plot_binary_features</span><span class="p">,</span>
+    <span class="n">plot_joint_numeric_distributions</span><span class="p">,</span>
+    <span class="n">plot_per_feature_loss</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [__init__.py:13] Loaded pybalance version 0.1.0.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">generate_toy_dataset</span><span class="p">(</span><span class="n">n_pool</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">m</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>60.807949</td>
+      <td>173.610298</td>
+      <td>77.912924</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>45.810836</td>
+      <td>170.541198</td>
+      <td>112.416988</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>58.876976</td>
+      <td>188.138610</td>
+      <td>108.789013</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>73.398077</td>
+      <td>162.939196</td>
+      <td>65.345017</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>56.890587</td>
+      <td>156.386701</td>
+      <td>78.140295</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>39.662026</td>
+      <td>162.692755</td>
+      <td>54.607476</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10995</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>49.130301</td>
+      <td>141.583192</td>
+      <td>103.798145</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>target</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10996</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>68.035281</td>
+      <td>168.744482</td>
+      <td>56.499644</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>10997</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>62.044564</td>
+      <td>177.796983</td>
+      <td>75.983973</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>10998</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>51.243734</td>
+      <td>161.013556</td>
+      <td>86.513956</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10999</td>
+    </tr>
+  </tbody>
+</table>
+<p>11000 rows × 12 columns</p>
+</div></div>
+</div>
+<section id="Optimize-Beta-(Mean-Absolute-SMD)">
+<h2>Optimize Beta (Mean Absolute SMD)<a class="headerlink" href="#Optimize-Beta-(Mean-Absolute-SMD)" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that using a caliper can result in matched population being</span>
+<span class="c1"># smaller than target! If this is undesired, do not use a caliper.</span>
+<span class="n">objective</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">matcher</span> <span class="o">=</span> <span class="n">PropensityScoreMatcher</span><span class="p">(</span>
+    <span class="n">matching_data</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
+    <span class="n">time_limit</span><span class="o">=</span><span class="mi">900</span><span class="p">,</span>
+    <span class="n">max_iter</span><span class="o">=</span><span class="mi">250</span><span class="p">)</span>
+<span class="n">matcher</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;objective&#39;: &#39;beta&#39;,
+ &#39;caliper&#39;: None,
+ &#39;max_iter&#39;: 250,
+ &#39;time_limit&#39;: 900,
+ &#39;method&#39;: &#39;greedy&#39;}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [matcher.py:181] Training model LogisticRegression (iter 1/250, 0.001 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.3082667764306295
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0466
+INFO [matcher.py:142]   Solution time: 0.005 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 2/250, 0.005 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.4178302034480908
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0370
+INFO [matcher.py:142]   Solution time: 0.008 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 3/250, 0.008 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 4/250, 0.010 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 5/250, 0.012 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 6/250, 0.014 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 7/250, 0.016 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 8/250, 0.018 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 9/250, 0.026 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 10/250, 0.035 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 11/250, 0.037 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 14.096856154490826
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0338
+INFO [matcher.py:142]   Solution time: 0.052 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 12/250, 0.052 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 13/250, 0.055 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 14/250, 0.058 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 15/250, 0.079 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 16/250, 0.081 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 17/250, 0.083 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 18/250, 0.086 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 19/250, 0.088 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 20/250, 0.094 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 7.10413629509646
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0333
+INFO [matcher.py:142]   Solution time: 0.106 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 21/250, 0.106 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 22/250, 0.108 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 37.6925771014261
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0325
+INFO [matcher.py:142]   Solution time: 0.127 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 23/250, 0.128 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 24/250, 0.135 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 25/250, 0.137 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 26/250, 0.139 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 27/250, 0.140 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 28/250, 0.152 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 29/250, 0.154 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 30/250, 0.157 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 31/250, 0.159 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 32/250, 0.162 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 33/250, 0.165 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 34/250, 0.192 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 35/250, 0.195 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 36/250, 0.204 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 37/250, 0.206 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 38/250, 0.219 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 39/250, 0.220 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 40/250, 0.223 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 41/250, 0.225 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 42/250, 0.227 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 43/250, 0.256 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 44/250, 0.258 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 45/250, 0.260 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 46/250, 0.262 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 47/250, 0.264 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 48/250, 0.290 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 49/250, 0.292 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 50/250, 0.295 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 51/250, 0.297 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 52/250, 0.299 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 53/250, 0.301 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 54/250, 0.303 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 55/250, 0.305 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 56/250, 0.307 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 57/250, 0.310 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 58/250, 0.312 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 59/250, 0.314 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 60/250, 0.317 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 61/250, 0.319 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 62/250, 0.346 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 63/250, 0.349 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 64/250, 0.351 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 65/250, 0.379 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 66/250, 0.381 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 67/250, 0.383 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 68/250, 0.386 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 69/250, 0.409 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 70/250, 0.412 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 71/250, 0.414 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 72/250, 0.442 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 73/250, 0.444 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 1.1176816672180454
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0295
+INFO [matcher.py:142]   Solution time: 0.472 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 74/250, 0.473 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 75/250, 0.476 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 76/250, 0.480 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 77/250, 0.484 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 78/250, 0.487 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 79/250, 0.489 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 80/250, 0.492 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 81/250, 0.523 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 82/250, 0.526 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 83/250, 0.529 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 84/250, 0.532 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 85/250, 0.560 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 86/250, 0.564 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 87/250, 0.567 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 88/250, 0.570 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 89/250, 0.572 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 90/250, 0.575 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 91/250, 0.578 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 92/250, 0.581 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 93/250, 0.583 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 94/250, 0.604 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 95/250, 0.612 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 96/250, 0.615 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 97/250, 0.619 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 98/250, 0.631 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 99/250, 0.637 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 100/250, 0.640 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 101/250, 0.674 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 102/250, 0.698 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 103/250, 0.701 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 104/250, 0.705 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 105/250, 0.708 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 106/250, 0.736 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 107/250, 0.780 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 108/250, 0.820 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 109/250, 0.832 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 110/250, 0.836 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 111/250, 0.839 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 112/250, 0.843 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 113/250, 0.846 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 114/250, 0.878 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 115/250, 0.881 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 116/250, 0.886 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 117/250, 0.889 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 118/250, 0.894 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 119/250, 0.936 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 120/250, 0.939 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 121/250, 0.981 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 122/250, 0.984 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 123/250, 1.024 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 124/250, 1.028 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 125/250, 1.030 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 126/250, 1.071 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 127/250, 1.074 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 128/250, 1.076 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 129/250, 1.087 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 130/250, 1.090 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 131/250, 1.092 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 132/250, 1.099 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 133/250, 1.102 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 134/250, 1.105 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 135/250, 1.108 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 136/250, 1.112 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 137/250, 1.117 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 138/250, 1.155 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 139/250, 1.195 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 140/250, 1.198 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 141/250, 1.201 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 142/250, 1.204 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 143/250, 1.206 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 144/250, 1.244 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 145/250, 1.246 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 146/250, 1.258 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 147/250, 1.260 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 148/250, 1.263 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 149/250, 1.265 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 150/250, 1.269 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 151/250, 1.278 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 152/250, 1.283 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 153/250, 1.286 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 154/250, 1.289 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 155/250, 1.291 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 156/250, 1.294 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 157/250, 1.299 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 158/250, 1.320 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 159/250, 1.358 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 160/250, 1.364 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 161/250, 1.368 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 162/250, 1.373 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 163/250, 1.375 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 164/250, 1.380 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 165/250, 1.424 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 166/250, 1.427 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 167/250, 1.432 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 168/250, 1.476 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 169/250, 1.479 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 170/250, 1.482 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 171/250, 1.527 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 172/250, 1.530 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 173/250, 1.558 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 174/250, 1.561 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 175/250, 1.565 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 176/250, 1.568 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 177/250, 1.573 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 178/250, 1.576 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 179/250, 1.579 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 180/250, 1.584 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 181/250, 1.586 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 182/250, 1.630 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 183/250, 1.639 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 184/250, 1.647 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 185/250, 1.652 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 186/250, 1.657 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 187/250, 1.704 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 188/250, 1.708 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 189/250, 1.712 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 190/250, 1.715 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 191/250, 1.750 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 192/250, 1.752 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 193/250, 1.764 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 194/250, 1.767 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 195/250, 1.771 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 196/250, 1.775 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 197/250, 1.779 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 198/250, 1.782 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 199/250, 1.789 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 200/250, 1.791 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 201/250, 1.794 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 202/250, 1.797 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 203/250, 1.846 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 204/250, 1.852 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 205/250, 1.855 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 206/250, 1.881 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 207/250, 1.886 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 208/250, 1.891 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 209/250, 1.895 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 210/250, 1.942 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 211/250, 1.947 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 212/250, 1.953 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 213/250, 2.006 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 214/250, 2.010 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 215/250, 2.014 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 216/250, 2.019 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 217/250, 2.058 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 218/250, 2.061 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 219/250, 2.065 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 220/250, 2.069 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 221/250, 2.079 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 222/250, 2.082 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 223/250, 2.086 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 224/250, 2.090 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 225/250, 2.093 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 226/250, 2.100 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 227/250, 2.104 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 228/250, 2.107 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 229/250, 2.110 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 230/250, 2.145 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 231/250, 2.166 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 232/250, 2.171 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 233/250, 2.229 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 234/250, 2.234 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 235/250, 2.237 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 236/250, 2.242 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 237/250, 2.249 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 238/250, 2.252 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 239/250, 2.305 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 240/250, 2.310 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 241/250, 2.314 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 242/250, 2.318 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 243/250, 2.322 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 244/250, 2.327 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 245/250, 2.345 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 246/250, 2.349 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 247/250, 2.407 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 248/250, 2.409 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 249/250, 2.412 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 250/250, 2.431 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 1.1176816672180454
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0295
+INFO [matcher.py:142]   Solution time: 0.472 min
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3446</th>
+      <td>37.549356</td>
+      <td>139.579121</td>
+      <td>60.890246</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>3446</td>
+    </tr>
+    <tr>
+      <th>4926</th>
+      <td>27.557032</td>
+      <td>151.371970</td>
+      <td>77.182597</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>4926</td>
+    </tr>
+    <tr>
+      <th>3456</th>
+      <td>60.742592</td>
+      <td>179.351062</td>
+      <td>73.254390</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3456</td>
+    </tr>
+    <tr>
+      <th>6891</th>
+      <td>53.909882</td>
+      <td>185.862281</td>
+      <td>54.818220</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>6891</td>
+    </tr>
+    <tr>
+      <th>962</th>
+      <td>52.829914</td>
+      <td>137.725077</td>
+      <td>93.206007</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>962</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>39.662026</td>
+      <td>162.692755</td>
+      <td>54.607476</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10995</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>49.130301</td>
+      <td>141.583192</td>
+      <td>103.798145</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>target</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10996</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>68.035281</td>
+      <td>168.744482</td>
+      <td>56.499644</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>10997</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>62.044564</td>
+      <td>177.796983</td>
+      <td>75.983973</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>10998</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>51.243734</td>
+      <td>161.013556</td>
+      <td>86.513956</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10999</td>
+    </tr>
+  </tbody>
+</table>
+<p>2000 rows × 12 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">plot_propensity_score_match_distributions</span><span class="p">(</span><span class="n">matcher</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/usr/local/lib/python3.8/site-packages/seaborn/axisgrid.py:118: UserWarning: The figure layout has changed to tight
+  self._figure.tight_layout(*args, **kwargs)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;seaborn.axisgrid.FacetGrid at 0x7f4d18658130&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_ps_matcher_6_2.png" src="../_images/demos_ps_matcher_6_2.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">objective</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+<span class="n">match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
+<span class="k">match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">debin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 1.1176816672180454
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0295
+INFO [matcher.py:142]   Solution time: 0.472 min
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_ps_matcher_7_1.png" src="../_images/demos_ps_matcher_7_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_ps_matcher_7_2.png" src="../_images/demos_ps_matcher_7_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_ps_matcher_7_3.png" src="../_images/demos_ps_matcher_7_3.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="matching_data.html" class="btn btn-neutral float-left" title="Matching Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ea_matcher.html" class="btn btn-neutral float-right" title="Genetic Matcher" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

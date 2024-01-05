@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=f6245a2f"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation instructions" href="01_installation.html" />
+    <link rel="prev" title="Population Matching Utilities" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Population Matching
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#problem-statement">Problem Statement</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Population Matching</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/00_introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
+<p>The <cite>pybalance</cite> library implements several routines for optimizing the
+balance between non-random populations. In observational studies, this matching
+process is a key step towards minimizing the potential effects of confounding
+covariates.</p>
+<p>The library implements two separate approaches to matching, both of which work
+by balancing covariate distributions directly, without specifying to whom a
+given individual is matched.</p>
+<section id="problem-statement">
+<h2>Problem Statement<a class="headerlink" href="#problem-statement" title="Permalink to this heading"></a></h2>
+<p>Consider two groups of study subjects, together with a set of <span class="math notranslate nohighlight">\(F\)</span>
+covariates (e.g., age, height, smoker/non-smoker) describing the characteristics
+of the two groups. By convention, we refer to the smaller group as the “target”
+population and the larger group as the “pool”. Our goal is to draw subjects from
+the pool such that the chosen subset “matches” (to be defined) as close as
+possible the target population.</p>
+<p>More formally, given a pool of size <span class="math notranslate nohighlight">\(M\)</span> and a target of size <span class="math notranslate nohighlight">\(N\)</span>,
+our goal is to choose <span class="math notranslate nohighlight">\(N\)</span> patients from the pool that best resemble the
+target population. Since there are <span class="math notranslate nohighlight">\(M \choose N\)</span> such possible subsets,
+exploring the whole space of solutions is generally infeasible for even
+modestly-sized matching problems.</p>
+<p>Depending on the nature of the matching measure, different solvers are
+available. For instance, in the case of minimizing the mean standardized error
+between the covariates, one can formulate the optimization as follows.</p>
+<p><strong>Define</strong>:</p>
+<div class="math notranslate nohighlight" id="equation-eq1">
+\begin{equation}
+x_{m} =
+\begin{cases}
+1, &amp; \mbox{if patient m}\mbox{ is selected} \\
+0, &amp; \mbox{otherwise.}
+\end{cases}
+\end{equation}</div><p>Take <span class="math notranslate nohighlight">\(c_{mf}\)</span> to be the value of feature <span class="math notranslate nohighlight">\(f\)</span> corresponding to patient’s <span class="math notranslate nohighlight">\(m\)</span>.</p>
+<div class="math notranslate nohighlight" id="equation-cost1">
+\begin{align*}
+        a_f = \bigg| \sum_{m=1}^{M} x_{m}c_{mf} - \sum_{m=1}^N c_{mf} \bigg|,&amp;\\
+        Minimize~\sum_{f=1}^{F}a_f:&amp; \\
+        \mbox{Subject to :}\sum_{m=1}^{M} x_{m} = N.
+\end{align*}</div><p>In this case, since the objective function and constraints are linear, fast
+integer program solvers can be used as a backend to solve for the best matching
+population. The cost function defined in <a class="reference internal" href="#equation-cost1">(2)</a> is solved using SAT solver
+library from <a class="reference external" href="https://developers.google.com/optimization/cp/cp_solver">Google Or-Tools Sat</a>.</p>
+<p>Note that in this formulation, we do not explicitly assign a control patient to
+a treatment patient, therefore, the decision variable <span class="math notranslate nohighlight">\(x\)</span> is simply a
+vector with a length equal to the number of patients in the control group. This
+detail allows the integer program solver to scale to relatively large matching
+problems.</p>
+<p>However, linearity in the objective function is not always desireable, since
+improving a poorly matched dimension slightly is often better than improving a
+well-matched dimension by the same amount. Non-linear objective functions can
+enforce this prior on the solution space, but require different optimization
+methods. In this case, we can apply an evolutionary solver, which stochastically
+searches the solution space. An evolutionary solver is also implemented in
+<cite>pybalance</cite>, together with a number of heuristics for efficiently
+searching the space.</p>
+<p>For completeness and ease of comparison, <cite>pybalance</cite> also implements
+matching based on propensity score. For greater technical detail, see our
+publication (FIXME currently in review).</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Population Matching Utilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="01_installation.html" class="btn btn-neutral float-right" title="Installation instructions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

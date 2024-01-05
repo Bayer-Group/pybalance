@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Constraint Satisfaction Matcher &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=f6245a2f"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API documentation" href="../03_api.html" />
+    <link rel="prev" title="Genetic Matcher" href="ea_matcher.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Population Matching
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="matching_data.html">Matching Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ps_matcher.html">Propensity Score Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ea_matcher.html">Genetic Matcher</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Constraint Satisfaction Matcher</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-Beta-With-Cross-Terms-Added">Optimize Beta With Cross Terms Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-Gamma-(Area-Between-CDFs)">Optimize Gamma (Area Between CDFs)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Population Matching</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
+      <li class="breadcrumb-item active">Constraint Satisfaction Matcher</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/demos/lp_matcher.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Constraint-Satisfaction-Matcher">
+<h1>Constraint Satisfaction Matcher<a class="headerlink" href="#Constraint-Satisfaction-Matcher" title="Permalink to this heading"></a></h1>
+<p>The ConstraintSatisfactionMatcher can be used to optimize any linear function of the baseline covariates. In this demo notebook, we show how to call the matcher in the PyBalance library.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)-4s</span><span class="s2"> [</span><span class="si">%(filename)s</span><span class="s2">:</span><span class="si">%(lineno)d</span><span class="s2">] </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pybalance.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BetaBalance</span><span class="p">,</span>
+    <span class="n">BetaXBalance</span><span class="p">,</span>
+    <span class="n">GammaBalance</span><span class="p">,</span>
+    <span class="n">GammaXBalance</span><span class="p">,</span>
+    <span class="n">GammaXTreeBalance</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pybalance.sim</span> <span class="kn">import</span> <span class="n">generate_toy_dataset</span>
+<span class="kn">from</span> <span class="nn">pybalance.lp</span> <span class="kn">import</span> <span class="n">ConstraintSatisfactionMatcher</span>
+<span class="kn">from</span> <span class="nn">pybalance.visualization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">plot_numeric_features</span><span class="p">,</span>
+    <span class="n">plot_categoric_features</span><span class="p">,</span>
+    <span class="n">plot_binary_features</span><span class="p">,</span>
+    <span class="n">plot_per_feature_loss</span><span class="p">,</span>
+    <span class="n">plot_joint_numeric_distributions</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [__init__.py:13] Loaded pybalance version 0.1.0.
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_limit</span> <span class="o">=</span> <span class="mi">300</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">generate_toy_dataset</span><span class="p">()</span>
+<span class="n">m</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>62.511573</td>
+      <td>190.229250</td>
+      <td>105.165097</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>68.505065</td>
+      <td>161.121236</td>
+      <td>95.001474</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>50.071384</td>
+      <td>162.325356</td>
+      <td>84.290576</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>44.423692</td>
+      <td>150.948096</td>
+      <td>82.031381</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>41.695052</td>
+      <td>132.952651</td>
+      <td>54.857540</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>21.474205</td>
+      <td>168.602546</td>
+      <td>70.342128</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>10995</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>40.643320</td>
+      <td>188.188724</td>
+      <td>61.611744</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>target</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>10996</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>29.472765</td>
+      <td>161.408162</td>
+      <td>57.214095</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10997</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>41.291949</td>
+      <td>150.968833</td>
+      <td>91.270798</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10998</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>67.530294</td>
+      <td>155.124741</td>
+      <td>56.196505</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10999</td>
+    </tr>
+  </tbody>
+</table>
+<p>11000 rows × 12 columns</p>
+</div></div>
+</div>
+<section id="Optimize-Beta-(Mean-Absolute-SMD)">
+<h2>Optimize Beta (Mean Absolute SMD)<a class="headerlink" href="#Optimize-Beta-(Mean-Absolute-SMD)" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">objective</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher_beta</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
+    <span class="n">m</span><span class="p">,</span>
+    <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
+    <span class="n">ps_hinting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">matcher</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [matcher.py:65] Scaling features by factor 110.41 in order to use integer solver with &lt;= 0.6431% loss.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;objective&#39;: &#39;beta&#39;,
+ &#39;match_size&#39;: 1000,
+ &#39;time_limit&#39;: 300,
+ &#39;num_workers&#39;: 4,
+ &#39;ps_hinting&#39;: True,
+ &#39;verbose&#39;: True}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 15 dimensions ...
+INFO [matcher.py:335] Calculating bounds on feature variables ...
+INFO [matcher.py:350] Applying constraints ...
+INFO [matcher.py:378] Training PS model as guide for solver ...
+/pybalance/pybalance/cs/matcher.py:380: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  target.loc[:, &#34;ix&#34;] = list(range(len(target)))
+/pybalance/pybalance/cs/matcher.py:381: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  pool.loc[:, &#34;ix&#34;] = list(range(len(pool)))
+INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.004 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: SGDClassifier
+INFO [matcher.py:140]   * alpha: 0.10453554731869287
+INFO [matcher.py:140]   * class_weight: None
+INFO [matcher.py:140]   * early_stopping: False
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * loss: modified_huber
+INFO [matcher.py:140]   * max_iter: 1500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:141]   Score (beta): 0.1547
+INFO [matcher.py:142]   Solution time: 0.007 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 2/50, 0.008 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: SGDClassifier
+INFO [matcher.py:140]   * alpha: 0.0354658577371722
+INFO [matcher.py:140]   * class_weight: None
+INFO [matcher.py:140]   * early_stopping: False
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * loss: modified_huber
+INFO [matcher.py:140]   * max_iter: 1500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:141]   Score (beta): 0.0532
+INFO [matcher.py:142]   Solution time: 0.010 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 3/50, 0.011 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.7627616953429357
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0285
+INFO [matcher.py:142]   Solution time: 0.015 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 4/50, 0.015 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 5/50, 0.019 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 6/50, 0.053 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 7/50, 0.112 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 8/50, 0.146 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 9/50, 0.151 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 10/50, 0.198 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 11/50, 0.228 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 12/50, 0.233 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 13/50, 0.249 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 14/50, 0.311 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 15/50, 0.313 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 16/50, 0.320 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 17/50, 0.376 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 18/50, 0.383 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 19/50, 0.388 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 20/50, 0.392 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 21/50, 0.396 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 19.525273903291264
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0278
+INFO [matcher.py:142]   Solution time: 0.458 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 22/50, 0.458 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 23/50, 0.461 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 24/50, 0.467 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.472 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 26/50, 0.479 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 27/50, 0.484 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 28/50, 0.487 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 29/50, 0.517 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 30/50, 0.526 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 31/50, 0.547 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 32/50, 0.600 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 33/50, 0.604 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 34/50, 0.609 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 35/50, 0.613 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 36/50, 0.616 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 37/50, 0.667 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 38/50, 0.671 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 39/50, 0.674 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 40/50, 0.724 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 41/50, 0.741 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 0.753 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.13217032311178473
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0273
+INFO [matcher.py:142]   Solution time: 0.757 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 43/50, 0.757 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 44/50, 0.762 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 45/50, 0.776 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 46/50, 0.783 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 47/50, 0.787 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 48/50, 0.793 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 0.796 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 50/50, 0.800 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.13217032311178473
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta): 0.0273
+INFO [matcher.py:142]   Solution time: 0.757 min
+INFO [matcher.py:415] Hint achieves objective value = 24305.
+INFO [matcher.py:417] Applying hints ...
+INFO [matcher.py:446] Solving with 4 workers ...
+INFO [matcher.py:89] Initial balance score: 0.2328
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 1, time = 0.03 m
+INFO [matcher.py:100] Objective:        24305.0
+INFO [matcher.py:113] Balance:  0.0273
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 2, time = 0.05 m
+INFO [matcher.py:100] Objective:        24254.0
+INFO [matcher.py:113] Balance:  0.0272
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 3, time = 0.08 m
+INFO [matcher.py:100] Objective:        24173.0
+INFO [matcher.py:113] Balance:  0.0272
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 4, time = 0.17 m
+INFO [matcher.py:100] Objective:        10321.0
+INFO [matcher.py:113] Balance:  0.0103
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 5, time = 0.20 m
+INFO [matcher.py:100] Objective:        10193.0
+INFO [matcher.py:113] Balance:  0.0102
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 6, time = 0.42 m
+INFO [matcher.py:100] Objective:        10174.0
+INFO [matcher.py:113] Balance:  0.0123
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 7, time = 0.50 m
+INFO [matcher.py:100] Objective:        10168.0
+INFO [matcher.py:113] Balance:  0.0123
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 8, time = 0.61 m
+INFO [matcher.py:100] Objective:        10159.0
+INFO [matcher.py:113] Balance:  0.0102
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 9, time = 0.70 m
+INFO [matcher.py:100] Objective:        10130.0
+INFO [matcher.py:113] Balance:  0.0102
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 10, time = 0.86 m
+INFO [matcher.py:100] Objective:        10126.0
+INFO [matcher.py:113] Balance:  0.0105
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 11, time = 1.25 m
+INFO [matcher.py:100] Objective:        10124.0
+INFO [matcher.py:113] Balance:  0.0104
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 12, time = 2.38 m
+INFO [matcher.py:100] Objective:        10123.0
+INFO [matcher.py:113] Balance:  0.0099
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:453] Status = FEASIBLE
+INFO [matcher.py:454] Number of solutions found: 12
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>55.261578</td>
+      <td>139.396134</td>
+      <td>94.438359</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>63.113091</td>
+      <td>165.563337</td>
+      <td>67.433016</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>10001</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>58.232216</td>
+      <td>160.859857</td>
+      <td>71.915385</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10002</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>58.996941</td>
+      <td>140.357415</td>
+      <td>115.606615</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10003</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>36.850195</td>
+      <td>189.983706</td>
+      <td>53.000581</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10004</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>9875</th>
+      <td>61.252012</td>
+      <td>125.610654</td>
+      <td>76.982561</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9875</td>
+    </tr>
+    <tr>
+      <th>9929</th>
+      <td>64.365442</td>
+      <td>190.227081</td>
+      <td>96.254238</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>9929</td>
+    </tr>
+    <tr>
+      <th>9933</th>
+      <td>68.194783</td>
+      <td>127.495418</td>
+      <td>69.177329</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9933</td>
+    </tr>
+    <tr>
+      <th>9946</th>
+      <td>22.630370</td>
+      <td>185.351623</td>
+      <td>117.381552</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9946</td>
+    </tr>
+    <tr>
+      <th>9981</th>
+      <td>39.006118</td>
+      <td>133.419182</td>
+      <td>71.135407</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9981</td>
+    </tr>
+  </tbody>
+</table>
+<p>2000 rows × 12 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="n">match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
+<span class="k">match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">debin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_7_0.png" src="../_images/demos_lp_matcher_7_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_7_1.png" src="../_images/demos_lp_matcher_7_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_7_2.png" src="../_images/demos_lp_matcher_7_2.png" />
+</div>
+</div>
+</section>
+<section id="Optimize-Beta-With-Cross-Terms-Added">
+<h2>Optimize Beta With Cross Terms Added<a class="headerlink" href="#Optimize-Beta-With-Cross-Terms-Added" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">objective</span> <span class="o">=</span> <span class="n">beta_x</span> <span class="o">=</span> <span class="n">BetaXBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher_betax</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
+    <span class="n">m</span><span class="p">,</span>
+    <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
+    <span class="n">ps_hinting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">matcher</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [preprocess.py:445] Added cross term height * weight to matching features.
+INFO [preprocess.py:445] Added cross term gender * age to matching features.
+INFO [preprocess.py:445] Added cross term binary_0 * binary_3 to matching features.
+INFO [preprocess.py:445] Added cross term binary_0 * age to matching features.
+INFO [preprocess.py:445] Added cross term binary_3 * weight to matching features.
+INFO [preprocess.py:445] Added cross term binary_2 * weight to matching features.
+INFO [preprocess.py:445] Added cross term binary_1 * binary_3 to matching features.
+INFO [preprocess.py:445] Added cross term binary_2 * binary_3 to matching features.
+INFO [preprocess.py:445] Added cross term binary_2 * height to matching features.
+INFO [preprocess.py:445] Added cross term binary_0 * binary_2 to matching features.
+INFO [matcher.py:65] Scaling features by factor 158.99 in order to use integer solver with &lt;= 0.8895% loss.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;objective&#39;: &#39;beta_x&#39;,
+ &#39;match_size&#39;: 1000,
+ &#39;time_limit&#39;: 300,
+ &#39;num_workers&#39;: 4,
+ &#39;ps_hinting&#39;: True,
+ &#39;verbose&#39;: True}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 25 dimensions ...
+INFO [matcher.py:335] Calculating bounds on feature variables ...
+INFO [matcher.py:350] Applying constraints ...
+INFO [matcher.py:378] Training PS model as guide for solver ...
+/pybalance/pybalance/cs/matcher.py:380: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  target.loc[:, &#34;ix&#34;] = list(range(len(target)))
+/pybalance/pybalance/cs/matcher.py:381: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  pool.loc[:, &#34;ix&#34;] = list(range(len(pool)))
+INFO [preprocess.py:445] Added cross term height * weight to matching features.
+INFO [preprocess.py:445] Added cross term gender * age to matching features.
+INFO [preprocess.py:445] Added cross term binary_0 * binary_3 to matching features.
+INFO [preprocess.py:445] Added cross term binary_0 * age to matching features.
+INFO [preprocess.py:445] Added cross term binary_3 * weight to matching features.
+INFO [preprocess.py:445] Added cross term binary_2 * weight to matching features.
+INFO [preprocess.py:445] Added cross term binary_1 * binary_3 to matching features.
+INFO [preprocess.py:445] Added cross term binary_2 * binary_3 to matching features.
+INFO [preprocess.py:445] Added cross term binary_2 * height to matching features.
+INFO [preprocess.py:445] Added cross term binary_0 * binary_2 to matching features.
+INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.003 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: SGDClassifier
+INFO [matcher.py:140]   * alpha: 4.774501445415407
+INFO [matcher.py:140]   * class_weight: None
+INFO [matcher.py:140]   * early_stopping: True
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * loss: modified_huber
+INFO [matcher.py:140]   * max_iter: 1500
+INFO [matcher.py:140]   * penalty: elasticnet
+INFO [matcher.py:141]   Score (beta_x): 0.2294
+INFO [matcher.py:142]   Solution time: 0.012 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 2/50, 0.012 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.05854199518952411
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta_x): 0.0867
+INFO [matcher.py:142]   Solution time: 0.023 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 3/50, 0.023 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.09099552707413873
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta_x): 0.0685
+INFO [matcher.py:142]   Solution time: 0.032 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 4/50, 0.033 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 5/50, 0.038 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 6/50, 0.043 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.15085738749804517
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta_x): 0.0681
+INFO [matcher.py:142]   Solution time: 0.135 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 7/50, 0.135 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: SGDClassifier
+INFO [matcher.py:140]   * alpha: 0.0926265187718931
+INFO [matcher.py:140]   * class_weight: balanced
+INFO [matcher.py:140]   * early_stopping: False
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * loss: log_loss
+INFO [matcher.py:140]   * max_iter: 1500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:141]   Score (beta_x): 0.0635
+INFO [matcher.py:142]   Solution time: 0.140 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 8/50, 0.141 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.11558026973872339
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta_x): 0.0632
+INFO [matcher.py:142]   Solution time: 0.149 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 9/50, 0.150 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 10/50, 0.169 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 22.703034120730198
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta_x): 0.0631
+INFO [matcher.py:142]   Solution time: 0.262 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 11/50, 0.262 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 12/50, 0.315 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 13/50, 0.323 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 14/50, 0.416 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 15/50, 0.436 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 16/50, 0.441 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 17/50, 0.446 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 18/50, 0.461 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 19/50, 0.466 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.796468661160752
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta_x): 0.0610
+INFO [matcher.py:142]   Solution time: 0.571 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 20/50, 0.571 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 21/50, 0.689 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 22/50, 0.697 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 23/50, 0.703 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 24/50, 0.825 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.831 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 26/50, 0.839 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 27/50, 0.938 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 28/50, 0.947 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 29/50, 0.956 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 30/50, 0.996 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 31/50, 1.002 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 32/50, 1.008 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 33/50, 1.039 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 34/50, 1.162 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 35/50, 1.227 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 36/50, 1.235 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 37/50, 1.240 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 38/50, 1.247 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 39/50, 1.312 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 40/50, 1.317 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 41/50, 1.325 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 1.361 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 43/50, 1.369 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 44/50, 1.377 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 45/50, 1.385 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 46/50, 1.392 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 47/50, 1.399 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 48/50, 1.410 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 1.501 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 50/50, 1.507 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 0.796468661160752
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (beta_x): 0.0610
+INFO [matcher.py:142]   Solution time: 0.571 min
+INFO [matcher.py:415] Hint achieves objective value = 93575.
+INFO [matcher.py:417] Applying hints ...
+INFO [matcher.py:446] Solving with 4 workers ...
+INFO [matcher.py:89] Initial balance score: 0.2324
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 1, time = 0.07 m
+INFO [matcher.py:100] Objective:        93575.0
+INFO [matcher.py:113] Balance:  0.0610
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 2, time = 0.09 m
+INFO [matcher.py:100] Objective:        92822.0
+INFO [matcher.py:113] Balance:  0.0606
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 3, time = 0.13 m
+INFO [matcher.py:100] Objective:        92657.0
+INFO [matcher.py:113] Balance:  0.0606
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 4, time = 0.28 m
+INFO [matcher.py:100] Objective:        92640.0
+INFO [matcher.py:113] Balance:  0.0606
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 5, time = 0.29 m
+INFO [matcher.py:100] Objective:        92600.0
+INFO [matcher.py:113] Balance:  0.0604
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 6, time = 0.35 m
+INFO [matcher.py:100] Objective:        92472.0
+INFO [matcher.py:113] Balance:  0.0605
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 7, time = 0.40 m
+INFO [matcher.py:100] Objective:        92468.0
+INFO [matcher.py:113] Balance:  0.0604
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 8, time = 0.44 m
+INFO [matcher.py:100] Objective:        43811.0
+INFO [matcher.py:113] Balance:  0.0331
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 9, time = 0.52 m
+INFO [matcher.py:100] Objective:        39784.0
+INFO [matcher.py:113] Balance:  0.0314
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 10, time = 0.54 m
+INFO [matcher.py:100] Objective:        39382.0
+INFO [matcher.py:113] Balance:  0.0313
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 11, time = 0.58 m
+INFO [matcher.py:100] Objective:        39283.0
+INFO [matcher.py:113] Balance:  0.0313
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 12, time = 3.19 m
+INFO [matcher.py:100] Objective:        35933.0
+INFO [matcher.py:113] Balance:  0.0310
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 13, time = 4.86 m
+INFO [matcher.py:100] Objective:        35920.0
+INFO [matcher.py:113] Balance:  0.0310
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:453] Status = FEASIBLE
+INFO [matcher.py:454] Number of solutions found: 13
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>55.261578</td>
+      <td>139.396134</td>
+      <td>94.438359</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>63.113091</td>
+      <td>165.563337</td>
+      <td>67.433016</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>10001</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>58.232216</td>
+      <td>160.859857</td>
+      <td>71.915385</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10002</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>58.996941</td>
+      <td>140.357415</td>
+      <td>115.606615</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10003</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>36.850195</td>
+      <td>189.983706</td>
+      <td>53.000581</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10004</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>9958</th>
+      <td>51.722321</td>
+      <td>170.350117</td>
+      <td>80.695438</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9958</td>
+    </tr>
+    <tr>
+      <th>9965</th>
+      <td>41.035792</td>
+      <td>130.021437</td>
+      <td>80.495109</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>9965</td>
+    </tr>
+    <tr>
+      <th>9981</th>
+      <td>39.006118</td>
+      <td>133.419182</td>
+      <td>71.135407</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9981</td>
+    </tr>
+    <tr>
+      <th>9982</th>
+      <td>50.575808</td>
+      <td>139.401060</td>
+      <td>89.848616</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9982</td>
+    </tr>
+    <tr>
+      <th>9983</th>
+      <td>68.616093</td>
+      <td>167.546870</td>
+      <td>58.683367</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9983</td>
+    </tr>
+  </tbody>
+</table>
+<p>2000 rows × 12 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="n">match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
+<span class="k">match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">debin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_11_0.png" src="../_images/demos_lp_matcher_11_0.png" />
+</div>
+</div>
+</section>
+<section id="Optimize-Gamma-(Area-Between-CDFs)">
+<h2>Optimize Gamma (Area Between CDFs)<a class="headerlink" href="#Optimize-Gamma-(Area-Between-CDFs)" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">objective</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">=</span> <span class="n">GammaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher_gamma</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
+    <span class="n">m</span><span class="p">,</span>
+    <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
+    <span class="n">ps_hinting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">matcher</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [preprocess.py:338] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
+INFO [preprocess.py:338] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
+INFO [preprocess.py:338] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
+INFO [matcher.py:65] Scaling features by factor 2.00 in order to use integer solver with &lt;= 0.0000% loss.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;objective&#39;: &#39;gamma&#39;,
+ &#39;match_size&#39;: 1000,
+ &#39;time_limit&#39;: 300,
+ &#39;num_workers&#39;: 4,
+ &#39;ps_hinting&#39;: True,
+ &#39;verbose&#39;: True}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 27 dimensions ...
+INFO [matcher.py:335] Calculating bounds on feature variables ...
+INFO [matcher.py:350] Applying constraints ...
+INFO [matcher.py:378] Training PS model as guide for solver ...
+/pybalance/pybalance/cs/matcher.py:380: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  target.loc[:, &#34;ix&#34;] = list(range(len(target)))
+/pybalance/pybalance/cs/matcher.py:381: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  pool.loc[:, &#34;ix&#34;] = list(range(len(pool)))
+INFO [preprocess.py:338] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
+INFO [preprocess.py:338] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
+INFO [preprocess.py:338] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
+INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.001 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: SGDClassifier
+INFO [matcher.py:140]   * alpha: 0.06755757715302801
+INFO [matcher.py:140]   * class_weight: balanced
+INFO [matcher.py:140]   * early_stopping: False
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * loss: log_loss
+INFO [matcher.py:140]   * max_iter: 1500
+INFO [matcher.py:140]   * penalty: elasticnet
+INFO [matcher.py:141]   Score (gamma): 0.0680
+INFO [matcher.py:142]   Solution time: 0.007 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 2/50, 0.007 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 3/50, 0.014 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 4/50, 0.019 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 1.238805221235582
+INFO [matcher.py:140]   * fit_intercept: True
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l2
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (gamma): 0.0372
+INFO [matcher.py:142]   Solution time: 0.032 min
+INFO [matcher.py:181] Training model LogisticRegression (iter 5/50, 0.032 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 2.1117929238507878
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (gamma): 0.0301
+INFO [matcher.py:142]   Solution time: 0.130 min
+INFO [matcher.py:181] Training model SGDClassifier (iter 6/50, 0.131 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 7/50, 0.138 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 8/50, 0.145 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 9/50, 0.152 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 10/50, 0.158 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 11/50, 0.163 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 12/50, 0.168 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 13/50, 0.175 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 14/50, 0.230 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 15/50, 0.236 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 16/50, 0.243 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 17/50, 0.249 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 18/50, 0.377 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 19/50, 0.471 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 20/50, 0.515 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model SGDClassifier (iter 21/50, 0.634 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 22/50, 0.641 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 23/50, 0.705 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 24/50, 0.714 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.719 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 26/50, 0.726 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 27/50, 0.733 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 28/50, 0.740 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 29/50, 0.845 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 30/50, 0.885 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 31/50, 0.889 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 32/50, 0.894 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 33/50, 0.900 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 34/50, 0.917 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 35/50, 0.981 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 36/50, 0.988 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 37/50, 1.079 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 38/50, 1.096 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 39/50, 1.196 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 40/50, 1.204 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 41/50, 1.263 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 1.302 min) ...
+/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:181] Training model LogisticRegression (iter 43/50, 1.427 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 44/50, 1.450 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 45/50, 1.456 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 46/50, 1.464 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 47/50, 1.472 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 48/50, 1.485 min) ...
+INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 1.569 min) ...
+INFO [matcher.py:181] Training model LogisticRegression (iter 50/50, 1.576 min) ...
+INFO [matcher.py:137] Best propensity score match found:
+INFO [matcher.py:138]   Model: LogisticRegression
+INFO [matcher.py:140]   * C: 2.1117929238507878
+INFO [matcher.py:140]   * fit_intercept: False
+INFO [matcher.py:140]   * max_iter: 500
+INFO [matcher.py:140]   * penalty: l1
+INFO [matcher.py:140]   * solver: saga
+INFO [matcher.py:141]   Score (gamma): 0.0301
+INFO [matcher.py:142]   Solution time: 0.130 min
+INFO [matcher.py:415] Hint achieves objective value = 982.
+INFO [matcher.py:417] Applying hints ...
+INFO [matcher.py:446] Solving with 4 workers ...
+INFO [matcher.py:89] Initial balance score: 0.2110
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 1, time = 0.10 m
+INFO [matcher.py:100] Objective:        1208.0
+INFO [matcher.py:113] Balance:  0.0367
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 2, time = 0.11 m
+INFO [matcher.py:100] Objective:        1206.0
+INFO [matcher.py:113] Balance:  0.0367
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 3, time = 0.12 m
+INFO [matcher.py:100] Objective:        1202.0
+INFO [matcher.py:113] Balance:  0.0365
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 4, time = 0.15 m
+INFO [matcher.py:100] Objective:        1198.0
+INFO [matcher.py:113] Balance:  0.0365
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 5, time = 0.18 m
+INFO [matcher.py:100] Objective:        216.0
+INFO [matcher.py:113] Balance:  0.0067
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 6, time = 0.60 m
+INFO [matcher.py:100] Objective:        186.0
+INFO [matcher.py:113] Balance:  0.0068
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 7, time = 0.69 m
+INFO [matcher.py:100] Objective:        184.0
+INFO [matcher.py:113] Balance:  0.0068
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:453] Status = OPTIMAL
+INFO [matcher.py:454] Number of solutions found: 7
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>55.261578</td>
+      <td>139.396134</td>
+      <td>94.438359</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>63.113091</td>
+      <td>165.563337</td>
+      <td>67.433016</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>10001</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>58.232216</td>
+      <td>160.859857</td>
+      <td>71.915385</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10002</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>58.996941</td>
+      <td>140.357415</td>
+      <td>115.606615</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10003</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>36.850195</td>
+      <td>189.983706</td>
+      <td>53.000581</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10004</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>9933</th>
+      <td>68.194783</td>
+      <td>127.495418</td>
+      <td>69.177329</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9933</td>
+    </tr>
+    <tr>
+      <th>9981</th>
+      <td>39.006118</td>
+      <td>133.419182</td>
+      <td>71.135407</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9981</td>
+    </tr>
+    <tr>
+      <th>9982</th>
+      <td>50.575808</td>
+      <td>139.401060</td>
+      <td>89.848616</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9982</td>
+    </tr>
+    <tr>
+      <th>9983</th>
+      <td>68.616093</td>
+      <td>167.546870</td>
+      <td>58.683367</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9983</td>
+    </tr>
+    <tr>
+      <th>9988</th>
+      <td>74.994562</td>
+      <td>142.069423</td>
+      <td>59.899521</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9988</td>
+    </tr>
+  </tbody>
+</table>
+<p>2000 rows × 12 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="n">match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
+<span class="k">match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">debin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_15_0.png" src="../_images/demos_lp_matcher_15_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_15_1.png" src="../_images/demos_lp_matcher_15_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_15_2.png" src="../_images/demos_lp_matcher_15_2.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ea_matcher.html" class="btn btn-neutral float-left" title="Genetic Matcher" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../03_api.html" class="btn btn-neutral float-right" title="API documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

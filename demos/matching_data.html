@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matching Data &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=f6245a2f"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Propensity Score Matcher" href="ps_matcher.html" />
+    <link rel="prev" title="Demos" href="../02_demos.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Population Matching
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Matching Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Initializing-MatchingData">Initializing MatchingData</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Exploring-MatchingData">Exploring MatchingData</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Visualizing-MatchingData">Visualizing MatchingData</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ps_matcher.html">Propensity Score Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ea_matcher.html">Genetic Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lp_matcher.html">Constraint Satisfaction Matcher</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Population Matching</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
+      <li class="breadcrumb-item active">Matching Data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/demos/matching_data.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Matching-Data">
+<h1>Matching Data<a class="headerlink" href="#Matching-Data" title="Permalink to this heading"></a></h1>
+<p>In this notebook, we demonstrate the MatchingData class, which organizes population data for matching, and some plotting tools for visualizing the data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)-4s</span><span class="s2"> [</span><span class="si">%(filename)s</span><span class="s2">:</span><span class="si">%(lineno)d</span><span class="s2">] </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">pybalance</span> <span class="kn">import</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">MatchingHeaders</span><span class="p">,</span> <span class="n">split_target_pool</span><span class="p">,</span> <span class="n">BetaBalance</span>
+<span class="kn">from</span> <span class="nn">pybalance.genetic</span> <span class="kn">import</span> <span class="n">GeneticMatcher</span>
+<span class="kn">from</span> <span class="nn">pybalance.visualization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">plot_numeric_features</span><span class="p">,</span>
+    <span class="n">plot_categoric_features</span><span class="p">,</span>
+    <span class="n">plot_binary_features</span><span class="p">,</span>
+    <span class="n">plot_joint_numeric_distributions</span><span class="p">,</span>
+    <span class="n">plot_joint_numeric_categoric_distributions</span><span class="p">,</span>
+    <span class="n">plot_per_feature_loss</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [__init__.py:13] Loaded pybalance version 0.1.0.
+</pre></div></div>
+</div>
+<section id="Initializing-MatchingData">
+<h2>Initializing MatchingData<a class="headerlink" href="#Initializing-MatchingData" title="Permalink to this heading"></a></h2>
+<p>MatchingData can be initialized from either a string or pandas DataFrame.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_path</span> <span class="o">=</span> <span class="s1">&#39;../../pybalance/sim/data/pool250000-target25000-normal0-lognormal0-binary4.parquet&#39;</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_path</span><span class="p">)</span>
+<span class="n">m</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>64.854093</td>
+      <td>189.466850</td>
+      <td>88.835049</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>135740</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>52.571993</td>
+      <td>158.134940</td>
+      <td>94.215107</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>49288</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>25.828361</td>
+      <td>154.692482</td>
+      <td>94.226222</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>256676</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>70.177571</td>
+      <td>160.536632</td>
+      <td>94.244356</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>338287</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>73.779164</td>
+      <td>153.551419</td>
+      <td>86.161814</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>72849</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>274995</th>
+      <td>62.547794</td>
+      <td>186.005015</td>
+      <td>50.975051</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>579081</td>
+    </tr>
+    <tr>
+      <th>274996</th>
+      <td>69.879934</td>
+      <td>142.371386</td>
+      <td>100.138389</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>569939</td>
+    </tr>
+    <tr>
+      <th>274997</th>
+      <td>56.921402</td>
+      <td>130.639589</td>
+      <td>108.745182</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>532419</td>
+    </tr>
+    <tr>
+      <th>274998</th>
+      <td>34.082754</td>
+      <td>174.764051</td>
+      <td>67.998396</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>566266</td>
+    </tr>
+    <tr>
+      <th>274999</th>
+      <td>60.981259</td>
+      <td>137.419436</td>
+      <td>89.897817</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>544231</td>
+    </tr>
+  </tbody>
+</table>
+<p>275000 rows × 12 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="n">m</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>64.854093</td>
+      <td>189.466850</td>
+      <td>88.835049</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>135740</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>52.571993</td>
+      <td>158.134940</td>
+      <td>94.215107</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>49288</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>25.828361</td>
+      <td>154.692482</td>
+      <td>94.226222</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>256676</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>70.177571</td>
+      <td>160.536632</td>
+      <td>94.244356</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>338287</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>73.779164</td>
+      <td>153.551419</td>
+      <td>86.161814</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>72849</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>274995</th>
+      <td>62.547794</td>
+      <td>186.005015</td>
+      <td>50.975051</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>579081</td>
+    </tr>
+    <tr>
+      <th>274996</th>
+      <td>69.879934</td>
+      <td>142.371386</td>
+      <td>100.138389</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>569939</td>
+    </tr>
+    <tr>
+      <th>274997</th>
+      <td>56.921402</td>
+      <td>130.639589</td>
+      <td>108.745182</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>532419</td>
+    </tr>
+    <tr>
+      <th>274998</th>
+      <td>34.082754</td>
+      <td>174.764051</td>
+      <td>67.998396</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>566266</td>
+    </tr>
+    <tr>
+      <th>274999</th>
+      <td>60.981259</td>
+      <td>137.419436</td>
+      <td>89.897817</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>544231</td>
+    </tr>
+  </tbody>
+</table>
+<p>275000 rows × 12 columns</p>
+</div></div>
+</div>
+<p>MatchingData will infer which covariates to use for matching and the separation of these into numeric and categoric, unless explicitly specified. Here we specify a subset of the covariates to use for matching. Note that the unused columns are still present in the data, but will simply not be used for matching.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">headers</span> <span class="o">=</span> <span class="n">MatchingHeaders</span><span class="p">(</span>
+    <span class="n">categoric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;country&#39;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="s1">&#39;binary_0&#39;</span><span class="p">,</span> <span class="s1">&#39;binary_1&#39;</span><span class="p">],</span>
+    <span class="n">numeric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">headers</span><span class="o">=</span><span class="n">headers</span>
+<span class="p">)</span>
+<span class="n">m</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'weight', 'height']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['country', 'gender', 'binary_0', 'binary_1'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>64.854093</td>
+      <td>189.466850</td>
+      <td>88.835049</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>135740</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>52.571993</td>
+      <td>158.134940</td>
+      <td>94.215107</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>49288</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>25.828361</td>
+      <td>154.692482</td>
+      <td>94.226222</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>256676</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>70.177571</td>
+      <td>160.536632</td>
+      <td>94.244356</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>338287</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>73.779164</td>
+      <td>153.551419</td>
+      <td>86.161814</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>72849</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>274995</th>
+      <td>62.547794</td>
+      <td>186.005015</td>
+      <td>50.975051</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>579081</td>
+    </tr>
+    <tr>
+      <th>274996</th>
+      <td>69.879934</td>
+      <td>142.371386</td>
+      <td>100.138389</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>569939</td>
+    </tr>
+    <tr>
+      <th>274997</th>
+      <td>56.921402</td>
+      <td>130.639589</td>
+      <td>108.745182</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>532419</td>
+    </tr>
+    <tr>
+      <th>274998</th>
+      <td>34.082754</td>
+      <td>174.764051</td>
+      <td>67.998396</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>566266</td>
+    </tr>
+    <tr>
+      <th>274999</th>
+      <td>60.981259</td>
+      <td>137.419436</td>
+      <td>89.897817</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>544231</td>
+    </tr>
+  </tbody>
+</table>
+<p>275000 rows × 12 columns</p>
+</div></div>
+</div>
+</section>
+<section id="Exploring-MatchingData">
+<h2>Exploring MatchingData<a class="headerlink" href="#Exploring-MatchingData" title="Permalink to this heading"></a></h2>
+<p>The describe*() methods can be used to generate summary tables of the matching covariates.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>pool</th>
+      <th>target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>population size</th>
+      <th>N</th>
+      <td>250000.00</td>
+      <td>25000.00</td>
+    </tr>
+    <tr>
+      <th rowspan="6" valign="top">country</th>
+      <th>0</th>
+      <td>0.00</td>
+      <td>2490.00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>25033.00</td>
+      <td>5045.00</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>49534.00</td>
+      <td>4981.00</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>75337.00</td>
+      <td>2474.00</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>74934.00</td>
+      <td>5010.00</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>25162.00</td>
+      <td>5000.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">gender</th>
+      <th>0</th>
+      <td>120054.00</td>
+      <td>12956.00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>129946.00</td>
+      <td>12044.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">binary_0</th>
+      <th>0</th>
+      <td>225028.00</td>
+      <td>17535.00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>24972.00</td>
+      <td>7465.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">binary_1</th>
+      <th>0</th>
+      <td>175673.00</td>
+      <td>12527.00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>74327.00</td>
+      <td>12473.00</td>
+    </tr>
+    <tr>
+      <th rowspan="7" valign="top">age</th>
+      <th>mean</th>
+      <td>55.27</td>
+      <td>48.33</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>13.18</td>
+      <td>14.39</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>18.01</td>
+      <td>18.01</td>
+    </tr>
+    <tr>
+      <th>q25</th>
+      <td>46.38</td>
+      <td>37.29</td>
+    </tr>
+    <tr>
+      <th>median</th>
+      <td>57.15</td>
+      <td>48.74</td>
+    </tr>
+    <tr>
+      <th>q75</th>
+      <td>66.10</td>
+      <td>59.85</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>75.00</td>
+      <td>75.00</td>
+    </tr>
+    <tr>
+      <th rowspan="7" valign="top">weight</th>
+      <th>mean</th>
+      <td>88.30</td>
+      <td>82.25</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>16.32</td>
+      <td>18.89</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>50.00</td>
+      <td>50.00</td>
+    </tr>
+    <tr>
+      <th>q25</th>
+      <td>76.39</td>
+      <td>66.14</td>
+    </tr>
+    <tr>
+      <th>median</th>
+      <td>88.85</td>
+      <td>81.69</td>
+    </tr>
+    <tr>
+      <th>q75</th>
+      <td>100.88</td>
+      <td>97.41</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>120.00</td>
+      <td>120.00</td>
+    </tr>
+    <tr>
+      <th rowspan="7" valign="top">height</th>
+      <th>mean</th>
+      <td>159.13</td>
+      <td>153.68</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>19.84</td>
+      <td>16.45</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>125.00</td>
+      <td>125.00</td>
+    </tr>
+    <tr>
+      <th>q25</th>
+      <td>142.09</td>
+      <td>140.29</td>
+    </tr>
+    <tr>
+      <th>median</th>
+      <td>158.74</td>
+      <td>152.75</td>
+    </tr>
+    <tr>
+      <th>q75</th>
+      <td>175.87</td>
+      <td>165.95</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>195.00</td>
+      <td>195.00</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>You can access fields on the underlying data similarly to how you would in pandas.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="p">[[</span><span class="s1">&#39;population&#39;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>population</th>
+      <th>gender</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>pool</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>pool</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>pool</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>pool</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>pool</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>274995</th>
+      <td>target</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>274996</th>
+      <td>target</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>274997</th>
+      <td>target</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>274998</th>
+      <td>target</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>274999</th>
+      <td>target</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>275000 rows × 2 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;gender&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>4</th>
+      <td>73.779164</td>
+      <td>153.551419</td>
+      <td>86.161814</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>72849</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>67.404918</td>
+      <td>132.383184</td>
+      <td>67.107753</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>171211</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>61.489148</td>
+      <td>140.780034</td>
+      <td>73.662572</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>20695</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>73.718093</td>
+      <td>133.743721</td>
+      <td>58.879321</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>58718</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>70.707782</td>
+      <td>156.629048</td>
+      <td>70.681391</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>352801</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>274990</th>
+      <td>19.063519</td>
+      <td>167.704149</td>
+      <td>59.876565</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>536365</td>
+    </tr>
+    <tr>
+      <th>274992</th>
+      <td>58.745450</td>
+      <td>146.747313</td>
+      <td>70.291448</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>535279</td>
+    </tr>
+    <tr>
+      <th>274993</th>
+      <td>55.736083</td>
+      <td>132.434020</td>
+      <td>92.264209</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>595582</td>
+    </tr>
+    <tr>
+      <th>274995</th>
+      <td>62.547794</td>
+      <td>186.005015</td>
+      <td>50.975051</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>579081</td>
+    </tr>
+    <tr>
+      <th>274998</th>
+      <td>34.082754</td>
+      <td>174.764051</td>
+      <td>67.998396</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>566266</td>
+    </tr>
+  </tbody>
+</table>
+<p>133010 rows × 12 columns</p>
+</div></div>
+</div>
+<p>Often our matching data consists of exactly two populations, a reference population, which we call the “target” and a population to be matched, which we call the “pool”. It is sometimes convenient to split these two populations and the function split_target_pool does just that. The function will assign the smaller population to the target, unless explicitly given the name of the target population.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">target</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>250000</th>
+      <td>57.266010</td>
+      <td>159.759575</td>
+      <td>94.325267</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>512966</td>
+    </tr>
+    <tr>
+      <th>250001</th>
+      <td>53.152645</td>
+      <td>145.515410</td>
+      <td>95.988094</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>target</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>540606</td>
+    </tr>
+    <tr>
+      <th>250002</th>
+      <td>34.079212</td>
+      <td>166.272208</td>
+      <td>73.090671</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>578266</td>
+    </tr>
+    <tr>
+      <th>250003</th>
+      <td>45.494927</td>
+      <td>144.336677</td>
+      <td>96.678251</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>559858</td>
+    </tr>
+    <tr>
+      <th>250004</th>
+      <td>18.036012</td>
+      <td>174.843524</td>
+      <td>60.586475</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>588368</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">target_name</span><span class="o">=</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">pool</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>250000</th>
+      <td>57.266010</td>
+      <td>159.759575</td>
+      <td>94.325267</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>512966</td>
+    </tr>
+    <tr>
+      <th>250001</th>
+      <td>53.152645</td>
+      <td>145.515410</td>
+      <td>95.988094</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>target</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>540606</td>
+    </tr>
+    <tr>
+      <th>250002</th>
+      <td>34.079212</td>
+      <td>166.272208</td>
+      <td>73.090671</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>578266</td>
+    </tr>
+    <tr>
+      <th>250003</th>
+      <td>45.494927</td>
+      <td>144.336677</td>
+      <td>96.678251</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>559858</td>
+    </tr>
+    <tr>
+      <th>250004</th>
+      <td>18.036012</td>
+      <td>174.843524</td>
+      <td>60.586475</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>588368</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Visualizing-MatchingData">
+<h2>Visualizing MatchingData<a class="headerlink" href="#Visualizing-MatchingData" title="Permalink to this heading"></a></h2>
+<p>Some built-in tools help you get a quick visual snapshot of the data. Many of these plotting routines are thin wrappers around seaborn plotting routines with extra logic relevant to matching situations (e.g. where one of the populations is a reference population or where variables should be treated as numeric / categoric). In most cases, the user can pass along any keyword arguments that are understood by the underlying seaborn routine.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bc</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">bc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_matching_data_21_0.png" src="../_images/demos_matching_data_21_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;OrRd_r&#39;</span><span class="p">,</span> <span class="n">include_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_matching_data_22_0.png" src="../_images/demos_matching_data_22_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;OrRd_r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_matching_data_23_0.png" src="../_images/demos_matching_data_23_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grids</span> <span class="o">=</span> <span class="n">plot_joint_numeric_distributions</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">include_only</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">],</span> <span class="n">joint_kind</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;OrRd_r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/usr/local/lib/python3.8/site-packages/IPython/core/events.py:89: UserWarning: Creating legend with loc=&#34;best&#34; can be slow with large amounts of data.
+  func(*args, **kwargs)
+/usr/local/lib/python3.8/site-packages/IPython/core/pylabtools.py:152: UserWarning: Creating legend with loc=&#34;best&#34; can be slow with large amounts of data.
+  fig.canvas.print_figure(bytes_io, **kw)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_matching_data_24_1.png" src="../_images/demos_matching_data_24_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grids</span> <span class="o">=</span> <span class="n">plot_joint_numeric_categoric_distributions</span><span class="p">(</span>
+    <span class="n">m</span><span class="p">,</span>
+    <span class="n">include_only_categoric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;gender&#39;</span><span class="p">],</span>
+    <span class="n">include_only_numeric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">],</span>
+    <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;OrRd_r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_matching_data_25_0.png" src="../_images/demos_matching_data_25_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../02_demos.html" class="btn btn-neutral float-left" title="Demos" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ps_matcher.html" class="btn btn-neutral float-right" title="Propensity Score Matcher" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybalance.lp.matcher &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=f6245a2f"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Population Matching
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Population Matching</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybalance.lp.matcher</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybalance.lp.matcher</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ortools.sat.python</span> <span class="kn">import</span> <span class="n">cp_model</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">pybalance.propensity</span> <span class="kn">import</span> <span class="n">PropensityScoreMatcher</span>
+<span class="kn">from</span> <span class="nn">pybalance.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MatchingData</span><span class="p">,</span>
+    <span class="n">BaseBalanceCalculator</span><span class="p">,</span>
+    <span class="n">BalanceCalculator</span><span class="p">,</span>
+    <span class="n">split_target_pool</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_check_fitted</span><span class="p">(</span><span class="n">matcher</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">matcher</span><span class="o">.</span><span class="n">best_match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="s2">&quot;Matcher has not been fitted!&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">compute_truncation_error</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_rescale_for_discretization</span><span class="p">(</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">pool</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find a scale factor that allows one to convert datasets to integer datatypes</span>
+<span class="sd">    with minimal loss. Input parameter tolerance specifies the max allowable</span>
+<span class="sd">    truncation error as a fraction.</span>
+
+<span class="sd">    tolerance has a somewhat surprising effect of requiring more memory to</span>
+<span class="sd">    search. by using a lower tolerance, one can put better bounds on the</span>
+<span class="sd">    optimization variables and I think this helps memory usage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get initial truncation error</span>
+    <span class="n">truncation_error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+        <span class="n">compute_truncation_error</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="n">compute_truncation_error</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Ideally, no scaling is required at all, e.g., if everything is already</span>
+    <span class="c1"># an integer. Start with an initial scaling of 1 and increase as needed</span>
+    <span class="c1"># to find the right scale.</span>
+    <span class="n">scalefac</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Keep increasing the scale factor until the (worst) truncation error is</span>
+    <span class="c1"># less than the specified tolerance.</span>
+    <span class="k">while</span> <span class="n">truncation_error</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">:</span>
+        <span class="n">truncation_error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="n">compute_truncation_error</span><span class="p">(</span><span class="n">target</span> <span class="o">*</span> <span class="n">scalefac</span><span class="p">),</span>
+            <span class="n">compute_truncation_error</span><span class="p">(</span><span class="n">pool</span> <span class="o">*</span> <span class="n">scalefac</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">scalefac</span> <span class="o">*=</span> <span class="mf">1.2</span>
+
+    <span class="c1"># We add an extra factor of 2 for good measure. Better safe than sorry</span>
+    <span class="n">scalefac</span> <span class="o">*=</span> <span class="mi">2</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Scaling features by factor </span><span class="si">{</span><span class="n">scalefac</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> in order to use integer solver with &lt;= </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">truncation_error</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">% loss.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">scalefac</span> <span class="o">*</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="p">(</span><span class="n">scalefac</span> <span class="o">*</span> <span class="n">pool</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">target</span><span class="p">,</span> <span class="n">pool</span>
+
+
+<span class="k">class</span> <span class="nc">SolutionPrinter</span><span class="p">(</span><span class="n">cp_model</span><span class="o">.</span><span class="n">CpSolverSolutionCallback</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print intermediate solutions.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">matcher</span><span class="p">):</span>
+        <span class="n">cp_model</span><span class="o">.</span><span class="n">CpSolverSolutionCallback</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ind</span> <span class="o">=</span> <span class="n">ind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__deltas</span> <span class="o">=</span> <span class="n">deltas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__solution_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_scores</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">balance_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Initial balance score: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">pool</span><span class="p">))))</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_solution_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=========================================&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Solution </span><span class="si">%i</span><span class="s2">, time = </span><span class="si">%0.2f</span><span class="s2"> m&quot;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__solution_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">current_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__start_time</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Objective:</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ObjectiveValue</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ind</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ind</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># ---- Get indices of patients ----#</span>
+
+            <span class="n">balance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">balance</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Balance:</span><span class="se">\t</span><span class="si">{</span><span class="n">balance</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ---- Print Deltas per feature ----#</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patients:</span><span class="se">\t</span><span class="si">{</span><span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__ind</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ---- Print Deltas per feature ----#</span>
+        <span class="c1"># Don&#39;t touch this code. You may think it is written by a crazy person,</span>
+        <span class="c1"># but I promise ORTools will crash if you try to change it. I have no</span>
+        <span class="c1"># idea why.</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deltas</span><span class="p">:</span>
+            <span class="n">feat</span> <span class="o">=</span> <span class="n">headers</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Feature deltas: %12i </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__solution_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">solution_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__solution_count</span>
+
+
+<div class="viewcode-block" id="ConstraintSatisfactionMatcher"><a class="viewcode-back" href="../../../03_api.html#pybalance.lp.ConstraintSatisfactionMatcher">[docs]</a><span class="k">class</span> <span class="nc">ConstraintSatisfactionMatcher</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructs the class patient selection class.</span>
+
+<span class="sd">    :param matching_data: A MatchingData object describing the pool and target</span>
+<span class="sd">        populations. See utils.matching_data.</span>
+
+<span class="sd">    :param objective: Matching objective to optimize. Technically, you can pass</span>
+<span class="sd">        any balance calculator, but this solver cannot handle non-linear</span>
+<span class="sd">        objective functions. The solver uses the preprocessing from the balance</span>
+<span class="sd">        calculator for setting up the problem; the balance calculator itself is</span>
+<span class="sd">        used to report the balance of generated matches but not in actually</span>
+<span class="sd">        finding solutions (since the CS solver needs a discretized objective</span>
+<span class="sd">        function). The solver will optimize the absolute mean difference on the</span>
+<span class="sd">        output features of the balance calculator&#39;s preprocessing.</span>
+
+<span class="sd">    :param match_size: How large the match population should be. If passed as a</span>
+<span class="sd">        float, interpreted to be a fraction of the target population.</span>
+
+<span class="sd">    :param time_limit: Time limit to stop solving in seconds (def: 180 sec).</span>
+
+<span class="sd">    :param num_workers: Number of workers to use to optimize objective. See</span>
+<span class="sd">        https://github.com/google/or-tools/blob/stable/ortools/sat/sat_parameters.proto#L556</span>
+<span class="sd">        for more detail.</span>
+
+<span class="sd">    :param ps_hinting: Compute a propensity score match and use the result as a</span>
+<span class="sd">        hint for the solver</span>
+
+<span class="sd">    :param verbose: Verbose solving.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+        <span class="n">objective</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseBalanceCalculator</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;beta&quot;</span><span class="p">,</span>
+        <span class="n">match_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span>
+        <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">ps_hinting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orig_target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BalanceCalculator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">objective</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">objective</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">target</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="c1"># We will have to rescale everything to use an integer solver. If</span>
+        <span class="c1"># features are not normalized, then features with larger overall scale</span>
+        <span class="c1"># end up being emphasized more in the objective function.</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">_rescale_for_discretization</span><span class="p">(</span>
+            <span class="n">target</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">pool</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.01</span>
+        <span class="p">)</span>
+
+        <span class="c1"># ===== Sanity Check ======#</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">),</span> <span class="s2">&quot;The number of features should be the same in both reference population and input!&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span>
+        <span class="p">),</span> <span class="s2">&quot;Number of patients in treatment arm should be equal or less then control.&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">=</span> <span class="n">match_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">=</span> <span class="n">time_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="n">num_workers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps_hinting</span> <span class="o">=</span> <span class="n">ps_hinting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_params</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_features</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">sum</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_best_match</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># set match size</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Match size must not be greater than target population size.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Assume it represents a fraction of the target size</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;objective&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;match_size&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_limit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;num_workers&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ps_hinting&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;verbose&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reset_best_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_match</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_match_idx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="k">def</span> <span class="nf">get_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span><span class="p">,</span> <span class="s2">&quot;feature_weights&quot;</span><span class="p">):</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">feature_weights</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">min_nonzero_weight</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">weights</span> <span class="k">if</span> <span class="n">w</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">min_nonzero_weight</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">weights</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span>
+
+        <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">feat</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">headers</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Feature weights: </span><span class="si">{</span><span class="n">weight</span><span class="si">:</span><span class="s2">6d</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">weights</span>
+
+    <span class="k">def</span> <span class="nf">_get_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">match_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">match_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">match_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+
+        <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+
+        <span class="c1"># sort feature values ascending</span>
+        <span class="n">pool_features</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">])</span>
+        <span class="n">min_pool_feature</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pool_features</span><span class="p">[:</span><span class="n">match_size</span><span class="p">])</span>
+        <span class="n">max_pool_feature</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pool_features</span><span class="p">[</span><span class="o">-</span><span class="n">match_size</span><span class="p">:])</span>
+
+        <span class="n">target_feature_values</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
+        <span class="n">min_target_feature</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">target_feature_values</span><span class="p">[:</span><span class="n">match_size</span><span class="p">])</span>
+        <span class="n">max_target_feature</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">target_feature_values</span><span class="p">[</span><span class="o">-</span><span class="n">match_size</span><span class="p">:])</span>
+
+        <span class="n">max_delta</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="nb">abs</span><span class="p">(</span><span class="n">max_pool_feature</span> <span class="o">-</span> <span class="n">min_target_feature</span><span class="p">),</span>
+            <span class="nb">abs</span><span class="p">(</span><span class="n">max_target_feature</span> <span class="o">-</span> <span class="n">min_pool_feature</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">max_delta</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">50</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Inferred max_delta = </span><span class="si">{</span><span class="n">max_delta</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Feature dynamic range may exceed integer dynamic range and lead to suboptimal solutions.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">min_feature</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_target_feature</span><span class="p">,</span> <span class="n">min_pool_feature</span><span class="p">)</span>
+        <span class="n">max_feature</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_target_feature</span><span class="p">,</span> <span class="n">max_pool_feature</span><span class="p">)</span>
+
+        <span class="n">feat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">][</span><span class="n">f</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Feature limits:  [</span><span class="si">{</span><span class="n">min_feature</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">max_feature</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="n">max_delta</span>
+
+<div class="viewcode-block" id="ConstraintSatisfactionMatcher.match"><a class="viewcode-back" href="../../../03_api.html#pybalance.lp.ConstraintSatisfactionMatcher.match">[docs]</a>    <span class="k">def</span> <span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Match populations passed during __init__(). Returns MatchingData</span>
+<span class="sd">        instance containing the matched pool and target populations.</span>
+
+<span class="sd">        :param hint: You can supply a &quot;hint&quot; as either (1) A list of indices to</span>
+<span class="sd">            the pool. It will be assumed that the entire target is used, or (2)</span>
+<span class="sd">            A list of two lists, the first list being the indices to the target,</span>
+<span class="sd">            and the second being the indices to the pool, or (3) by omitting the</span>
+<span class="sd">            hint altoghether and passing ps_hinting=True in __init__(). In case</span>
+<span class="sd">            (3), a propensity score model will be estimated on the fly and used</span>
+<span class="sd">            to create a match population as a hint to the solver.</span>
+
+<span class="sd">            I admit the interface here is a bit confusing. We will clean this</span>
+<span class="sd">            up in a later release.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">time_limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Solving for match population with size = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">match_size</span><span class="si">}</span><span class="s2">. Will match on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="si">}</span><span class="s2"> dimensions ...&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># ========= Create Model===========#</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">cp_model</span><span class="o">.</span><span class="n">CpModel</span><span class="p">()</span>
+
+        <span class="c1"># ========= Variables===========#</span>
+        <span class="c1"># --- Binary flag for inclusion of patients ---------#</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># pool</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># target</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">):</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewBoolVar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;x[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">):</span>
+            <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewBoolVar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;y[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Calculating bounds on feature variables ...&quot;</span><span class="p">)</span>
+
+        <span class="n">abs_deltas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ref_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">deltas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">):</span>
+            <span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="n">max_delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limits</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span><span class="p">)</span>
+            <span class="n">abs_deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;abs_deltas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
+            <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;features[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
+            <span class="n">deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="o">-</span><span class="n">max_delta</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;deltas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
+            <span class="n">ref_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ref_features[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying constraints ...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ========= Constraints===========#</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">):</span>
+            <span class="c1"># --- aggregate for feature j ---------#</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">))</span> <span class="o">==</span> <span class="n">features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">))</span>
+                <span class="o">==</span> <span class="n">ref_features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="c1"># --- Taxicab distance ---------#</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">ref_features</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">==</span> <span class="n">deltas</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">AddAbsEquality</span><span class="p">(</span><span class="n">abs_deltas</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">deltas</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+        <span class="c1"># --- Cardinality ---------#</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">))</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">))</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span><span class="p">)</span>
+
+        <span class="c1"># ========= Hint! ==============#</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ps_hinting</span> <span class="ow">or</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">matching_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">target</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="n">matching_data</span><span class="p">)</span>
+            <span class="n">target_name</span> <span class="o">=</span> <span class="n">target</span><span class="p">[</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">pool_name</span> <span class="o">=</span> <span class="n">pool</span><span class="p">[</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">hint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Training PS model as guide for solver ...&quot;</span><span class="p">)</span>
+
+                <span class="n">target</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;ix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">)))</span>
+                <span class="n">pool</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;ix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)))</span>
+                <span class="n">matching_data</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">target</span><span class="p">,</span> <span class="n">pool</span><span class="p">]),</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">headers</span>
+                <span class="p">)</span>
+                <span class="n">ps_matcher</span> <span class="o">=</span> <span class="n">PropensityScoreMatcher</span><span class="p">(</span>
+                    <span class="n">matching_data</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span>
+                <span class="p">)</span>
+                <span class="n">ps_match</span> <span class="o">=</span> <span class="n">ps_matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+
+                <span class="n">target_hint</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">ps_match</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">ps_match</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">population</span> <span class="o">==</span> <span class="n">target_name</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">ix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="n">pool_hint</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">ps_match</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">ps_match</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">population</span> <span class="o">==</span> <span class="n">pool_name</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">ix</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">target_hint</span><span class="p">,</span> <span class="n">pool_hint</span> <span class="o">=</span> <span class="n">hint</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">target_hint</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+                    <span class="n">pool_hint</span> <span class="o">=</span> <span class="n">hint</span>
+
+            <span class="c1"># Kind of sanity check that the indices are aligned between what</span>
+            <span class="c1"># comes out of the PS solver and what we will apply as hints</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">):</span>
+                <span class="n">feat</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pool_hint</span><span class="p">)</span>
+                <span class="n">ref</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">target_hint</span><span class="p">)</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">feat</span> <span class="o">-</span> <span class="n">ref</span><span class="p">)</span>
+                <span class="n">obj</span> <span class="o">+=</span> <span class="n">delta</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hint achieves objective value = </span><span class="si">{</span><span class="n">obj</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying hints ...&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pool_hint</span><span class="p">:</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">AddHint</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">AddHint</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">target_hint</span><span class="p">:</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">AddHint</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">AddHint</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># ========= Objective===========#</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">abs_deltas</span><span class="p">))</span>
+
+        <span class="c1"># ===== Creates a solver =======#</span>
+        <span class="n">solver</span> <span class="o">=</span> <span class="n">cp_model</span><span class="o">.</span><span class="n">CpSolver</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">time_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">max_time_in_seconds</span> <span class="o">=</span> <span class="n">time_limit</span>
+
+        <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">log_search_progress</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">share_objective_bounds</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">share_level_zero_bounds</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Solving with </span><span class="si">%d</span><span class="s2"> workers ...&quot;</span> <span class="o">%</span> <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">num_workers</span><span class="p">)</span>
+        <span class="c1"># ========= Solve===========#</span>
+        <span class="c1"># ----- Append the important stuff for printing -----#</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">solution_printer</span> <span class="o">=</span> <span class="n">SolutionPrinter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">abs_deltas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">SolveWithSolutionCallback</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">solution_printer</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Status = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">solver</span><span class="o">.</span><span class="n">StatusName</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Number of solutions found: </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">solution_printer</span><span class="o">.</span><span class="n">solution_count</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">StatusName</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;FEASIBLE&quot;</span><span class="p">,</span> <span class="s2">&quot;OPTIMAL&quot;</span><span class="p">]:</span>
+            <span class="n">pool_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+            <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_pool</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">pool_indices</span><span class="p">]</span>
+            <span class="n">target_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_target</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">target_indices</span><span class="p">]</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">target</span><span class="p">,</span> <span class="n">pool</span><span class="p">]),</span>
+                <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">population_col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_match</span> <span class="o">=</span> <span class="n">match</span>
+
+        <span class="k">return</span> <span class="n">match</span></div>
+
+    <span class="k">def</span> <span class="nf">get_best_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_check_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_match</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
