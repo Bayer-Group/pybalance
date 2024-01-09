@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: Build deps
-        run: pip install -r environments/requirements.txt && python3 -m pip install build
+        run: python3 -m pip install -r environments/requirements.txt && python3 -m pip install build
       - name: Build sdist
         run: python3 -m build --sdist && python3 -m build --wheel
       - name: Publish package distributions to PyPI
