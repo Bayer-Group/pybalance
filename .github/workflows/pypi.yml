@@ -23,8 +23,8 @@ jobs:
         with:
           python-version: '3.9'
       - name: Build deps
-        run: python3 -m pip install -r environments/requirements.txt && python3 -m pip install build
-      - name: Build sdist
-        run: python3 -m build --sdist && python3 -m build --wheel
+        run: python3 -m pip install -r environments/requirements.txt
+      - name: Build artifacts
+        run: python3 setup.py sdist && python setup.py wheel
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
