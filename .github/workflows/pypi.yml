@@ -6,7 +6,7 @@ permissions:
   id-token: write
 
 on: 
-  create:
+  release:
     tags:
        - 'v[0-9]+.[0-9]+.[0-9]+'
    
