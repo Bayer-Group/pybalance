@@ -5,8 +5,11 @@ permissions:
   pages: write
   id-token: write
 
-on: [push, pull_request]
-
+on: 
+  create:
+    tags:
+       - 'v[0-9]+.[0-9]+.[0-9]+'
+   
 jobs:
   pypi-publish:
     runs-on: ubuntu-latest
