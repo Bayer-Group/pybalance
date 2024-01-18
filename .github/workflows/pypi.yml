@@ -25,6 +25,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+      - name: Clean old build artifacts
+        run: rm -rf dist/*
       - name: Build deps
         run: python3 -m pip install -r environments/requirements.txt && pip install wheel
       - name: Build artifacts
