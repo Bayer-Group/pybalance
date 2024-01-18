@@ -4,6 +4,9 @@ from pybalance import __version__
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open('environments/requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setuptools.setup(
     name="pybalance",
     version=__version__,
@@ -11,6 +14,7 @@ setuptools.setup(
     author_email="author@example.com",
     description="Population Matching",
     long_description=long_description,
+    install_requires=requirements,
     long_description_content_type="text/markdown",
     url="",
     packages=setuptools.find_packages(),
