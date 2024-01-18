@@ -4,7 +4,7 @@ from pybalance import __version__
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open('environments/requirements.txt') as f:
+with open("environments/requirements.txt") as f:
     requirements = f.read().splitlines()
 
 setuptools.setup(
