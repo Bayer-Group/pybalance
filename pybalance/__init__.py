@@ -5,7 +5,7 @@ import pybalance.sim
 import pybalance.visualization
 import pybalance.lp
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import logging
 
