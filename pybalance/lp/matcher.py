@@ -449,7 +449,7 @@ class ConstraintSatisfactionMatcher(object):
 
         if self.verbose:
             solution_printer = SolutionPrinter(x, abs_deltas, self)
-            status = solver.SolveWithSolutionCallback(model, solution_printer)
+            status = solver.Solve(model, solution_printer)
             logger.info("Status = %s" % solver.StatusName(status))
             logger.info(
                 "Number of solutions found: %i" % solution_printer.solution_count()
