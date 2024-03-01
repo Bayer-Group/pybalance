@@ -12,6 +12,16 @@ We reccomend using virtualenv and installing pybalance using pip:
 	>>> pip install --upgrade pip
 	>>> pip install pybalance
 
+If you wish you use pybalance within a jupyter notebook, you will also need to
+install jupyter:
+
+	>>> pip install jupyter
+
+and then register your enviroment with jupyter:
+
+	>>> python -m ipykernel install --user --name=pybalance
+
+Make sure to select the pybalance kernel when running the notebook.
 
 Install from source
 =========================
