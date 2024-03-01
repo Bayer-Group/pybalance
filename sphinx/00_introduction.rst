@@ -77,6 +77,7 @@ searches the solution space. An evolutionary solver is also implemented in
 `pybalance`, together with a number of heuristics for efficiently
 searching the space.
 
-For completeness and ease of comparison, `pybalance` also implements
-matching based on propensity score. For greater technical detail, see our
-publication (FIXME currently in review).
+For completeness and ease of comparison, `pybalance` also implements matching
+based on propensity score. For greater technical detail as well as applications,
+see our publication `here
+<https://onlinelibrary.wiley.com/doi/10.1002/pst.2352>`_.

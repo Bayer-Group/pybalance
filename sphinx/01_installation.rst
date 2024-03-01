@@ -5,8 +5,12 @@ Installation instructions
 Install from PIP
 =========================
 
-For now, everyone must install from source. Installation from PIP will be made
-available soon.
+We reccomend using virtualenv and installing pybalance using pip:
+
+	>>> python3.9 -m venv venv/pybalance
+	>>> source venv/pybalance/bin/activate
+	>>> pip install --upgrade pip
+	>>> pip install pybalance
 
 
 Install from source
