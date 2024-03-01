@@ -183,12 +183,22 @@ def generate_toy_dataset(n_pool=10000, n_target=1000, seed=45):
     return MatchingData(feature_data)
 
 
-def load_paper_dataset():
+def get_paper_dataset_path():
     """
-    Load the simulated matching dataset presented in the pybalance paper.
+    Get the path to the simulated matching dataset presented in the pybalance paper
+    (https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).
     """
     filepath = "pool250000-target25000-normal0-lognormal0-binary4.parquet"
     resource = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "data", filepath
     )
+    return resource
+
+
+def load_paper_dataset():
+    """
+    Load the simulated matching dataset presented in the pybalance paper
+    (https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).
+    """
+    resource = get_paper_dataset_path()
     return MatchingData(resource)
