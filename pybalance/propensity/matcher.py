@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 def _check_fitted(matcher):
     if matcher.best_match is None:
-        raise (ValueError, "Matcher has not been fitted!")
+        raise ValueError("Matcher has not been fitted!")
 
 
 class PropensityScoreMatcher:
