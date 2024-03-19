@@ -21,9 +21,9 @@ DOCS_DIR = os.path.split(__file__)[0]
 
 # -- Project information -----------------------------------------------------
 
-project = "Population Matching"
+project = "PyBalance"
 author = "Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein"
-copyright = f"2022 - Bayer AG - {author}"
+copyright = f"2024 - Bayer AG - {author}"
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.1"
