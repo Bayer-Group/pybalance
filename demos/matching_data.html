@@ -38,7 +38,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            Population Matching
+            PyBalance
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -81,7 +81,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Population Matching</a>
+          <a href="../index.html">PyBalance</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -102,12 +102,13 @@
              
   <section id="Matching-Data">
 <h1>Matching Data<a class="headerlink" href="#Matching-Data" title="Permalink to this heading"></a></h1>
-<p>In this notebook, we demonstrate the MatchingData class, which organizes population data for matching, and some plotting tools for visualizing the data.</p>
-<div class="nbinput docutils container">
+<p>In this notebook, we demonstrate the MatchingData class, which organizes population data for matching, and some plotting tools for visualizing the data. You can download this notebook to run yourself here: <a class="reference external" href="https://github.com/Bayer-Group/pybalance/blob/main/sphinx/demos/matching_data.ipynb">https://github.com/Bayer-Group/pybalance/blob/main/sphinx/demos/matching_data.ipynb</a>.</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(levelname)-4s</span><span class="s2"> [</span><span class="si">%(filename)s</span><span class="s2">:</span><span class="si">%(lineno)d</span><span class="s2">] </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
@@ -115,8 +116,8 @@
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">pybalance</span> <span class="kn">import</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">MatchingHeaders</span><span class="p">,</span> <span class="n">split_target_pool</span><span class="p">,</span> <span class="n">BetaBalance</span>
-<span class="kn">from</span> <span class="nn">pybalance.genetic</span> <span class="kn">import</span> <span class="n">GeneticMatcher</span>
+<span class="kn">import</span> <span class="nn">pybalance</span>
+<span class="kn">from</span> <span class="nn">pybalance</span> <span class="kn">import</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">MatchingHeaders</span><span class="p">,</span> <span class="n">split_target_pool</span>
 <span class="kn">from</span> <span class="nn">pybalance.visualization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">plot_numeric_features</span><span class="p">,</span>
     <span class="n">plot_categoric_features</span><span class="p">,</span>
@@ -125,25 +126,19 @@
     <span class="n">plot_joint_numeric_categoric_distributions</span><span class="p">,</span>
     <span class="n">plot_per_feature_loss</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pybalance.sim</span> <span class="kn">import</span> <span class="n">get_paper_dataset_path</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO [__init__.py:13] Loaded pybalance version 0.1.0.
-</pre></div></div>
-</div>
 <section id="Initializing-MatchingData">
 <h2>Initializing MatchingData<a class="headerlink" href="#Initializing-MatchingData" title="Permalink to this heading"></a></h2>
-<p>MatchingData can be initialized from either a string or pandas DataFrame.</p>
+<p>The MatchingData class is a thin wrapper around pandas DataFrame that additionally keeps track of certain metadata about the columns relevant for matching. MatchingData can be initialized from either a string or pandas DataFrame.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_path</span> <span class="o">=</span> <span class="s1">&#39;../../pybalance/sim/data/pool250000-target25000-normal0-lognormal0-binary4.parquet&#39;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize MatchingData from path</span>
+<span class="n">data_path</span> <span class="o">=</span> <span class="n">get_paper_dataset_path</span><span class="p">()</span>
 <span class="n">m</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_path</span><span class="p">)</span>
 <span class="n">m</span>
 </pre></div>
@@ -367,7 +362,8 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize MatchingData from pandas DataFrame</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
 <span class="n">m</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 <span class="n">m</span>
 </pre></div>
@@ -596,11 +592,11 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
     <span class="n">categoric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;country&#39;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="s1">&#39;binary_0&#39;</span><span class="p">,</span> <span class="s1">&#39;binary_1&#39;</span><span class="p">],</span>
     <span class="n">numeric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span>
+<span class="n">m_restricted_features</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span>
     <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
     <span class="n">headers</span><span class="o">=</span><span class="n">headers</span>
 <span class="p">)</span>
-<span class="n">m</span>
+<span class="n">m_restricted_features</span>
 </pre></div>
 </div>
 </div>
@@ -866,13 +862,40 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
       <td>25000.00</td>
     </tr>
     <tr>
+      <th rowspan="2" valign="top">gender</th>
+      <th>0.0</th>
+      <td>120054.00</td>
+      <td>12956.00</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>129946.00</td>
+      <td>12044.00</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">haircolor</th>
+      <th>0.0</th>
+      <td>100096.00</td>
+      <td>4924.00</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>75185.00</td>
+      <td>10055.00</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>74719.00</td>
+      <td>10021.00</td>
+    </tr>
+    <tr>
       <th rowspan="6" valign="top">country</th>
-      <th>0</th>
+      <th>0.0</th>
       <td>0.00</td>
       <td>2490.00</td>
     </tr>
     <tr>
-      <th>1</th>
+      <th>1.0</th>
       <td>25033.00</td>
       <td>5045.00</td>
     </tr>
@@ -897,37 +920,48 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
       <td>5000.00</td>
     </tr>
     <tr>
-      <th rowspan="2" valign="top">gender</th>
-      <th>0</th>
-      <td>120054.00</td>
-      <td>12956.00</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>129946.00</td>
-      <td>12044.00</td>
-    </tr>
-    <tr>
       <th rowspan="2" valign="top">binary_0</th>
-      <th>0</th>
+      <th>0.0</th>
       <td>225028.00</td>
       <td>17535.00</td>
     </tr>
     <tr>
-      <th>1</th>
+      <th>1.0</th>
       <td>24972.00</td>
       <td>7465.00</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">binary_1</th>
-      <th>0</th>
+      <th>0.0</th>
       <td>175673.00</td>
       <td>12527.00</td>
     </tr>
     <tr>
-      <th>1</th>
+      <th>1.0</th>
       <td>74327.00</td>
       <td>12473.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">binary_2</th>
+      <th>0.0</th>
+      <td>125113.00</td>
+      <td>17472.00</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>124887.00</td>
+      <td>7528.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">binary_3</th>
+      <th>0.0</th>
+      <td>49933.00</td>
+      <td>12562.00</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>200067.00</td>
+      <td>12438.00</td>
     </tr>
     <tr>
       <th rowspan="7" valign="top">age</th>
@@ -966,42 +1000,6 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
       <td>75.00</td>
     </tr>
     <tr>
-      <th rowspan="7" valign="top">weight</th>
-      <th>mean</th>
-      <td>88.30</td>
-      <td>82.25</td>
-    </tr>
-    <tr>
-      <th>std</th>
-      <td>16.32</td>
-      <td>18.89</td>
-    </tr>
-    <tr>
-      <th>min</th>
-      <td>50.00</td>
-      <td>50.00</td>
-    </tr>
-    <tr>
-      <th>q25</th>
-      <td>76.39</td>
-      <td>66.14</td>
-    </tr>
-    <tr>
-      <th>median</th>
-      <td>88.85</td>
-      <td>81.69</td>
-    </tr>
-    <tr>
-      <th>q75</th>
-      <td>100.88</td>
-      <td>97.41</td>
-    </tr>
-    <tr>
-      <th>max</th>
-      <td>120.00</td>
-      <td>120.00</td>
-    </tr>
-    <tr>
       <th rowspan="7" valign="top">height</th>
       <th>mean</th>
       <td>159.13</td>
@@ -1036,6 +1034,42 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
       <th>max</th>
       <td>195.00</td>
       <td>195.00</td>
+    </tr>
+    <tr>
+      <th rowspan="7" valign="top">weight</th>
+      <th>mean</th>
+      <td>88.30</td>
+      <td>82.25</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>16.32</td>
+      <td>18.89</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>50.00</td>
+      <td>50.00</td>
+    </tr>
+    <tr>
+      <th>q25</th>
+      <td>76.39</td>
+      <td>66.14</td>
+    </tr>
+    <tr>
+      <th>median</th>
+      <td>88.85</td>
+      <td>81.69</td>
+    </tr>
+    <tr>
+      <th>q75</th>
+      <td>100.88</td>
+      <td>97.41</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>120.00</td>
+      <td>120.00</td>
     </tr>
   </tbody>
 </table>
@@ -1354,7 +1388,7 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
 <p>133010 rows × 12 columns</p>
 </div></div>
 </div>
-<p>Often our matching data consists of exactly two populations, a reference population, which we call the “target” and a population to be matched, which we call the “pool”. It is sometimes convenient to split these two populations and the function split_target_pool does just that. The function will assign the smaller population to the target, unless explicitly given the name of the target population.</p>
+<p>Often our matching data consists of exactly two populations, a reference population, which we call the “target” and a population to be matched, which we call the “pool”. It is sometimes convenient to split these two populations and the function split_target_pool does just that. The function will assign the smaller population to the target, unless explicitly given the name of the target population. Note that the returned values are pandas DataFrame objects and not MatchingData objects.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -1623,23 +1657,232 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bc</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">bc</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<img alt="../_images/demos_matching_data_21_0.png" src="../_images/demos_matching_data_21_0.png" />
-</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>64.854093</td>
+      <td>189.466850</td>
+      <td>88.835049</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>135740</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>52.571993</td>
+      <td>158.134940</td>
+      <td>94.215107</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>49288</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>25.828361</td>
+      <td>154.692482</td>
+      <td>94.226222</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>256676</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>70.177571</td>
+      <td>160.536632</td>
+      <td>94.244356</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>338287</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>73.779164</td>
+      <td>153.551419</td>
+      <td>86.161814</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>72849</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>274995</th>
+      <td>62.547794</td>
+      <td>186.005015</td>
+      <td>50.975051</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>579081</td>
+    </tr>
+    <tr>
+      <th>274996</th>
+      <td>69.879934</td>
+      <td>142.371386</td>
+      <td>100.138389</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>569939</td>
+    </tr>
+    <tr>
+      <th>274997</th>
+      <td>56.921402</td>
+      <td>130.639589</td>
+      <td>108.745182</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>532419</td>
+    </tr>
+    <tr>
+      <th>274998</th>
+      <td>34.082754</td>
+      <td>174.764051</td>
+      <td>67.998396</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>566266</td>
+    </tr>
+    <tr>
+      <th>274999</th>
+      <td>60.981259</td>
+      <td>137.419436</td>
+      <td>89.897817</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>544231</td>
+    </tr>
+  </tbody>
+</table>
+<p>275000 rows × 12 columns</p>
+</div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;OrRd_r&#39;</span><span class="p">,</span> <span class="n">include_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the standardized mean difference for each feature</span>
+<span class="kn">from</span> <span class="nn">pybalance.utils</span> <span class="kn">import</span> <span class="n">BetaBalance</span>
+<span class="n">bc</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">standardize_difference</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">bc</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1654,7 +1897,7 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;OrRd_r&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;colorblind&#39;</span><span class="p">,</span> <span class="n">include_binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1669,7 +1912,22 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grids</span> <span class="o">=</span> <span class="n">plot_joint_numeric_distributions</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">include_only</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">],</span> <span class="n">joint_kind</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;OrRd_r&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;colorblind&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_matching_data_24_0.png" src="../_images/demos_matching_data_24_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_binary_features</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;colorblind&#39;</span><span class="p">,</span> <span class="n">orient_horizontal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">standardize_difference</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1678,36 +1936,15 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/usr/local/lib/python3.8/site-packages/IPython/core/events.py:89: UserWarning: Creating legend with loc=&#34;best&#34; can be slow with large amounts of data.
-  func(*args, **kwargs)
-/usr/local/lib/python3.8/site-packages/IPython/core/pylabtools.py:152: UserWarning: Creating legend with loc=&#34;best&#34; can be slow with large amounts of data.
-  fig.canvas.print_figure(bytes_io, **kw)
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/pybalance/visualization/distributions.py:331: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  plt.gca().set_yticklabels([&#34;&#34;] * len(labels), minor=True)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_matching_data_24_1.png" src="../_images/demos_matching_data_24_1.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grids</span> <span class="o">=</span> <span class="n">plot_joint_numeric_categoric_distributions</span><span class="p">(</span>
-    <span class="n">m</span><span class="p">,</span>
-    <span class="n">include_only_categoric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;gender&#39;</span><span class="p">],</span>
-    <span class="n">include_only_numeric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">],</span>
-    <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;OrRd_r&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/demos_matching_data_25_0.png" src="../_images/demos_matching_data_25_0.png" />
+<img alt="../_images/demos_matching_data_25_1.png" src="../_images/demos_matching_data_25_1.png" />
 </div>
 </div>
 </section>
@@ -1724,7 +1961,7 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

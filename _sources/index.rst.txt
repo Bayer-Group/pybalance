@@ -1,5 +1,5 @@
 **************************
-Population Matching Utilities
+PyBalance Utilities
 **************************
 
 Usage

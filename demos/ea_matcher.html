@@ -38,7 +38,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            Population Matching
+            PyBalance
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -81,7 +81,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Population Matching</a>
+          <a href="../index.html">PyBalance</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -103,7 +103,7 @@
   <section id="Genetic-Matcher">
 <h1>Genetic Matcher<a class="headerlink" href="#Genetic-Matcher" title="Permalink to this heading"></a></h1>
 <p>The GeneticMatcher can be used to optimize any function of the baseline covariates, both linear and non-linear. In this demo notebook, we show how to call the matcher in the PyBalance library, including an example of a non-linear balance function.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -131,20 +131,11 @@
     <span class="n">plot_categoric_features</span><span class="p">,</span>
     <span class="n">plot_binary_features</span><span class="p">,</span>
     <span class="n">plot_per_feature_loss</span><span class="p">,</span>
-    <span class="n">plot_joint_numeric_distributions</span>
 <span class="p">)</span>
 
 <span class="n">time_limit</span> <span class="o">=</span> <span class="mi">300</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO [__init__.py:13] Loaded pybalance version 0.1.0.
-</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -392,7 +383,7 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:127] cpu
+INFO [matcher.py:125] cpu
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -431,141 +422,152 @@ INFO [matcher.py:127] cpu
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [initialization.py:34] Optimizing balance with genetic algorithm ...
-INFO [initialization.py:35] Initial balance scores:
-INFO [initialization.py:40]     beta:   0.233
-INFO [initialization.py:41] Initializing candidate populations ...
-INFO [initialization.py:89] Computing PROPENSITY 1-1 matching method ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.003 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: SGDClassifier
-INFO [matcher.py:140]   * alpha: 1.5074398973827778
-INFO [matcher.py:140]   * class_weight: None
-INFO [matcher.py:140]   * early_stopping: True
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * loss: log_loss
-INFO [matcher.py:140]   * max_iter: 1500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:141]   Score (beta): 0.0525
-INFO [matcher.py:142]   Solution time: 0.008 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 2/50, 0.009 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.05835496346821341
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0291
-INFO [matcher.py:142]   Solution time: 0.014 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 3/50, 0.014 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [initialization.py:31] Optimizing balance with genetic algorithm ...
+INFO [initialization.py:32] Initial balance scores:
+INFO [initialization.py:37]     beta:   0.233
+INFO [initialization.py:38] Initializing candidate populations ...
+INFO [initialization.py:86] Computing PROPENSITY 1-1 matching method ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.001 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: SGDClassifier
+INFO [matcher.py:139]   * alpha: 1.5074398973827774
+INFO [matcher.py:139]   * class_weight: None
+INFO [matcher.py:139]   * early_stopping: True
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * loss: log_loss
+INFO [matcher.py:139]   * max_iter: 1500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:140]   Score (beta): 0.0525
+INFO [matcher.py:141]   Solution time: 0.002 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 2/50, 0.002 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.05835496346821344
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta): 0.0291
+INFO [matcher.py:141]   Solution time: 0.004 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 3/50, 0.004 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 4/50, 0.074 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 5/50, 0.079 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model SGDClassifier (iter 4/50, 0.028 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 5/50, 0.029 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 6/50, 0.136 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 7/50, 0.141 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 8/50, 0.146 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 9/50, 0.150 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 10/50, 0.193 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 11/50, 0.198 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 12/50, 0.203 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 13/50, 0.208 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 14/50, 0.213 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 15/50, 0.217 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 16/50, 0.221 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 17/50, 0.226 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 18/50, 0.231 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 2.390557089970641
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0289
-INFO [matcher.py:142]   Solution time: 0.238 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 19/50, 0.239 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 20/50, 0.274 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 21/50, 0.280 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 22/50, 0.286 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 23/50, 0.295 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 24/50, 0.299 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.304 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 26/50, 0.308 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.26994114136168157
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0288
-INFO [matcher.py:142]   Solution time: 0.314 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 27/50, 0.314 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 28/50, 0.321 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 29/50, 0.372 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 30/50, 0.375 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 31/50, 0.384 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 32/50, 0.390 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 33/50, 0.395 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 34/50, 0.400 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 35/50, 0.404 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 6/50, 0.050 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 7/50, 0.052 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 8/50, 0.055 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.056 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.073 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 11/50, 0.075 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 12/50, 0.078 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 13/50, 0.079 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 14/50, 0.080 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 15/50, 0.082 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 16/50, 0.083 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 17/50, 0.085 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 18/50, 0.087 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 2.3905570899706423
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta): 0.0289
+INFO [matcher.py:141]   Solution time: 0.090 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 19/50, 0.090 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 20/50, 0.101 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 21/50, 0.102 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.104 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 23/50, 0.105 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 24/50, 0.107 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.109 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 26/50, 0.111 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.2699411413616818
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta): 0.0288
+INFO [matcher.py:141]   Solution time: 0.113 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 27/50, 0.113 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 28/50, 0.115 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 29/50, 0.133 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 30/50, 0.135 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 31/50, 0.137 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 32/50, 0.139 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 33/50, 0.141 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 34/50, 0.142 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 35/50, 0.144 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 36/50, 0.471 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 37/50, 0.486 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 36/50, 0.167 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 37/50, 0.172 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.5868985298319502
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0249
-INFO [matcher.py:142]   Solution time: 0.555 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 38/50, 0.556 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 39/50, 0.561 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 40/50, 0.566 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 41/50, 0.572 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 0.577 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 43/50, 0.617 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 44/50, 0.682 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 45/50, 0.687 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 46/50, 0.694 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.5868985298319505
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta): 0.0249
+INFO [matcher.py:141]   Solution time: 0.195 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 38/50, 0.195 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 39/50, 0.197 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 40/50, 0.199 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 41/50, 0.201 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.203 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 43/50, 0.213 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 44/50, 0.233 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 45/50, 0.234 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 46/50, 0.235 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 47/50, 0.756 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 47/50, 0.257 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 48/50, 0.819 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 0.824 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 50/50, 0.828 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.5868985298319502
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0249
-INFO [matcher.py:142]   Solution time: 0.555 min
-INFO [initialization.py:69]     beta:   0.025
-INFO [initialization.py:74]     Included in initial population.
+INFO [matcher.py:180] Training model SGDClassifier (iter 48/50, 0.279 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.281 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 50/50, 0.282 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.5868985298319505
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta): 0.0249
+INFO [matcher.py:141]   Solution time: 0.195 min
+INFO [initialization.py:66]     beta:   0.025
+INFO [initialization.py:71]     Included in initial population.
 
-INFO [initialization.py:135] Sampling 512 candidate populations according to PROPENSITY distribution ...
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [initialization.py:132] Sampling 512 candidate populations according to PROPENSITY distribution ...
 
-INFO [initialization.py:135] Sampling 511 candidate populations according to UNIFORM distribution ...
+INFO [initialization.py:132] Sampling 511 candidate populations according to UNIFORM distribution ...
 
-INFO [logger.py:38] Generation 0
-INFO [logger.py:39]     remaining patients: 10000
-INFO [logger.py:40]     elapsed time: 0.89 min
-INFO [logger.py:49]     best beta: 0.02494      worst beta: 0.25118
-INFO [matcher.py:213] Time limit exceeded. Stopping.
+INFO [logger.py:34] Generation 0
+INFO [logger.py:35]     remaining patients: 10000
+INFO [logger.py:36]     elapsed time: 0.31 min
+INFO [logger.py:45]     best beta: 0.02494      worst beta: 0.25118
+INFO [logger.py:34] Generation 1000
+INFO [logger.py:35]     remaining patients: 7451
+INFO [logger.py:36]     elapsed time: 4.36 min
+INFO [logger.py:45]     best beta: 0.01141      worst beta: 0.24623
+INFO [matcher.py:211] Time limit exceeded. Stopping.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -703,79 +705,79 @@ INFO [matcher.py:213] Time limit exceeded. Stopping.
       <td>...</td>
     </tr>
     <tr>
-      <th>1112</th>
-      <td>41.629635</td>
-      <td>184.070238</td>
-      <td>89.104386</td>
-      <td>1.0</td>
-      <td>1</td>
+      <th>43</th>
+      <td>28.382714</td>
+      <td>155.203257</td>
+      <td>73.126127</td>
+      <td>0.0</td>
+      <td>2</td>
       <td>5</td>
       <td>pool</td>
       <td>1</td>
-      <td>0</td>
+      <td>1</td>
       <td>0</td>
       <td>1</td>
-      <td>1112</td>
+      <td>43</td>
     </tr>
     <tr>
-      <th>3201</th>
-      <td>65.983796</td>
-      <td>143.585419</td>
-      <td>85.288685</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>3</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>3201</td>
-    </tr>
-    <tr>
-      <th>8918</th>
-      <td>51.343352</td>
-      <td>147.636272</td>
-      <td>71.272276</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>2</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>8918</td>
-    </tr>
-    <tr>
-      <th>106</th>
-      <td>57.306919</td>
-      <td>177.491110</td>
-      <td>89.600459</td>
+      <th>4050</th>
+      <td>44.186246</td>
+      <td>133.221816</td>
+      <td>97.047691</td>
       <td>1.0</td>
-      <td>1</td>
-      <td>2</td>
-      <td>pool</td>
       <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>106</td>
-    </tr>
-    <tr>
-      <th>4489</th>
-      <td>41.355307</td>
-      <td>135.700502</td>
-      <td>65.057679</td>
-      <td>0.0</td>
-      <td>2</td>
       <td>4</td>
       <td>pool</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
       <td>1</td>
-      <td>4489</td>
+      <td>4050</td>
+    </tr>
+    <tr>
+      <th>8313</th>
+      <td>46.510049</td>
+      <td>130.960298</td>
+      <td>88.501597</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>8313</td>
+    </tr>
+    <tr>
+      <th>7166</th>
+      <td>57.061793</td>
+      <td>157.544063</td>
+      <td>70.784043</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>7166</td>
+    </tr>
+    <tr>
+      <th>569</th>
+      <td>50.174501</td>
+      <td>161.973210</td>
+      <td>83.131287</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>569</td>
     </tr>
   </tbody>
 </table>
@@ -843,7 +845,7 @@ INFO [matcher.py:213] Time limit exceeded. Stopping.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:127] cpu
+INFO [matcher.py:125] cpu
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -877,146 +879,153 @@ INFO [matcher.py:127] cpu
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [initialization.py:31] Optimizing balance with genetic algorithm ...
+INFO [initialization.py:32] Initial balance scores:
+INFO [initialization.py:37]     beta_squared:   0.263
+INFO [initialization.py:38] Initializing candidate populations ...
+INFO [initialization.py:86] Computing PROPENSITY 1-1 matching method ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.001 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: SGDClassifier
+INFO [matcher.py:139]   * alpha: 1.5074398973827774
+INFO [matcher.py:139]   * class_weight: None
+INFO [matcher.py:139]   * early_stopping: True
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * loss: log_loss
+INFO [matcher.py:139]   * max_iter: 1500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:140]   Score (beta_squared): 0.0603
+INFO [matcher.py:141]   Solution time: 0.004 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 2/50, 0.004 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.05835496346821344
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta_squared): 0.0374
+INFO [matcher.py:141]   Solution time: 0.007 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 3/50, 0.007 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 16.16555309446666
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta_squared): 0.0357
+INFO [matcher.py:141]   Solution time: 0.044 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 4/50, 0.044 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 5/50, 0.048 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 54.02072493419677
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta_squared): 0.0347
+INFO [matcher.py:141]   Solution time: 0.080 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 6/50, 0.081 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 7/50, 0.085 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 8/50, 0.089 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.092 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.117 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 11/50, 0.120 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 12/50, 0.124 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 13/50, 0.126 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 14/50, 0.129 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 15/50, 0.131 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 16/50, 0.134 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 17/50, 0.136 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 18/50, 0.139 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 19/50, 0.143 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 20/50, 0.165 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 21/50, 0.168 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.170 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 23/50, 0.177 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 24/50, 0.181 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.186 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 26/50, 0.188 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 27/50, 0.192 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 28/50, 0.196 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 29/50, 0.224 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 30/50, 0.226 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 31/50, 0.232 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 32/50, 0.235 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 33/50, 0.238 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 34/50, 0.241 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 35/50, 0.245 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 36/50, 0.280 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 37/50, 0.288 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.5868985298319505
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta_squared): 0.0311
+INFO [matcher.py:141]   Solution time: 0.322 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 38/50, 0.323 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 39/50, 0.325 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 40/50, 0.328 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 41/50, 0.331 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.333 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 43/50, 0.350 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 44/50, 0.381 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 45/50, 0.385 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 46/50, 0.387 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 47/50, 0.423 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 48/50, 0.458 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.460 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 50/50, 0.462 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.5868985298319505
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta_squared): 0.0311
+INFO [matcher.py:141]   Solution time: 0.322 min
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [initialization.py:34] Optimizing balance with genetic algorithm ...
-INFO [initialization.py:35] Initial balance scores:
-INFO [initialization.py:40]     beta_squared:   0.263
-INFO [initialization.py:41] Initializing candidate populations ...
-INFO [initialization.py:89] Computing PROPENSITY 1-1 matching method ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.001 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: SGDClassifier
-INFO [matcher.py:140]   * alpha: 1.5074398973827778
-INFO [matcher.py:140]   * class_weight: None
-INFO [matcher.py:140]   * early_stopping: True
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * loss: log_loss
-INFO [matcher.py:140]   * max_iter: 1500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:141]   Score (beta_squared): 0.0603
-INFO [matcher.py:142]   Solution time: 0.005 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 2/50, 0.005 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.05835496346821341
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_squared): 0.0374
-INFO [matcher.py:142]   Solution time: 0.009 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 3/50, 0.010 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 16.16555309446664
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_squared): 0.0357
-INFO [matcher.py:142]   Solution time: 0.062 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 4/50, 0.062 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 5/50, 0.066 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 54.02072493419675
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_squared): 0.0347
-INFO [matcher.py:142]   Solution time: 0.113 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 6/50, 0.113 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 7/50, 0.119 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 8/50, 0.125 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 9/50, 0.129 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 10/50, 0.165 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 11/50, 0.170 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 12/50, 0.175 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 13/50, 0.179 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 14/50, 0.183 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 15/50, 0.187 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 16/50, 0.190 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 17/50, 0.194 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 18/50, 0.198 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 19/50, 0.203 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 20/50, 0.227 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 21/50, 0.231 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 22/50, 0.235 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 23/50, 0.238 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 24/50, 0.241 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.247 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 26/50, 0.251 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 27/50, 0.256 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 28/50, 0.262 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 29/50, 0.303 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 30/50, 0.307 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 31/50, 0.313 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 32/50, 0.317 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 33/50, 0.321 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 34/50, 0.325 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 35/50, 0.327 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 36/50, 0.378 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 37/50, 0.389 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.5868985298319502
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_squared): 0.0311
-INFO [matcher.py:142]   Solution time: 0.436 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 38/50, 0.437 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 39/50, 0.440 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 40/50, 0.443 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 41/50, 0.446 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 0.449 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 43/50, 0.473 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 44/50, 0.516 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 45/50, 0.518 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 46/50, 0.522 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 47/50, 0.567 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 48/50, 0.611 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 0.613 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 50/50, 0.616 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.5868985298319502
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_squared): 0.0311
-INFO [matcher.py:142]   Solution time: 0.436 min
-INFO [initialization.py:69]     beta_squared:   0.031
-INFO [initialization.py:74]     Included in initial population.
+INFO [initialization.py:66]     beta_squared:   0.031
+INFO [initialization.py:71]     Included in initial population.
 
-INFO [initialization.py:135] Sampling 512 candidate populations according to PROPENSITY distribution ...
+INFO [initialization.py:132] Sampling 512 candidate populations according to PROPENSITY distribution ...
 
-INFO [initialization.py:135] Sampling 511 candidate populations according to UNIFORM distribution ...
+INFO [initialization.py:132] Sampling 511 candidate populations according to UNIFORM distribution ...
 
-INFO [logger.py:38] Generation 0
-INFO [logger.py:39]     remaining patients: 10000
-INFO [logger.py:40]     elapsed time: 0.65 min
-INFO [logger.py:49]     best beta_squared: 0.03106      worst beta_squared: 0.28163
-INFO [matcher.py:213] Time limit exceeded. Stopping.
+INFO [logger.py:34] Generation 0
+INFO [logger.py:35]     remaining patients: 10000
+INFO [logger.py:36]     elapsed time: 0.51 min
+INFO [logger.py:45]     best beta_squared: 0.03106      worst beta_squared: 0.28163
+INFO [matcher.py:211] Time limit exceeded. Stopping.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1080,10 +1089,10 @@ INFO [matcher.py:213] Time limit exceeded. Stopping.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [preprocess.py:338] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
-INFO [preprocess.py:338] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
-INFO [preprocess.py:338] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
-INFO [matcher.py:127] cpu
+INFO [preprocess.py:335] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
+INFO [preprocess.py:335] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
+INFO [preprocess.py:335] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
+INFO [matcher.py:125] cpu
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1117,156 +1126,167 @@ INFO [matcher.py:127] cpu
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [initialization.py:31] Optimizing balance with genetic algorithm ...
+INFO [initialization.py:32] Initial balance scores:
+INFO [initialization.py:37]     gamma:  0.217
+INFO [initialization.py:38] Initializing candidate populations ...
+INFO [initialization.py:86] Computing PROPENSITY 1-1 matching method ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.001 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: SGDClassifier
+INFO [matcher.py:139]   * alpha: 1.5074398973827774
+INFO [matcher.py:139]   * class_weight: None
+INFO [matcher.py:139]   * early_stopping: True
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * loss: log_loss
+INFO [matcher.py:139]   * max_iter: 1500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:140]   Score (gamma): 0.1083
+INFO [matcher.py:141]   Solution time: 0.004 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 2/50, 0.004 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.05835496346821344
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0391
+INFO [matcher.py:141]   Solution time: 0.008 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 3/50, 0.008 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 16.16555309446666
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0376
+INFO [matcher.py:141]   Solution time: 0.055 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 4/50, 0.055 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 5/50, 0.058 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 54.02072493419677
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0337
+INFO [matcher.py:141]   Solution time: 0.091 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 6/50, 0.091 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 7/50, 0.095 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 8/50, 0.098 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.101 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 13.179630432958701
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0269
+INFO [matcher.py:141]   Solution time: 0.135 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.135 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 11/50, 0.138 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 12/50, 0.142 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 13/50, 0.144 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 14/50, 0.146 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 15/50, 0.149 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 16/50, 0.151 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 17/50, 0.154 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 18/50, 0.158 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 19/50, 0.165 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 20/50, 0.196 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 21/50, 0.199 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.201 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 23/50, 0.203 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 24/50, 0.206 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.211 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 26/50, 0.213 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 27/50, 0.219 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 28/50, 0.222 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 29/50, 0.263 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 30/50, 0.265 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 31/50, 0.271 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 32/50, 0.273 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 33/50, 0.277 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 34/50, 0.279 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 35/50, 0.281 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 36/50, 0.320 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 37/50, 0.333 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 38/50, 0.370 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 39/50, 0.372 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 40/50, 0.374 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 41/50, 0.378 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.380 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 43/50, 0.409 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 44/50, 0.446 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 45/50, 0.448 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 46/50, 0.450 min) ...
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 47/50, 0.486 min) ...
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [initialization.py:34] Optimizing balance with genetic algorithm ...
-INFO [initialization.py:35] Initial balance scores:
-INFO [initialization.py:40]     gamma:  0.217
-INFO [initialization.py:41] Initializing candidate populations ...
-INFO [initialization.py:89] Computing PROPENSITY 1-1 matching method ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.001 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: SGDClassifier
-INFO [matcher.py:140]   * alpha: 1.5074398973827778
-INFO [matcher.py:140]   * class_weight: None
-INFO [matcher.py:140]   * early_stopping: True
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * loss: log_loss
-INFO [matcher.py:140]   * max_iter: 1500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:141]   Score (gamma): 0.1083
-INFO [matcher.py:142]   Solution time: 0.005 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 2/50, 0.005 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.05835496346821341
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (gamma): 0.0391
-INFO [matcher.py:142]   Solution time: 0.009 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 3/50, 0.010 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+/Users/sprivite/src/pybalance/venv/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 16.16555309446664
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (gamma): 0.0376
-INFO [matcher.py:142]   Solution time: 0.067 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 4/50, 0.067 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 5/50, 0.072 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 54.02072493419675
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (gamma): 0.0337
-INFO [matcher.py:142]   Solution time: 0.118 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 6/50, 0.119 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 7/50, 0.125 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 8/50, 0.129 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 9/50, 0.132 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 13.179630432958684
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (gamma): 0.0269
-INFO [matcher.py:142]   Solution time: 0.180 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 10/50, 0.180 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 11/50, 0.185 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 12/50, 0.190 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 13/50, 0.194 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 14/50, 0.197 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 15/50, 0.201 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 16/50, 0.205 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 17/50, 0.209 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 18/50, 0.213 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 19/50, 0.224 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 20/50, 0.274 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 21/50, 0.278 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 22/50, 0.282 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 23/50, 0.286 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 24/50, 0.289 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.297 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 26/50, 0.301 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 27/50, 0.308 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 28/50, 0.313 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 29/50, 0.374 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 30/50, 0.378 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 31/50, 0.387 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 32/50, 0.391 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 33/50, 0.396 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 34/50, 0.399 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 35/50, 0.402 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 36/50, 0.465 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 37/50, 0.488 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 38/50, 0.549 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 39/50, 0.552 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 40/50, 0.555 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 41/50, 0.561 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 0.564 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 43/50, 0.610 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 44/50, 0.671 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 45/50, 0.674 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 46/50, 0.678 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 47/50, 0.732 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 48/50, 0.789 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 0.792 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 50/50, 0.796 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 13.179630432958684
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (gamma): 0.0269
-INFO [matcher.py:142]   Solution time: 0.180 min
-INFO [initialization.py:69]     gamma:  0.027
-INFO [initialization.py:74]     Included in initial population.
+INFO [matcher.py:180] Training model SGDClassifier (iter 48/50, 0.524 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.526 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 50/50, 0.528 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 13.179630432958701
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0269
+INFO [matcher.py:141]   Solution time: 0.135 min
+INFO [initialization.py:66]     gamma:  0.027
+INFO [initialization.py:71]     Included in initial population.
 
-INFO [initialization.py:135] Sampling 512 candidate populations according to PROPENSITY distribution ...
+INFO [initialization.py:132] Sampling 512 candidate populations according to PROPENSITY distribution ...
 
-INFO [initialization.py:135] Sampling 511 candidate populations according to UNIFORM distribution ...
+INFO [initialization.py:132] Sampling 511 candidate populations according to UNIFORM distribution ...
 
-INFO [logger.py:38] Generation 0
-INFO [logger.py:39]     remaining patients: 10000
-INFO [logger.py:40]     elapsed time: 0.83 min
-INFO [logger.py:49]     best gamma: 0.02688     worst gamma: 0.23595
-INFO [matcher.py:213] Time limit exceeded. Stopping.
+INFO [logger.py:34] Generation 0
+INFO [logger.py:35]     remaining patients: 10000
+INFO [logger.py:36]     elapsed time: 0.55 min
+INFO [logger.py:45]     best gamma: 0.02688     worst gamma: 0.23595
+INFO [logger.py:34] Generation 1000
+INFO [logger.py:35]     remaining patients: 7375
+INFO [logger.py:36]     elapsed time: 4.93 min
+INFO [logger.py:45]     best gamma: 0.01151     worst gamma: 0.24080
+INFO [matcher.py:211] Time limit exceeded. Stopping.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1320,7 +1340,7 @@ INFO [matcher.py:213] Time limit exceeded. Stopping.
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

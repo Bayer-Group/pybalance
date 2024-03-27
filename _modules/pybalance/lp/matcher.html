@@ -32,7 +32,7 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            Population Matching
+            PyBalance
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -64,7 +64,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Population Matching</a>
+          <a href="../../../index.html">PyBalance</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -106,7 +106,7 @@
 
 <span class="k">def</span> <span class="nf">_check_fitted</span><span class="p">(</span><span class="n">matcher</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">matcher</span><span class="o">.</span><span class="n">best_match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="s2">&quot;Matcher has not been fitted!&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Matcher has not been fitted!&quot;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">compute_truncation_error</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -534,7 +534,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="n">solution_printer</span> <span class="o">=</span> <span class="n">SolutionPrinter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">abs_deltas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-            <span class="n">status</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">SolveWithSolutionCallback</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">solution_printer</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">solution_printer</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Status = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">solver</span><span class="o">.</span><span class="n">StatusName</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s2">&quot;Number of solutions found: </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">solution_printer</span><span class="o">.</span><span class="n">solution_count</span><span class="p">()</span>
@@ -571,7 +571,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

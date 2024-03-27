@@ -32,7 +32,7 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            Population Matching
+            PyBalance
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -64,7 +64,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Population Matching</a>
+          <a href="../../../index.html">PyBalance</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -268,14 +268,24 @@
     <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">feature_data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="load_paper_dataset"><a class="viewcode-back" href="../../../03_api.html#pybalance.sim.load_paper_dataset">[docs]</a><span class="k">def</span> <span class="nf">load_paper_dataset</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">get_paper_dataset_path</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Load the simulated matching dataset presented in the pybalance paper.</span>
+<span class="sd">    Get the path to the simulated matching dataset presented in the pybalance paper</span>
+<span class="sd">    (https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">filepath</span> <span class="o">=</span> <span class="s2">&quot;pool250000-target25000-normal0-lognormal0-binary4.parquet&quot;</span>
     <span class="n">resource</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">filepath</span>
     <span class="p">)</span>
+    <span class="k">return</span> <span class="n">resource</span>
+
+
+<div class="viewcode-block" id="load_paper_dataset"><a class="viewcode-back" href="../../../03_api.html#pybalance.sim.load_paper_dataset">[docs]</a><span class="k">def</span> <span class="nf">load_paper_dataset</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the simulated matching dataset presented in the pybalance paper</span>
+<span class="sd">    (https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="n">get_paper_dataset_path</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span></div>
 </pre></div>
 
@@ -286,7 +296,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -38,7 +38,7 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            Population Matching
+            PyBalance
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -81,7 +81,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Population Matching</a>
+          <a href="../index.html">PyBalance</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -103,7 +103,7 @@
   <section id="Constraint-Satisfaction-Matcher">
 <h1>Constraint Satisfaction Matcher<a class="headerlink" href="#Constraint-Satisfaction-Matcher" title="Permalink to this heading"></a></h1>
 <p>The ConstraintSatisfactionMatcher can be used to optimize any linear function of the baseline covariates. In this demo notebook, we show how to call the matcher in the PyBalance library.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -126,24 +126,15 @@
     <span class="n">plot_categoric_features</span><span class="p">,</span>
     <span class="n">plot_binary_features</span><span class="p">,</span>
     <span class="n">plot_per_feature_loss</span><span class="p">,</span>
-    <span class="n">plot_joint_numeric_distributions</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO [__init__.py:13] Loaded pybalance version 0.1.0.
-</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_limit</span> <span class="o">=</span> <span class="mi">300</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_limit</span> <span class="o">=</span> <span class="mi">360</span>
 </pre></div>
 </div>
 </div>
@@ -381,7 +372,7 @@ INFO [__init__.py:13] Loaded pybalance version 0.1.0.
     <span class="n">m</span><span class="p">,</span>
     <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
     <span class="n">objective</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
-    <span class="n">ps_hinting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">ps_hinting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">matcher</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
 </pre></div>
@@ -403,9 +394,9 @@ INFO [matcher.py:65] Scaling features by factor 110.41 in order to use integer s
 <div class="highlight"><pre>
 {&#39;objective&#39;: &#39;beta&#39;,
  &#39;match_size&#39;: 1000,
- &#39;time_limit&#39;: 300,
+ &#39;time_limit&#39;: 360,
  &#39;num_workers&#39;: 4,
- &#39;ps_hinting&#39;: True,
+ &#39;ps_hinting&#39;: False,
  &#39;verbose&#39;: True}
 </pre></div></div>
 </div>
@@ -425,219 +416,142 @@ INFO [matcher.py:65] Scaling features by factor 110.41 in order to use integer s
 INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 15 dimensions ...
 INFO [matcher.py:335] Calculating bounds on feature variables ...
 INFO [matcher.py:350] Applying constraints ...
-INFO [matcher.py:378] Training PS model as guide for solver ...
-/pybalance/pybalance/cs/matcher.py:380: SettingWithCopyWarning:
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  target.loc[:, &#34;ix&#34;] = list(range(len(target)))
-/pybalance/pybalance/cs/matcher.py:381: SettingWithCopyWarning:
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  pool.loc[:, &#34;ix&#34;] = list(range(len(pool)))
-INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.004 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: SGDClassifier
-INFO [matcher.py:140]   * alpha: 0.10453554731869287
-INFO [matcher.py:140]   * class_weight: None
-INFO [matcher.py:140]   * early_stopping: False
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * loss: modified_huber
-INFO [matcher.py:140]   * max_iter: 1500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:141]   Score (beta): 0.1547
-INFO [matcher.py:142]   Solution time: 0.007 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 2/50, 0.008 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: SGDClassifier
-INFO [matcher.py:140]   * alpha: 0.0354658577371722
-INFO [matcher.py:140]   * class_weight: None
-INFO [matcher.py:140]   * early_stopping: False
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * loss: modified_huber
-INFO [matcher.py:140]   * max_iter: 1500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:141]   Score (beta): 0.0532
-INFO [matcher.py:142]   Solution time: 0.010 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 3/50, 0.011 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.7627616953429357
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0285
-INFO [matcher.py:142]   Solution time: 0.015 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 4/50, 0.015 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 5/50, 0.019 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 6/50, 0.053 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 7/50, 0.112 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 8/50, 0.146 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 9/50, 0.151 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 10/50, 0.198 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 11/50, 0.228 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 12/50, 0.233 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 13/50, 0.249 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 14/50, 0.311 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 15/50, 0.313 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 16/50, 0.320 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 17/50, 0.376 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 18/50, 0.383 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 19/50, 0.388 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 20/50, 0.392 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 21/50, 0.396 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 19.525273903291264
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0278
-INFO [matcher.py:142]   Solution time: 0.458 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 22/50, 0.458 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 23/50, 0.461 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 24/50, 0.467 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.472 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 26/50, 0.479 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 27/50, 0.484 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 28/50, 0.487 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 29/50, 0.517 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 30/50, 0.526 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 31/50, 0.547 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 32/50, 0.600 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 33/50, 0.604 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 34/50, 0.609 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 35/50, 0.613 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 36/50, 0.616 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 37/50, 0.667 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 38/50, 0.671 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 39/50, 0.674 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 40/50, 0.724 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 41/50, 0.741 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 0.753 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.13217032311178473
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0273
-INFO [matcher.py:142]   Solution time: 0.757 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 43/50, 0.757 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 44/50, 0.762 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 45/50, 0.776 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 46/50, 0.783 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 47/50, 0.787 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 48/50, 0.793 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 0.796 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 50/50, 0.800 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.13217032311178473
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta): 0.0273
-INFO [matcher.py:142]   Solution time: 0.757 min
-INFO [matcher.py:415] Hint achieves objective value = 24305.
-INFO [matcher.py:417] Applying hints ...
 INFO [matcher.py:446] Solving with 4 workers ...
 INFO [matcher.py:89] Initial balance score: 0.2328
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 1, time = 0.03 m
-INFO [matcher.py:100] Objective:        24305.0
-INFO [matcher.py:113] Balance:  0.0273
+INFO [matcher.py:96] Solution 1, time = 0.02 m
+INFO [matcher.py:100] Objective:        207734.0
+INFO [matcher.py:113] Balance:  0.2298
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 2, time = 0.05 m
-INFO [matcher.py:100] Objective:        24254.0
-INFO [matcher.py:113] Balance:  0.0272
+INFO [matcher.py:96] Solution 2, time = 0.03 m
+INFO [matcher.py:100] Objective:        207713.0
+INFO [matcher.py:113] Balance:  0.2297
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 3, time = 0.08 m
-INFO [matcher.py:100] Objective:        24173.0
-INFO [matcher.py:113] Balance:  0.0272
+INFO [matcher.py:96] Solution 3, time = 0.04 m
+INFO [matcher.py:100] Objective:        207689.0
+INFO [matcher.py:113] Balance:  0.2296
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 4, time = 0.17 m
-INFO [matcher.py:100] Objective:        10321.0
-INFO [matcher.py:113] Balance:  0.0103
+INFO [matcher.py:96] Solution 4, time = 0.04 m
+INFO [matcher.py:100] Objective:        207630.0
+INFO [matcher.py:113] Balance:  0.2296
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 5, time = 0.20 m
-INFO [matcher.py:100] Objective:        10193.0
-INFO [matcher.py:113] Balance:  0.0102
+INFO [matcher.py:96] Solution 5, time = 0.04 m
+INFO [matcher.py:100] Objective:        207593.0
+INFO [matcher.py:113] Balance:  0.2295
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 6, time = 0.42 m
-INFO [matcher.py:100] Objective:        10174.0
+INFO [matcher.py:96] Solution 6, time = 0.05 m
+INFO [matcher.py:100] Objective:        207488.0
+INFO [matcher.py:113] Balance:  0.2294
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 7, time = 0.06 m
+INFO [matcher.py:100] Objective:        207381.0
+INFO [matcher.py:113] Balance:  0.2293
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 8, time = 0.06 m
+INFO [matcher.py:100] Objective:        10433.0
+INFO [matcher.py:113] Balance:  0.0105
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 9, time = 0.08 m
+INFO [matcher.py:100] Objective:        10229.0
+INFO [matcher.py:113] Balance:  0.0124
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 10, time = 0.10 m
+INFO [matcher.py:100] Objective:        10173.0
 INFO [matcher.py:113] Balance:  0.0123
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 7, time = 0.50 m
+INFO [matcher.py:96] Solution 11, time = 0.11 m
 INFO [matcher.py:100] Objective:        10168.0
 INFO [matcher.py:113] Balance:  0.0123
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 8, time = 0.61 m
-INFO [matcher.py:100] Objective:        10159.0
+INFO [matcher.py:96] Solution 12, time = 0.13 m
+INFO [matcher.py:100] Objective:        10165.0
+INFO [matcher.py:113] Balance:  0.0122
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 13, time = 0.14 m
+INFO [matcher.py:100] Objective:        10137.0
 INFO [matcher.py:113] Balance:  0.0102
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 9, time = 0.70 m
-INFO [matcher.py:100] Objective:        10130.0
+INFO [matcher.py:96] Solution 14, time = 0.17 m
+INFO [matcher.py:100] Objective:        10132.0
+INFO [matcher.py:113] Balance:  0.0123
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 15, time = 0.19 m
+INFO [matcher.py:100] Objective:        10129.0
+INFO [matcher.py:113] Balance:  0.0122
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 16, time = 0.29 m
+INFO [matcher.py:100] Objective:        10128.0
+INFO [matcher.py:113] Balance:  0.0122
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 17, time = 0.39 m
+INFO [matcher.py:100] Objective:        10127.0
 INFO [matcher.py:113] Balance:  0.0102
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 10, time = 0.86 m
-INFO [matcher.py:100] Objective:        10126.0
-INFO [matcher.py:113] Balance:  0.0105
+INFO [matcher.py:96] Solution 18, time = 0.51 m
+INFO [matcher.py:100] Objective:        10125.0
+INFO [matcher.py:113] Balance:  0.0122
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 11, time = 1.25 m
+INFO [matcher.py:96] Solution 19, time = 0.70 m
 INFO [matcher.py:100] Objective:        10124.0
+INFO [matcher.py:113] Balance:  0.0122
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 20, time = 0.93 m
+INFO [matcher.py:100] Objective:        10123.0
 INFO [matcher.py:113] Balance:  0.0104
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 12, time = 2.38 m
-INFO [matcher.py:100] Objective:        10123.0
-INFO [matcher.py:113] Balance:  0.0099
+INFO [matcher.py:96] Solution 21, time = 1.85 m
+INFO [matcher.py:100] Objective:        10121.0
+INFO [matcher.py:113] Balance:  0.0104
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
-INFO [matcher.py:453] Status = FEASIBLE
-INFO [matcher.py:454] Number of solutions found: 12
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 22, time = 3.52 m
+INFO [matcher.py:100] Objective:        10120.0
+INFO [matcher.py:113] Balance:  0.0102
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:453] Status = OPTIMAL
+INFO [matcher.py:454] Number of solutions found: 22
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -775,64 +689,34 @@ INFO [matcher.py:454] Number of solutions found: 12
       <td>...</td>
     </tr>
     <tr>
-      <th>9875</th>
-      <td>61.252012</td>
-      <td>125.610654</td>
-      <td>76.982561</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>1</td>
-      <td>pool</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>9875</td>
-    </tr>
-    <tr>
-      <th>9929</th>
-      <td>64.365442</td>
-      <td>190.227081</td>
-      <td>96.254238</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>1</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>9929</td>
-    </tr>
-    <tr>
-      <th>9933</th>
-      <td>68.194783</td>
-      <td>127.495418</td>
-      <td>69.177329</td>
-      <td>0.0</td>
-      <td>1</td>
-      <td>5</td>
-      <td>pool</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>9933</td>
-    </tr>
-    <tr>
-      <th>9946</th>
-      <td>22.630370</td>
-      <td>185.351623</td>
-      <td>117.381552</td>
+      <th>9975</th>
+      <td>51.242281</td>
+      <td>130.812647</td>
+      <td>87.967028</td>
       <td>1.0</td>
-      <td>1</td>
-      <td>2</td>
+      <td>0</td>
+      <td>4</td>
       <td>pool</td>
       <td>1</td>
       <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>9975</td>
+    </tr>
+    <tr>
+      <th>9977</th>
+      <td>56.698850</td>
+      <td>169.861617</td>
+      <td>99.292786</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>pool</td>
       <td>0</td>
       <td>1</td>
-      <td>9946</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9977</td>
     </tr>
     <tr>
       <th>9981</th>
@@ -849,376 +733,52 @@ INFO [matcher.py:454] Number of solutions found: 12
       <td>0</td>
       <td>9981</td>
     </tr>
+    <tr>
+      <th>9982</th>
+      <td>50.575808</td>
+      <td>139.401060</td>
+      <td>89.848616</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9982</td>
+    </tr>
+    <tr>
+      <th>9995</th>
+      <td>45.215942</td>
+      <td>186.043723</td>
+      <td>115.100146</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>9995</td>
+    </tr>
   </tbody>
 </table>
 <p>2000 rows × 12 columns</p>
 </div></div>
 </div>
+<p>Note that it is possible for the “balance” value to go up (hopefully only slightly) as the solver progresses. This behavior is due to rounding errors incurred when casting a continuous problem into the discrete space understood by the solver. The “balance” reported here is the actual balance computed to full accuracy on the original dataset; the “objective” value here is the actual quantity being optimized and should never increase.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-
-<span class="n">match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
-<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
-<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
-<span class="k">match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">debin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
-<br/></pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/demos_lp_matcher_7_0.png" src="../_images/demos_lp_matcher_7_0.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/demos_lp_matcher_7_1.png" src="../_images/demos_lp_matcher_7_1.png" />
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+</pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/demos_lp_matcher_7_2.png" src="../_images/demos_lp_matcher_7_2.png" />
-</div>
-</div>
-</section>
-<section id="Optimize-Beta-With-Cross-Terms-Added">
-<h2>Optimize Beta With Cross Terms Added<a class="headerlink" href="#Optimize-Beta-With-Cross-Terms-Added" title="Permalink to this heading"></a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">objective</span> <span class="o">=</span> <span class="n">beta_x</span> <span class="o">=</span> <span class="n">BetaXBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-<span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher_betax</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
-    <span class="n">m</span><span class="p">,</span>
-    <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
-    <span class="n">objective</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
-    <span class="n">ps_hinting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">matcher</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO [preprocess.py:445] Added cross term height * weight to matching features.
-INFO [preprocess.py:445] Added cross term gender * age to matching features.
-INFO [preprocess.py:445] Added cross term binary_0 * binary_3 to matching features.
-INFO [preprocess.py:445] Added cross term binary_0 * age to matching features.
-INFO [preprocess.py:445] Added cross term binary_3 * weight to matching features.
-INFO [preprocess.py:445] Added cross term binary_2 * weight to matching features.
-INFO [preprocess.py:445] Added cross term binary_1 * binary_3 to matching features.
-INFO [preprocess.py:445] Added cross term binary_2 * binary_3 to matching features.
-INFO [preprocess.py:445] Added cross term binary_2 * height to matching features.
-INFO [preprocess.py:445] Added cross term binary_0 * binary_2 to matching features.
-INFO [matcher.py:65] Scaling features by factor 158.99 in order to use integer solver with &lt;= 0.8895% loss.
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{&#39;objective&#39;: &#39;beta_x&#39;,
- &#39;match_size&#39;: 1000,
- &#39;time_limit&#39;: 300,
- &#39;num_workers&#39;: 4,
- &#39;ps_hinting&#39;: True,
- &#39;verbose&#39;: True}
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 25 dimensions ...
-INFO [matcher.py:335] Calculating bounds on feature variables ...
-INFO [matcher.py:350] Applying constraints ...
-INFO [matcher.py:378] Training PS model as guide for solver ...
-/pybalance/pybalance/cs/matcher.py:380: SettingWithCopyWarning:
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  target.loc[:, &#34;ix&#34;] = list(range(len(target)))
-/pybalance/pybalance/cs/matcher.py:381: SettingWithCopyWarning:
-A value is trying to be set on a copy of a slice from a DataFrame.
-Try using .loc[row_indexer,col_indexer] = value instead
-
-See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  pool.loc[:, &#34;ix&#34;] = list(range(len(pool)))
-INFO [preprocess.py:445] Added cross term height * weight to matching features.
-INFO [preprocess.py:445] Added cross term gender * age to matching features.
-INFO [preprocess.py:445] Added cross term binary_0 * binary_3 to matching features.
-INFO [preprocess.py:445] Added cross term binary_0 * age to matching features.
-INFO [preprocess.py:445] Added cross term binary_3 * weight to matching features.
-INFO [preprocess.py:445] Added cross term binary_2 * weight to matching features.
-INFO [preprocess.py:445] Added cross term binary_1 * binary_3 to matching features.
-INFO [preprocess.py:445] Added cross term binary_2 * binary_3 to matching features.
-INFO [preprocess.py:445] Added cross term binary_2 * height to matching features.
-INFO [preprocess.py:445] Added cross term binary_0 * binary_2 to matching features.
-INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.003 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: SGDClassifier
-INFO [matcher.py:140]   * alpha: 4.774501445415407
-INFO [matcher.py:140]   * class_weight: None
-INFO [matcher.py:140]   * early_stopping: True
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * loss: modified_huber
-INFO [matcher.py:140]   * max_iter: 1500
-INFO [matcher.py:140]   * penalty: elasticnet
-INFO [matcher.py:141]   Score (beta_x): 0.2294
-INFO [matcher.py:142]   Solution time: 0.012 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 2/50, 0.012 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.05854199518952411
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_x): 0.0867
-INFO [matcher.py:142]   Solution time: 0.023 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 3/50, 0.023 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.09099552707413873
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_x): 0.0685
-INFO [matcher.py:142]   Solution time: 0.032 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 4/50, 0.033 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 5/50, 0.038 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 6/50, 0.043 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.15085738749804517
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_x): 0.0681
-INFO [matcher.py:142]   Solution time: 0.135 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 7/50, 0.135 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: SGDClassifier
-INFO [matcher.py:140]   * alpha: 0.0926265187718931
-INFO [matcher.py:140]   * class_weight: balanced
-INFO [matcher.py:140]   * early_stopping: False
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * loss: log_loss
-INFO [matcher.py:140]   * max_iter: 1500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:141]   Score (beta_x): 0.0635
-INFO [matcher.py:142]   Solution time: 0.140 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 8/50, 0.141 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.11558026973872339
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_x): 0.0632
-INFO [matcher.py:142]   Solution time: 0.149 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 9/50, 0.150 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 10/50, 0.169 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 22.703034120730198
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_x): 0.0631
-INFO [matcher.py:142]   Solution time: 0.262 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 11/50, 0.262 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 12/50, 0.315 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 13/50, 0.323 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 14/50, 0.416 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 15/50, 0.436 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 16/50, 0.441 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 17/50, 0.446 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 18/50, 0.461 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 19/50, 0.466 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.796468661160752
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_x): 0.0610
-INFO [matcher.py:142]   Solution time: 0.571 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 20/50, 0.571 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 21/50, 0.689 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 22/50, 0.697 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 23/50, 0.703 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 24/50, 0.825 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.831 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 26/50, 0.839 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 27/50, 0.938 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 28/50, 0.947 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 29/50, 0.956 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 30/50, 0.996 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 31/50, 1.002 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 32/50, 1.008 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 33/50, 1.039 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 34/50, 1.162 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 35/50, 1.227 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 36/50, 1.235 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 37/50, 1.240 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 38/50, 1.247 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 39/50, 1.312 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 40/50, 1.317 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 41/50, 1.325 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 1.361 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 43/50, 1.369 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 44/50, 1.377 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 45/50, 1.385 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 46/50, 1.392 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 47/50, 1.399 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 48/50, 1.410 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 1.501 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 50/50, 1.507 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 0.796468661160752
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (beta_x): 0.0610
-INFO [matcher.py:142]   Solution time: 0.571 min
-INFO [matcher.py:415] Hint achieves objective value = 93575.
-INFO [matcher.py:417] Applying hints ...
-INFO [matcher.py:446] Solving with 4 workers ...
-INFO [matcher.py:89] Initial balance score: 0.2324
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 1, time = 0.07 m
-INFO [matcher.py:100] Objective:        93575.0
-INFO [matcher.py:113] Balance:  0.0610
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 2, time = 0.09 m
-INFO [matcher.py:100] Objective:        92822.0
-INFO [matcher.py:113] Balance:  0.0606
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 3, time = 0.13 m
-INFO [matcher.py:100] Objective:        92657.0
-INFO [matcher.py:113] Balance:  0.0606
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 4, time = 0.28 m
-INFO [matcher.py:100] Objective:        92640.0
-INFO [matcher.py:113] Balance:  0.0606
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 5, time = 0.29 m
-INFO [matcher.py:100] Objective:        92600.0
-INFO [matcher.py:113] Balance:  0.0604
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 6, time = 0.35 m
-INFO [matcher.py:100] Objective:        92472.0
-INFO [matcher.py:113] Balance:  0.0605
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 7, time = 0.40 m
-INFO [matcher.py:100] Objective:        92468.0
-INFO [matcher.py:113] Balance:  0.0604
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 8, time = 0.44 m
-INFO [matcher.py:100] Objective:        43811.0
-INFO [matcher.py:113] Balance:  0.0331
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 9, time = 0.52 m
-INFO [matcher.py:100] Objective:        39784.0
-INFO [matcher.py:113] Balance:  0.0314
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 10, time = 0.54 m
-INFO [matcher.py:100] Objective:        39382.0
-INFO [matcher.py:113] Balance:  0.0313
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 11, time = 0.58 m
-INFO [matcher.py:100] Objective:        39283.0
-INFO [matcher.py:113] Balance:  0.0313
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 12, time = 3.19 m
-INFO [matcher.py:100] Objective:        35933.0
-INFO [matcher.py:113] Balance:  0.0310
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 13, time = 4.86 m
-INFO [matcher.py:100] Objective:        35920.0
-INFO [matcher.py:113] Balance:  0.0310
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:453] Status = FEASIBLE
-INFO [matcher.py:454] Number of solutions found: 13
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1352,10 +912,25 @@ INFO [matcher.py:454] Number of solutions found: 13
       <td>...</td>
     </tr>
     <tr>
-      <th>9958</th>
-      <td>51.722321</td>
-      <td>170.350117</td>
-      <td>80.695438</td>
+      <th>9975</th>
+      <td>51.242281</td>
+      <td>130.812647</td>
+      <td>87.967028</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>9975</td>
+    </tr>
+    <tr>
+      <th>9977</th>
+      <td>56.698850</td>
+      <td>169.861617</td>
+      <td>99.292786</td>
       <td>0.0</td>
       <td>2</td>
       <td>4</td>
@@ -1364,7 +939,1170 @@ INFO [matcher.py:454] Number of solutions found: 13
       <td>1</td>
       <td>0</td>
       <td>1</td>
-      <td>9958</td>
+      <td>9977</td>
+    </tr>
+    <tr>
+      <th>9981</th>
+      <td>39.006118</td>
+      <td>133.419182</td>
+      <td>71.135407</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9981</td>
+    </tr>
+    <tr>
+      <th>9982</th>
+      <td>50.575808</td>
+      <td>139.401060</td>
+      <td>89.848616</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9982</td>
+    </tr>
+    <tr>
+      <th>9995</th>
+      <td>45.215942</td>
+      <td>186.043723</td>
+      <td>115.100146</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>9995</td>
+    </tr>
+  </tbody>
+</table>
+<p>2000 rows × 12 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="n">match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
+<span class="k">match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
+<span class="c1"># fig = plot_per_feature_loss(match, beta, &#39;target&#39;, debin=False)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_9_0.png" src="../_images/demos_lp_matcher_9_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_lp_matcher_9_1.png" src="../_images/demos_lp_matcher_9_1.png" />
+</div>
+</div>
+</section>
+<section id="Optimize-Beta-With-Cross-Terms-Added">
+<h2>Optimize Beta With Cross Terms Added<a class="headerlink" href="#Optimize-Beta-With-Cross-Terms-Added" title="Permalink to this heading"></a></h2>
+<p>Sometimes it helps to add a known (non-optimal) solution as a hint to the solver. A natural choice for hinting the solver is to take a solution from PS matching. We can choose to use the PS as a hint to the solver by passing ps_hinting=True.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">objective</span> <span class="o">=</span> <span class="n">beta_x</span> <span class="o">=</span> <span class="n">BetaXBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher_betax</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
+    <span class="n">m</span><span class="p">,</span>
+    <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
+    <span class="n">ps_hinting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">matcher</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [preprocess.py:442] Added cross term height * weight to matching features.
+INFO [preprocess.py:442] Added cross term gender * age to matching features.
+INFO [preprocess.py:442] Added cross term binary_0 * binary_3 to matching features.
+INFO [preprocess.py:442] Added cross term binary_0 * age to matching features.
+INFO [preprocess.py:442] Added cross term binary_3 * weight to matching features.
+INFO [preprocess.py:442] Added cross term binary_2 * weight to matching features.
+INFO [preprocess.py:442] Added cross term binary_1 * binary_3 to matching features.
+INFO [preprocess.py:442] Added cross term binary_2 * binary_3 to matching features.
+INFO [preprocess.py:442] Added cross term binary_2 * height to matching features.
+INFO [preprocess.py:442] Added cross term binary_0 * binary_2 to matching features.
+INFO [matcher.py:65] Scaling features by factor 158.99 in order to use integer solver with &lt;= 0.8895% loss.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;objective&#39;: &#39;beta_x&#39;,
+ &#39;match_size&#39;: 1000,
+ &#39;time_limit&#39;: 360,
+ &#39;num_workers&#39;: 4,
+ &#39;ps_hinting&#39;: True,
+ &#39;verbose&#39;: True}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 25 dimensions ...
+INFO [matcher.py:335] Calculating bounds on feature variables ...
+INFO [matcher.py:350] Applying constraints ...
+INFO [matcher.py:378] Training PS model as guide for solver ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/pybalance/lp/matcher.py:380: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  target.loc[:, &#34;ix&#34;] = list(range(len(target)))
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/pybalance/lp/matcher.py:381: SettingWithCopyWarning:
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  pool.loc[:, &#34;ix&#34;] = list(range(len(pool)))
+INFO [preprocess.py:442] Added cross term height * weight to matching features.
+INFO [preprocess.py:442] Added cross term gender * age to matching features.
+INFO [preprocess.py:442] Added cross term binary_0 * binary_3 to matching features.
+INFO [preprocess.py:442] Added cross term binary_0 * age to matching features.
+INFO [preprocess.py:442] Added cross term binary_3 * weight to matching features.
+INFO [preprocess.py:442] Added cross term binary_2 * weight to matching features.
+INFO [preprocess.py:442] Added cross term binary_1 * binary_3 to matching features.
+INFO [preprocess.py:442] Added cross term binary_2 * binary_3 to matching features.
+INFO [preprocess.py:442] Added cross term binary_2 * height to matching features.
+INFO [preprocess.py:442] Added cross term binary_0 * binary_2 to matching features.
+INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.001 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: SGDClassifier
+INFO [matcher.py:139]   * alpha: 0.10453554731869287
+INFO [matcher.py:139]   * class_weight: None
+INFO [matcher.py:139]   * early_stopping: False
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * loss: modified_huber
+INFO [matcher.py:139]   * max_iter: 1500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:140]   Score (beta_x): 0.1650
+INFO [matcher.py:141]   Solution time: 0.002 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 2/50, 0.002 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: SGDClassifier
+INFO [matcher.py:139]   * alpha: 0.0354658577371722
+INFO [matcher.py:139]   * class_weight: None
+INFO [matcher.py:139]   * early_stopping: False
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * loss: modified_huber
+INFO [matcher.py:139]   * max_iter: 1500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:140]   Score (beta_x): 0.0887
+INFO [matcher.py:141]   Solution time: 0.003 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 3/50, 0.003 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.7627616953429357
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta_x): 0.0670
+INFO [matcher.py:141]   Solution time: 0.006 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 4/50, 0.006 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.015804928600429948
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (beta_x): 0.0615
+INFO [matcher.py:141]   Solution time: 0.007 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 5/50, 0.007 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 6/50, 0.022 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 7/50, 0.040 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 8/50, 0.058 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.059 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.074 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 11/50, 0.090 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 12/50, 0.091 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 13/50, 0.102 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 14/50, 0.120 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 15/50, 0.121 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 16/50, 0.123 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 17/50, 0.141 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 18/50, 0.142 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 19/50, 0.143 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 20/50, 0.144 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 21/50, 0.145 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.163 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 23/50, 0.164 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 24/50, 0.165 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.166 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 26/50, 0.167 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 27/50, 0.172 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 28/50, 0.173 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 29/50, 0.187 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 30/50, 0.188 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 31/50, 0.201 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model SGDClassifier (iter 32/50, 0.220 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 33/50, 0.221 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 34/50, 0.222 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: SGDClassifier
+INFO [matcher.py:139]   * alpha: 0.026061113485170782
+INFO [matcher.py:139]   * class_weight: balanced
+INFO [matcher.py:139]   * early_stopping: True
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * loss: log_loss
+INFO [matcher.py:139]   * max_iter: 1500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:140]   Score (beta_x): 0.0603
+INFO [matcher.py:141]   Solution time: 0.223 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 35/50, 0.223 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 36/50, 0.224 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 37/50, 0.243 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 38/50, 0.245 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 39/50, 0.246 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+  warnings.warn(
+INFO [matcher.py:180] Training model LogisticRegression (iter 40/50, 0.264 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 41/50, 0.278 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.286 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 43/50, 0.288 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 44/50, 0.289 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 45/50, 0.300 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 46/50, 0.305 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 47/50, 0.306 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 48/50, 0.307 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.308 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 50/50, 0.309 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: SGDClassifier
+INFO [matcher.py:139]   * alpha: 0.026061113485170782
+INFO [matcher.py:139]   * class_weight: balanced
+INFO [matcher.py:139]   * early_stopping: True
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * loss: log_loss
+INFO [matcher.py:139]   * max_iter: 1500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:140]   Score (beta_x): 0.0603
+INFO [matcher.py:141]   Solution time: 0.223 min
+INFO [matcher.py:415] Hint achieves objective value = 97213.
+INFO [matcher.py:417] Applying hints ...
+INFO [matcher.py:446] Solving with 4 workers ...
+INFO [matcher.py:89] Initial balance score: 0.2324
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 1, time = 0.05 m
+INFO [matcher.py:100] Objective:        97213.0
+INFO [matcher.py:113] Balance:  0.0603
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 2, time = 0.06 m
+INFO [matcher.py:100] Objective:        97192.0
+INFO [matcher.py:113] Balance:  0.0604
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 3, time = 0.06 m
+INFO [matcher.py:100] Objective:        97172.0
+INFO [matcher.py:113] Balance:  0.0604
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 4, time = 0.06 m
+INFO [matcher.py:100] Objective:        97154.0
+INFO [matcher.py:113] Balance:  0.0604
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 5, time = 0.06 m
+INFO [matcher.py:100] Objective:        97118.0
+INFO [matcher.py:113] Balance:  0.0603
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 6, time = 0.07 m
+INFO [matcher.py:100] Objective:        96362.0
+INFO [matcher.py:113] Balance:  0.0599
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 7, time = 0.07 m
+INFO [matcher.py:100] Objective:        96278.0
+INFO [matcher.py:113] Balance:  0.0598
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 8, time = 0.07 m
+INFO [matcher.py:100] Objective:        96248.0
+INFO [matcher.py:113] Balance:  0.0598
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 9, time = 0.07 m
+INFO [matcher.py:100] Objective:        96125.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 10, time = 0.08 m
+INFO [matcher.py:100] Objective:        96108.0
+INFO [matcher.py:113] Balance:  0.0599
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 11, time = 0.08 m
+INFO [matcher.py:100] Objective:        96090.0
+INFO [matcher.py:113] Balance:  0.0598
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 12, time = 0.08 m
+INFO [matcher.py:100] Objective:        96054.0
+INFO [matcher.py:113] Balance:  0.0598
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 13, time = 0.09 m
+INFO [matcher.py:100] Objective:        95990.0
+INFO [matcher.py:113] Balance:  0.0598
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 14, time = 0.09 m
+INFO [matcher.py:100] Objective:        95973.0
+INFO [matcher.py:113] Balance:  0.0599
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 15, time = 0.09 m
+INFO [matcher.py:100] Objective:        95955.0
+INFO [matcher.py:113] Balance:  0.0599
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 16, time = 0.11 m
+INFO [matcher.py:100] Objective:        95835.0
+INFO [matcher.py:113] Balance:  0.0598
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 17, time = 0.12 m
+INFO [matcher.py:100] Objective:        95820.0
+INFO [matcher.py:113] Balance:  0.0599
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 18, time = 0.12 m
+INFO [matcher.py:100] Objective:        95818.0
+INFO [matcher.py:113] Balance:  0.0599
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 19, time = 0.14 m
+INFO [matcher.py:100] Objective:        95782.0
+INFO [matcher.py:113] Balance:  0.0598
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 20, time = 0.15 m
+INFO [matcher.py:100] Objective:        95767.0
+INFO [matcher.py:113] Balance:  0.0600
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 21, time = 0.18 m
+INFO [matcher.py:100] Objective:        95616.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 22, time = 0.19 m
+INFO [matcher.py:100] Objective:        95540.0
+INFO [matcher.py:113] Balance:  0.0596
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 23, time = 0.20 m
+INFO [matcher.py:100] Objective:        95525.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 24, time = 0.20 m
+INFO [matcher.py:100] Objective:        95420.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 25, time = 0.23 m
+INFO [matcher.py:100] Objective:        95367.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 26, time = 0.23 m
+INFO [matcher.py:100] Objective:        95302.0
+INFO [matcher.py:113] Balance:  0.0596
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 27, time = 0.23 m
+INFO [matcher.py:100] Objective:        95272.0
+INFO [matcher.py:113] Balance:  0.0596
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 28, time = 0.24 m
+INFO [matcher.py:100] Objective:        95200.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 29, time = 0.25 m
+INFO [matcher.py:100] Objective:        95185.0
+INFO [matcher.py:113] Balance:  0.0596
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 30, time = 0.27 m
+INFO [matcher.py:100] Objective:        95167.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 31, time = 0.27 m
+INFO [matcher.py:100] Objective:        95166.0
+INFO [matcher.py:113] Balance:  0.0598
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 32, time = 0.27 m
+INFO [matcher.py:100] Objective:        95098.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 33, time = 0.27 m
+INFO [matcher.py:100] Objective:        95073.0
+INFO [matcher.py:113] Balance:  0.0597
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 34, time = 0.28 m
+INFO [matcher.py:100] Objective:        94920.0
+INFO [matcher.py:113] Balance:  0.0596
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 35, time = 0.28 m
+INFO [matcher.py:100] Objective:        94896.0
+INFO [matcher.py:113] Balance:  0.0596
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 36, time = 0.33 m
+INFO [matcher.py:100] Objective:        94746.0
+INFO [matcher.py:113] Balance:  0.0595
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 37, time = 0.34 m
+INFO [matcher.py:100] Objective:        94722.0
+INFO [matcher.py:113] Balance:  0.0596
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 38, time = 0.34 m
+INFO [matcher.py:100] Objective:        94697.0
+INFO [matcher.py:113] Balance:  0.0595
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 39, time = 0.34 m
+INFO [matcher.py:100] Objective:        94652.0
+INFO [matcher.py:113] Balance:  0.0595
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 40, time = 0.35 m
+INFO [matcher.py:100] Objective:        94544.0
+INFO [matcher.py:113] Balance:  0.0594
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 41, time = 0.35 m
+INFO [matcher.py:100] Objective:        94515.0
+INFO [matcher.py:113] Balance:  0.0595
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 42, time = 0.37 m
+INFO [matcher.py:100] Objective:        93901.0
+INFO [matcher.py:113] Balance:  0.0591
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 43, time = 0.46 m
+INFO [matcher.py:100] Objective:        93721.0
+INFO [matcher.py:113] Balance:  0.0592
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 44, time = 0.63 m
+INFO [matcher.py:100] Objective:        93717.0
+INFO [matcher.py:113] Balance:  0.0591
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 45, time = 0.77 m
+INFO [matcher.py:100] Objective:        93699.0
+INFO [matcher.py:113] Balance:  0.0591
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 46, time = 0.78 m
+INFO [matcher.py:100] Objective:        93583.0
+INFO [matcher.py:113] Balance:  0.0591
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 47, time = 0.78 m
+INFO [matcher.py:100] Objective:        93568.0
+INFO [matcher.py:113] Balance:  0.0590
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 48, time = 0.79 m
+INFO [matcher.py:100] Objective:        93532.0
+INFO [matcher.py:113] Balance:  0.0590
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 49, time = 0.79 m
+INFO [matcher.py:100] Objective:        93530.0
+INFO [matcher.py:113] Balance:  0.0590
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 50, time = 0.79 m
+INFO [matcher.py:100] Objective:        93521.0
+INFO [matcher.py:113] Balance:  0.0590
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 51, time = 0.81 m
+INFO [matcher.py:100] Objective:        93413.0
+INFO [matcher.py:113] Balance:  0.0590
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 52, time = 0.82 m
+INFO [matcher.py:100] Objective:        93382.0
+INFO [matcher.py:113] Balance:  0.0591
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 53, time = 0.82 m
+INFO [matcher.py:100] Objective:        93348.0
+INFO [matcher.py:113] Balance:  0.0591
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 54, time = 0.82 m
+INFO [matcher.py:100] Objective:        93296.0
+INFO [matcher.py:113] Balance:  0.0590
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 55, time = 0.83 m
+INFO [matcher.py:100] Objective:        93180.0
+INFO [matcher.py:113] Balance:  0.0590
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 56, time = 0.83 m
+INFO [matcher.py:100] Objective:        93159.0
+INFO [matcher.py:113] Balance:  0.0589
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 57, time = 0.84 m
+INFO [matcher.py:100] Objective:        93107.0
+INFO [matcher.py:113] Balance:  0.0589
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 58, time = 0.84 m
+INFO [matcher.py:100] Objective:        93031.0
+INFO [matcher.py:113] Balance:  0.0589
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 59, time = 0.85 m
+INFO [matcher.py:100] Objective:        93006.0
+INFO [matcher.py:113] Balance:  0.0589
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 60, time = 0.86 m
+INFO [matcher.py:100] Objective:        92967.0
+INFO [matcher.py:113] Balance:  0.0588
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 61, time = 0.86 m
+INFO [matcher.py:100] Objective:        92961.0
+INFO [matcher.py:113] Balance:  0.0588
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 62, time = 0.86 m
+INFO [matcher.py:100] Objective:        92924.0
+INFO [matcher.py:113] Balance:  0.0589
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 63, time = 0.87 m
+INFO [matcher.py:100] Objective:        92875.0
+INFO [matcher.py:113] Balance:  0.0588
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 64, time = 0.87 m
+INFO [matcher.py:100] Objective:        92809.0
+INFO [matcher.py:113] Balance:  0.0589
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 65, time = 0.87 m
+INFO [matcher.py:100] Objective:        92788.0
+INFO [matcher.py:113] Balance:  0.0589
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 66, time = 0.91 m
+INFO [matcher.py:100] Objective:        92715.0
+INFO [matcher.py:113] Balance:  0.0588
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 67, time = 0.91 m
+INFO [matcher.py:100] Objective:        92675.0
+INFO [matcher.py:113] Balance:  0.0588
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 68, time = 0.91 m
+INFO [matcher.py:100] Objective:        92650.0
+INFO [matcher.py:113] Balance:  0.0587
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 69, time = 0.92 m
+INFO [matcher.py:100] Objective:        92605.0
+INFO [matcher.py:113] Balance:  0.0587
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 70, time = 0.92 m
+INFO [matcher.py:100] Objective:        92577.0
+INFO [matcher.py:113] Balance:  0.0588
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 71, time = 0.92 m
+INFO [matcher.py:100] Objective:        92557.0
+INFO [matcher.py:113] Balance:  0.0587
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 72, time = 0.93 m
+INFO [matcher.py:100] Objective:        92519.0
+INFO [matcher.py:113] Balance:  0.0587
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 73, time = 0.93 m
+INFO [matcher.py:100] Objective:        92447.0
+INFO [matcher.py:113] Balance:  0.0587
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 74, time = 0.94 m
+INFO [matcher.py:100] Objective:        92432.0
+INFO [matcher.py:113] Balance:  0.0587
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 75, time = 0.96 m
+INFO [matcher.py:100] Objective:        92347.0
+INFO [matcher.py:113] Balance:  0.0587
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 76, time = 0.96 m
+INFO [matcher.py:100] Objective:        92035.0
+INFO [matcher.py:113] Balance:  0.0583
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 77, time = 0.99 m
+INFO [matcher.py:100] Objective:        91762.0
+INFO [matcher.py:113] Balance:  0.0585
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 78, time = 1.00 m
+INFO [matcher.py:100] Objective:        91550.0
+INFO [matcher.py:113] Balance:  0.0583
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 79, time = 1.01 m
+INFO [matcher.py:100] Objective:        91417.0
+INFO [matcher.py:113] Balance:  0.0583
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 80, time = 1.01 m
+INFO [matcher.py:100] Objective:        91286.0
+INFO [matcher.py:113] Balance:  0.0582
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 81, time = 1.01 m
+INFO [matcher.py:100] Objective:        91280.0
+INFO [matcher.py:113] Balance:  0.0583
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 82, time = 1.02 m
+INFO [matcher.py:100] Objective:        91277.0
+INFO [matcher.py:113] Balance:  0.0583
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 83, time = 1.02 m
+INFO [matcher.py:100] Objective:        91233.0
+INFO [matcher.py:113] Balance:  0.0583
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 84, time = 1.02 m
+INFO [matcher.py:100] Objective:        91230.0
+INFO [matcher.py:113] Balance:  0.0583
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 85, time = 1.02 m
+INFO [matcher.py:100] Objective:        91222.0
+INFO [matcher.py:113] Balance:  0.0582
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 86, time = 1.03 m
+INFO [matcher.py:100] Objective:        91220.0
+INFO [matcher.py:113] Balance:  0.0582
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 87, time = 1.04 m
+INFO [matcher.py:100] Objective:        91214.0
+INFO [matcher.py:113] Balance:  0.0582
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 88, time = 1.04 m
+INFO [matcher.py:100] Objective:        91213.0
+INFO [matcher.py:113] Balance:  0.0582
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 89, time = 1.05 m
+INFO [matcher.py:100] Objective:        91195.0
+INFO [matcher.py:113] Balance:  0.0582
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 90, time = 1.06 m
+INFO [matcher.py:100] Objective:        91124.0
+INFO [matcher.py:113] Balance:  0.0582
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 91, time = 1.06 m
+INFO [matcher.py:100] Objective:        90978.0
+INFO [matcher.py:113] Balance:  0.0581
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 92, time = 1.08 m
+INFO [matcher.py:100] Objective:        90961.0
+INFO [matcher.py:113] Balance:  0.0580
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 93, time = 1.08 m
+INFO [matcher.py:100] Objective:        90916.0
+INFO [matcher.py:113] Balance:  0.0580
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 94, time = 1.08 m
+INFO [matcher.py:100] Objective:        90868.0
+INFO [matcher.py:113] Balance:  0.0580
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 95, time = 1.10 m
+INFO [matcher.py:100] Objective:        90846.0
+INFO [matcher.py:113] Balance:  0.0579
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 96, time = 1.11 m
+INFO [matcher.py:100] Objective:        90808.0
+INFO [matcher.py:113] Balance:  0.0579
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 97, time = 1.15 m
+INFO [matcher.py:100] Objective:        90612.0
+INFO [matcher.py:113] Balance:  0.0578
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 98, time = 1.15 m
+INFO [matcher.py:100] Objective:        90547.0
+INFO [matcher.py:113] Balance:  0.0577
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 99, time = 1.16 m
+INFO [matcher.py:100] Objective:        90514.0
+INFO [matcher.py:113] Balance:  0.0578
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 100, time = 1.16 m
+INFO [matcher.py:100] Objective:        90502.0
+INFO [matcher.py:113] Balance:  0.0577
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 101, time = 1.17 m
+INFO [matcher.py:100] Objective:        90454.0
+INFO [matcher.py:113] Balance:  0.0577
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 102, time = 1.22 m
+INFO [matcher.py:100] Objective:        90048.0
+INFO [matcher.py:113] Balance:  0.0575
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 103, time = 1.22 m
+INFO [matcher.py:100] Objective:        89983.0
+INFO [matcher.py:113] Balance:  0.0574
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 104, time = 1.24 m
+INFO [matcher.py:100] Objective:        89952.0
+INFO [matcher.py:113] Balance:  0.0575
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 105, time = 1.24 m
+INFO [matcher.py:100] Objective:        89938.0
+INFO [matcher.py:113] Balance:  0.0574
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 106, time = 1.24 m
+INFO [matcher.py:100] Objective:        89827.0
+INFO [matcher.py:113] Balance:  0.0574
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 107, time = 1.25 m
+INFO [matcher.py:100] Objective:        89556.0
+INFO [matcher.py:113] Balance:  0.0573
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 108, time = 1.26 m
+INFO [matcher.py:100] Objective:        88638.0
+INFO [matcher.py:113] Balance:  0.0568
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 109, time = 1.41 m
+INFO [matcher.py:100] Objective:        88144.0
+INFO [matcher.py:113] Balance:  0.0567
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 110, time = 1.49 m
+INFO [matcher.py:100] Objective:        87463.0
+INFO [matcher.py:113] Balance:  0.0561
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 111, time = 1.57 m
+INFO [matcher.py:100] Objective:        86971.0
+INFO [matcher.py:113] Balance:  0.0559
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 112, time = 1.74 m
+INFO [matcher.py:100] Objective:        86313.0
+INFO [matcher.py:113] Balance:  0.0556
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 113, time = 1.89 m
+INFO [matcher.py:100] Objective:        86304.0
+INFO [matcher.py:113] Balance:  0.0556
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 114, time = 2.01 m
+INFO [matcher.py:100] Objective:        35917.0
+INFO [matcher.py:113] Balance:  0.0310
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 115, time = 2.52 m
+INFO [matcher.py:100] Objective:        35907.0
+INFO [matcher.py:113] Balance:  0.0310
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 116, time = 2.53 m
+INFO [matcher.py:100] Objective:        35896.0
+INFO [matcher.py:113] Balance:  0.0310
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 117, time = 4.39 m
+INFO [matcher.py:100] Objective:        35895.0
+INFO [matcher.py:113] Balance:  0.0310
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:453] Status = FEASIBLE
+INFO [matcher.py:454] Number of solutions found: 117
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>55.261578</td>
+      <td>139.396134</td>
+      <td>94.438359</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>63.113091</td>
+      <td>165.563337</td>
+      <td>67.433016</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>10001</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>58.232216</td>
+      <td>160.859857</td>
+      <td>71.915385</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10002</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>58.996941</td>
+      <td>140.357415</td>
+      <td>115.606615</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10003</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>36.850195</td>
+      <td>189.983706</td>
+      <td>53.000581</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10004</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>9933</th>
+      <td>68.194783</td>
+      <td>127.495418</td>
+      <td>69.177329</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9933</td>
     </tr>
     <tr>
       <th>9965</th>
@@ -1432,7 +2170,7 @@ INFO [matcher.py:454] Number of solutions found: 13
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
@@ -1449,7 +2187,7 @@ INFO [matcher.py:454] Number of solutions found: 13
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_lp_matcher_11_0.png" src="../_images/demos_lp_matcher_11_0.png" />
+<img alt="../_images/demos_lp_matcher_14_0.png" src="../_images/demos_lp_matcher_14_0.png" />
 </div>
 </div>
 </section>
@@ -1475,9 +2213,9 @@ INFO [matcher.py:454] Number of solutions found: 13
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [preprocess.py:338] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
-INFO [preprocess.py:338] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
-INFO [preprocess.py:338] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
+INFO [preprocess.py:335] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
+INFO [preprocess.py:335] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
+INFO [preprocess.py:335] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
 INFO [matcher.py:65] Scaling features by factor 2.00 in order to use integer solver with &lt;= 0.0000% loss.
 </pre></div></div>
 </div>
@@ -1489,7 +2227,7 @@ INFO [matcher.py:65] Scaling features by factor 2.00 in order to use integer sol
 <div class="highlight"><pre>
 {&#39;objective&#39;: &#39;gamma&#39;,
  &#39;match_size&#39;: 1000,
- &#39;time_limit&#39;: 300,
+ &#39;time_limit&#39;: 360,
  &#39;num_workers&#39;: 4,
  &#39;ps_hinting&#39;: True,
  &#39;verbose&#39;: True}
@@ -1512,173 +2250,296 @@ INFO [matcher.py:319] Solving for match population with size = 1000. Will match 
 INFO [matcher.py:335] Calculating bounds on feature variables ...
 INFO [matcher.py:350] Applying constraints ...
 INFO [matcher.py:378] Training PS model as guide for solver ...
-/pybalance/pybalance/cs/matcher.py:380: SettingWithCopyWarning:
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/pybalance/lp/matcher.py:380: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   target.loc[:, &#34;ix&#34;] = list(range(len(target)))
-/pybalance/pybalance/cs/matcher.py:381: SettingWithCopyWarning:
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/pybalance/lp/matcher.py:381: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   pool.loc[:, &#34;ix&#34;] = list(range(len(pool)))
-INFO [preprocess.py:338] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
-INFO [preprocess.py:338] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
-INFO [preprocess.py:338] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
-INFO [matcher.py:181] Training model SGDClassifier (iter 1/50, 0.001 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: SGDClassifier
-INFO [matcher.py:140]   * alpha: 0.06755757715302801
-INFO [matcher.py:140]   * class_weight: balanced
-INFO [matcher.py:140]   * early_stopping: False
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * loss: log_loss
-INFO [matcher.py:140]   * max_iter: 1500
-INFO [matcher.py:140]   * penalty: elasticnet
-INFO [matcher.py:141]   Score (gamma): 0.0680
-INFO [matcher.py:142]   Solution time: 0.007 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 2/50, 0.007 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 3/50, 0.014 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 4/50, 0.019 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 1.238805221235582
-INFO [matcher.py:140]   * fit_intercept: True
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l2
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (gamma): 0.0372
-INFO [matcher.py:142]   Solution time: 0.032 min
-INFO [matcher.py:181] Training model LogisticRegression (iter 5/50, 0.032 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [preprocess.py:335] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
+INFO [preprocess.py:335] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
+INFO [preprocess.py:335] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
+INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.000 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: SGDClassifier
+INFO [matcher.py:139]   * alpha: 4.774501445415407
+INFO [matcher.py:139]   * class_weight: None
+INFO [matcher.py:139]   * early_stopping: True
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * loss: modified_huber
+INFO [matcher.py:139]   * max_iter: 1500
+INFO [matcher.py:139]   * penalty: elasticnet
+INFO [matcher.py:140]   Score (gamma): 0.2142
+INFO [matcher.py:141]   Solution time: 0.002 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 2/50, 0.002 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.05854199518952411
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l2
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0472
+INFO [matcher.py:141]   Solution time: 0.003 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 3/50, 0.003 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.09099552707413873
+INFO [matcher.py:139]   * fit_intercept: True
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0448
+INFO [matcher.py:141]   Solution time: 0.005 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 4/50, 0.005 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 5/50, 0.006 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 6/50, 0.007 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 2.1117929238507878
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (gamma): 0.0301
-INFO [matcher.py:142]   Solution time: 0.130 min
-INFO [matcher.py:181] Training model SGDClassifier (iter 6/50, 0.131 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 7/50, 0.138 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 8/50, 0.145 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 9/50, 0.152 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 10/50, 0.158 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 11/50, 0.163 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 12/50, 0.168 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 13/50, 0.175 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 14/50, 0.230 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 15/50, 0.236 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 16/50, 0.243 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 17/50, 0.249 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.15085738749804517
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0347
+INFO [matcher.py:141]   Solution time: 0.028 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 7/50, 0.028 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 8/50, 0.029 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.030 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.033 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 18/50, 0.377 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 22.703034120730198
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0331
+INFO [matcher.py:141]   Solution time: 0.053 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 11/50, 0.053 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 12/50, 0.062 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 13/50, 0.063 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 19/50, 0.471 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 20/50, 0.515 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 14/50, 0.082 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 15/50, 0.085 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 16/50, 0.086 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 17/50, 0.087 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 18/50, 0.089 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 19/50, 0.090 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model SGDClassifier (iter 21/50, 0.634 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 22/50, 0.641 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 23/50, 0.705 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 24/50, 0.714 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 25/50, 0.719 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 26/50, 0.726 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 27/50, 0.733 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 28/50, 0.740 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.796468661160752
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0308
+INFO [matcher.py:141]   Solution time: 0.110 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 20/50, 0.110 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 29/50, 0.845 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 30/50, 0.885 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 31/50, 0.889 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 32/50, 0.894 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 33/50, 0.900 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 34/50, 0.917 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 35/50, 0.981 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 36/50, 0.988 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 21/50, 0.129 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.130 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 23/50, 0.131 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 37/50, 1.079 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 38/50, 1.096 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model SGDClassifier (iter 24/50, 0.152 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.153 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 26/50, 0.154 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 27/50, 0.165 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 28/50, 0.166 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 29/50, 0.167 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 30/50, 0.172 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 31/50, 0.173 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 32/50, 0.174 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 33/50, 0.177 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 39/50, 1.196 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 40/50, 1.204 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 41/50, 1.263 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 42/50, 1.302 min) ...
-/usr/local/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 34/50, 0.197 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 35/50, 0.206 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 36/50, 0.207 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 37/50, 0.208 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 38/50, 0.209 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 39/50, 0.219 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 40/50, 0.220 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 41/50, 0.221 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.227 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 43/50, 0.228 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 44/50, 0.229 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 45/50, 0.230 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 46/50, 0.231 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 47/50, 0.232 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 48/50, 0.234 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:181] Training model LogisticRegression (iter 43/50, 1.427 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 44/50, 1.450 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 45/50, 1.456 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 46/50, 1.464 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 47/50, 1.472 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 48/50, 1.485 min) ...
-INFO [matcher.py:181] Training model SGDClassifier (iter 49/50, 1.569 min) ...
-INFO [matcher.py:181] Training model LogisticRegression (iter 50/50, 1.576 min) ...
-INFO [matcher.py:137] Best propensity score match found:
-INFO [matcher.py:138]   Model: LogisticRegression
-INFO [matcher.py:140]   * C: 2.1117929238507878
-INFO [matcher.py:140]   * fit_intercept: False
-INFO [matcher.py:140]   * max_iter: 500
-INFO [matcher.py:140]   * penalty: l1
-INFO [matcher.py:140]   * solver: saga
-INFO [matcher.py:141]   Score (gamma): 0.0301
-INFO [matcher.py:142]   Solution time: 0.130 min
-INFO [matcher.py:415] Hint achieves objective value = 982.
+INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.254 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 50/50, 0.255 min) ...
+INFO [matcher.py:136] Best propensity score match found:
+INFO [matcher.py:137]   Model: LogisticRegression
+INFO [matcher.py:139]   * C: 0.796468661160752
+INFO [matcher.py:139]   * fit_intercept: False
+INFO [matcher.py:139]   * max_iter: 500
+INFO [matcher.py:139]   * penalty: l1
+INFO [matcher.py:139]   * solver: saga
+INFO [matcher.py:140]   Score (gamma): 0.0308
+INFO [matcher.py:141]   Solution time: 0.110 min
+INFO [matcher.py:415] Hint achieves objective value = 1004.
 INFO [matcher.py:417] Applying hints ...
 INFO [matcher.py:446] Solving with 4 workers ...
 INFO [matcher.py:89] Initial balance score: 0.2110
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 1, time = 0.10 m
-INFO [matcher.py:100] Objective:        1208.0
-INFO [matcher.py:113] Balance:  0.0367
+INFO [matcher.py:96] Solution 1, time = 0.04 m
+INFO [matcher.py:100] Objective:        1156.0
+INFO [matcher.py:113] Balance:  0.0349
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 2, time = 0.11 m
-INFO [matcher.py:100] Objective:        1206.0
-INFO [matcher.py:113] Balance:  0.0367
+INFO [matcher.py:96] Solution 2, time = 0.08 m
+INFO [matcher.py:100] Objective:        1152.0
+INFO [matcher.py:113] Balance:  0.0348
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 3, time = 0.12 m
-INFO [matcher.py:100] Objective:        1202.0
-INFO [matcher.py:113] Balance:  0.0365
+INFO [matcher.py:96] Solution 3, time = 0.09 m
+INFO [matcher.py:100] Objective:        1102.0
+INFO [matcher.py:113] Balance:  0.0334
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 4, time = 0.15 m
-INFO [matcher.py:100] Objective:        1198.0
-INFO [matcher.py:113] Balance:  0.0365
+INFO [matcher.py:96] Solution 4, time = 0.10 m
+INFO [matcher.py:100] Objective:        1100.0
+INFO [matcher.py:113] Balance:  0.0334
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 5, time = 0.18 m
-INFO [matcher.py:100] Objective:        216.0
-INFO [matcher.py:113] Balance:  0.0067
+INFO [matcher.py:96] Solution 5, time = 0.11 m
+INFO [matcher.py:100] Objective:        1064.0
+INFO [matcher.py:113] Balance:  0.0322
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 6, time = 0.60 m
+INFO [matcher.py:96] Solution 6, time = 0.11 m
+INFO [matcher.py:100] Objective:        1058.0
+INFO [matcher.py:113] Balance:  0.0321
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 7, time = 0.11 m
+INFO [matcher.py:100] Objective:        1056.0
+INFO [matcher.py:113] Balance:  0.0321
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 8, time = 0.12 m
+INFO [matcher.py:100] Objective:        1054.0
+INFO [matcher.py:113] Balance:  0.0320
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 9, time = 0.15 m
+INFO [matcher.py:100] Objective:        1052.0
+INFO [matcher.py:113] Balance:  0.0319
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 10, time = 0.15 m
+INFO [matcher.py:100] Objective:        1050.0
+INFO [matcher.py:113] Balance:  0.0319
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 11, time = 0.16 m
+INFO [matcher.py:100] Objective:        1048.0
+INFO [matcher.py:113] Balance:  0.0318
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 12, time = 0.18 m
+INFO [matcher.py:100] Objective:        1046.0
+INFO [matcher.py:113] Balance:  0.0318
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 13, time = 0.19 m
+INFO [matcher.py:100] Objective:        1044.0
+INFO [matcher.py:113] Balance:  0.0317
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 14, time = 0.23 m
+INFO [matcher.py:100] Objective:        1002.0
+INFO [matcher.py:113] Balance:  0.0301
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 15, time = 0.23 m
+INFO [matcher.py:100] Objective:        1000.0
+INFO [matcher.py:113] Balance:  0.0300
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 16, time = 0.24 m
+INFO [matcher.py:100] Objective:        994.0
+INFO [matcher.py:113] Balance:  0.0299
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 17, time = 0.25 m
+INFO [matcher.py:100] Objective:        928.0
+INFO [matcher.py:113] Balance:  0.0278
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 18, time = 0.25 m
+INFO [matcher.py:100] Objective:        926.0
+INFO [matcher.py:113] Balance:  0.0277
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 19, time = 0.26 m
+INFO [matcher.py:100] Objective:        920.0
+INFO [matcher.py:113] Balance:  0.0275
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 20, time = 0.28 m
+INFO [matcher.py:100] Objective:        190.0
+INFO [matcher.py:113] Balance:  0.0070
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 21, time = 0.28 m
+INFO [matcher.py:100] Objective:        188.0
+INFO [matcher.py:113] Balance:  0.0069
+INFO [matcher.py:116] Patients: 1000
+INFO [matcher.py:128]
+INFO [matcher.py:95] =========================================
+INFO [matcher.py:96] Solution 22, time = 0.29 m
 INFO [matcher.py:100] Objective:        186.0
 INFO [matcher.py:113] Balance:  0.0068
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 7, time = 0.69 m
+INFO [matcher.py:96] Solution 23, time = 0.30 m
 INFO [matcher.py:100] Objective:        184.0
-INFO [matcher.py:113] Balance:  0.0068
+INFO [matcher.py:113] Balance:  0.0067
 INFO [matcher.py:116] Patients: 1000
 INFO [matcher.py:128]
 INFO [matcher.py:453] Status = OPTIMAL
-INFO [matcher.py:454] Number of solutions found: 7
+INFO [matcher.py:454] Number of solutions found: 23
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1816,19 +2677,49 @@ INFO [matcher.py:454] Number of solutions found: 7
       <td>...</td>
     </tr>
     <tr>
-      <th>9933</th>
-      <td>68.194783</td>
-      <td>127.495418</td>
-      <td>69.177329</td>
-      <td>0.0</td>
-      <td>1</td>
+      <th>9948</th>
+      <td>32.893818</td>
+      <td>161.118343</td>
+      <td>105.629306</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9948</td>
+    </tr>
+    <tr>
+      <th>9957</th>
+      <td>63.949429</td>
+      <td>170.485188</td>
+      <td>99.498013</td>
+      <td>1.0</td>
+      <td>2</td>
       <td>5</td>
       <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>9957</td>
+    </tr>
+    <tr>
+      <th>9966</th>
+      <td>40.121009</td>
+      <td>168.339212</td>
+      <td>100.428001</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
       <td>1</td>
       <td>1</td>
       <td>0</td>
-      <td>0</td>
-      <td>9933</td>
+      <td>9966</td>
     </tr>
     <tr>
       <th>9981</th>
@@ -1846,21 +2737,6 @@ INFO [matcher.py:454] Number of solutions found: 7
       <td>9981</td>
     </tr>
     <tr>
-      <th>9982</th>
-      <td>50.575808</td>
-      <td>139.401060</td>
-      <td>89.848616</td>
-      <td>0.0</td>
-      <td>1</td>
-      <td>1</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>9982</td>
-    </tr>
-    <tr>
       <th>9983</th>
       <td>68.616093</td>
       <td>167.546870</td>
@@ -1874,21 +2750,6 @@ INFO [matcher.py:454] Number of solutions found: 7
       <td>0</td>
       <td>0</td>
       <td>9983</td>
-    </tr>
-    <tr>
-      <th>9988</th>
-      <td>74.994562</td>
-      <td>142.069423</td>
-      <td>59.899521</td>
-      <td>1.0</td>
-      <td>1</td>
-      <td>4</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>0</td>
-      <td>1</td>
-      <td>9988</td>
     </tr>
   </tbody>
 </table>
@@ -1915,21 +2776,21 @@ INFO [matcher.py:454] Number of solutions found: 7
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_lp_matcher_15_0.png" src="../_images/demos_lp_matcher_15_0.png" />
+<img alt="../_images/demos_lp_matcher_18_0.png" src="../_images/demos_lp_matcher_18_0.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_lp_matcher_15_1.png" src="../_images/demos_lp_matcher_15_1.png" />
+<img alt="../_images/demos_lp_matcher_18_1.png" src="../_images/demos_lp_matcher_18_1.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_lp_matcher_15_2.png" src="../_images/demos_lp_matcher_15_2.png" />
+<img alt="../_images/demos_lp_matcher_18_2.png" src="../_images/demos_lp_matcher_18_2.png" />
 </div>
 </div>
 </section>
@@ -1946,7 +2807,7 @@ INFO [matcher.py:454] Number of solutions found: 7
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
