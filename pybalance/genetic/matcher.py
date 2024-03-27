@@ -24,7 +24,7 @@ import torch
 
 def _check_fitted(matcher):
     if matcher.best_match is None:
-        raise (ValueError, "Matcher has not been fitted!")
+        raise ValueError("Matcher has not been fitted!")
 
 
 def get_global_defaults(n_candidate_populations=5000):

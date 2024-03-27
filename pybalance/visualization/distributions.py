@@ -1,6 +1,7 @@
 """
 Some helpful functions for plotting distribution.
 """
+
 from collections import defaultdict
 from typing import List, Optional
 import itertools
@@ -243,9 +244,9 @@ def plot_binary_features(
         frequencies.loc[:, "difference"] = frequencies.loc[:, "difference"] / np.sqrt(
             variance
         )
-        difference_label = "Standard Difference"
+        difference_label = "Std. Mean\nDifference"
     else:
-        difference_label = "Abs Difference"
+        difference_label = "Abs. Mean\nDifference"
 
     # Restrict to top features
     frequencies = frequencies.sort_values(
@@ -275,75 +276,81 @@ def plot_binary_features(
         fig, axes = plt.subplots(
             nrows=2,
             ncols=1,
-            figsize=(len(pool_frequencies) / 2, 16),
+            figsize=(len(pool_frequencies) / 2, 8),
             gridspec_kw={"height_ratios": [1, 3]},
         )
 
         plt.subplot(2, 1, 1)
         sns.barplot(data=frequencies, y="difference", x="index", **default_params)
-        xticks, labels = plt.xticks()
-        plt.gca().set_xticks(xticks + 0.5, minor=False)
-        plt.gca().set_xticks(xticks, minor=True)
-        plt.gca().set_xticklabels([""] * len(labels), minor=True, rotation=90)
+        ticks, labels = plt.xticks()
+        ticks = np.array(ticks)
+        plt.gca().set_xticks(ticks + 0.5, minor=False)
+        plt.gca().set_xticklabels([""] * len(labels), minor=True)
+        plt.gca().set_xticklabels([""] * len(labels), minor=False)
         plt.grid(True)
         plt.axhline(
             y=0.1,
-            xmin=xticks.min(),
-            xmax=xticks.max(),
+            xmin=ticks.min(),
+            xmax=ticks.max(),
             c="k",
             lw=2.5,
             zorder=10000,
             linestyle="--",
         )
         plt.ylim([0, 0.25])
-        plt.ylabel("Abs Difference", fontsize=18)
+        plt.ylabel(difference_label, fontsize=14)
         plt.gca().get_legend().remove()
         plt.xlabel("")
 
         plt.subplot(2, 1, 2)
         sns.barplot(data=frequencies, y="value", x="index", **default_params)
-        xticks, labels = plt.xticks()
-        plt.gca().set_xticks(xticks + 0.5, minor=False)
-        plt.gca().set_xticks(xticks, minor=True)
-        plt.gca().set_xticklabels(
-            labels, minor=True, rotation=45, ha="right", fontsize=16
-        )
+        ticks, labels = plt.xticks()
+        ticks = np.array(ticks)
+        plt.gca().set_xticks(ticks, minor=True)
+        plt.gca().set_xticklabels(labels, minor=True)
+        plt.gca().set_xticks(ticks + 0.5, minor=False)
+        plt.gca().set_xticklabels([""] * len(labels), minor=False)
+        plt.xticks(rotation=90, fontsize=12, ha="right", minor=True)
         plt.grid(True)
-        plt.ylabel("Frequency", fontsize=18)
-        plt.xlabel("Feature")
+        plt.ylabel("Frequency", fontsize=14)
+        plt.xlabel("Feature", fontsize=14)
 
     else:
         fig, axes = plt.subplots(
             nrows=1,
             ncols=2,
-            figsize=(16, len(pool_frequencies) / 2),
+            figsize=(8, len(pool_frequencies) / 2),
             gridspec_kw={"width_ratios": [3, 1]},
         )
 
         plt.subplot(1, 2, 2)
         sns.barplot(data=frequencies, x="difference", y="index", **default_params)
         ticks, labels = plt.yticks()
+        ticks = np.array(ticks)
         plt.gca().set_yticks(ticks + 0.5, minor=False)
-        plt.gca().set_yticks(ticks, minor=True)
         plt.gca().set_yticklabels([""] * len(labels), minor=True)
+        plt.gca().set_yticklabels([""] * len(labels), minor=False)
         plt.grid(True)
         plt.axvline(
             x=0.1, ymin=ticks.min(), ymax=ticks.max(), c="k", lw=2.5, linestyle="--"
         )
         plt.xlim([0, 0.25])
-        plt.xlabel(difference_label, fontsize=18)
+        plt.xlabel(difference_label, fontsize=14)
         plt.gca().get_legend().remove()
         plt.ylabel("")
 
         plt.subplot(1, 2, 1)
         sns.barplot(data=frequencies, x="value", y="index", **default_params)
         ticks, labels = plt.yticks()
-        plt.gca().set_yticks(ticks + 0.5, minor=False)
+        ticks = np.array(ticks)
         plt.gca().set_yticks(ticks, minor=True)
-        plt.gca().set_yticklabels(labels, minor=True, fontsize=16)
+        plt.gca().set_yticklabels(labels, minor=True)
+        plt.gca().set_yticks(ticks + 0.5, minor=False)
+        plt.gca().set_yticklabels([""] * len(labels), minor=False)
+        plt.yticks(rotation=0, fontsize=12, minor=True)
         plt.grid(True)
-        plt.xlabel("Frequency", fontsize=18)
-        plt.ylabel("Feature")
+        plt.xlabel("Frequency", fontsize=14)
+        plt.ylabel("Feature", fontsize=14)
 
     plt.tight_layout()
     return fig
@@ -457,8 +464,8 @@ def plot_per_feature_loss(
 
     plt.ylim(ymin=0)
     ymin, ymax = fig.gca().get_ylim()
-    plt.vlines(plt.xticks()[0] + 0.5, ymin, ymax, linewidth=0.5, color="k")
-    plt.vlines(plt.xticks()[0][0] - 0.5, ymin, ymax, linewidth=0.5, color="k")
+    plt.vlines(np.array(plt.xticks()[0]) + 0.5, ymin, ymax, linewidth=0.5, color="k")
+    plt.vlines(np.array(plt.xticks()[0]) - 0.5, ymin, ymax, linewidth=0.5, color="k")
 
     plt.xticks(rotation=90)
     xmin, xmax = plt.xticks()[0][0] - 0.5, plt.xticks()[0][-1] + 0.5
@@ -493,7 +500,7 @@ def plot_joint_numeric_categoric_distributions(
         g = sns.JointGrid(data=matching_data.data, x=x, y=y, **default_params)
         grids.append(g)
 
-        g.plot_joint(sns.violinplot, s=25, split=True, saturation=0.9, dodge=True)
+        g.plot_joint(sns.violinplot, split=True, saturation=0.9, dodge=True)
         g.ax_joint.grid(True)
 
         sns.histplot(
@@ -551,17 +558,7 @@ def plot_joint_numeric_distributions(
             g.plot_joint(sns.kdeplot, levels=5)
 
         elif joint_kind == "scatter":
-            # Give larger populations more alpha, so they don't overwhelm the plot
-            counts = matching_data.counts()
-            weights = (1 - counts / counts.sum()).reset_index()
-            alpha = np.clip(
-                matching_data.data.merge(weights, on=matching_data.population_col)[
-                    "N"
-                ].values,
-                0.25,
-                1,
-            )
-            g.plot_joint(sns.scatterplot, s=25, alpha=alpha)
+            g.plot_joint(sns.scatterplot, s=25)
 
         else:
             raise NotImplementedError(f"Unsupported joint_kind: {joint_kind}.")

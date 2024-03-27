@@ -16,3 +16,4 @@ docs/*
 .devcontainer/*
 .idea
 .idea/*
+venv/*
