@@ -22,11 +22,11 @@ DOCS_DIR = os.path.split(__file__)[0]
 # -- Project information -----------------------------------------------------
 
 project = "PyBalance"
-author = "Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein"
+author = "Stephen Privitera, Hooman Sedghamiz, Alex Hartenstei, Abhishek Choudhary"
 copyright = f"2024 - Bayer AG - {author}"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.1"
+release = "0.1.4"
 
 
 # -- General configuration ---------------------------------------------------
