@@ -5,11 +5,10 @@ Installation instructions
 Install from PIP
 =========================
 
-We reccomend using virtualenv and installing pybalance using pip:
+We reccomend using condas and installing pybalance using pip:
 
-	>>> python3.9 -m venv venv/pybalance
-	>>> source venv/pybalance/bin/activate
-	>>> pip install --upgrade pip
+	>>> conda create -n pybalance python=3.9
+	>>> conda activate pybalance
 	>>> pip install pybalance
 
 If you wish you use pybalance within a jupyter notebook, you will also need to
