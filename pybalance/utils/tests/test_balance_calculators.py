@@ -241,3 +241,33 @@ def test_gamma_is_area_between_cdfs():
         )
 
     assert np.isclose(distance_popmat, distance_direct, atol=1e-3)
+
+
+def test_target_subsets():
+
+    matching_data = generate_toy_dataset()
+    target, pool = split_target_pool(matching_data)
+    gamma = BalanceCalculator(matching_data, "gamma", n_bins=20)
+
+    d1 = gamma.distance(pool)
+    d2 = gamma.distance(pool, target)
+    assert d1 == d2
+
+    pool_subsets = np.array([
+        np.random.choice(pool.reset_index().index.values, size=200, replace=False),
+        np.random.choice(pool.reset_index().index.values, size=200, replace=False)
+    ])
+    target_subsets = np.array([
+        np.random.choice(target.reset_index().index.values, size=100, replace=False),
+        np.random.choice(target.reset_index().index.values, size=100, replace=False)
+    ])
+    distances = gamma.distance(pool_subsets, target_subsets)
+    assert len(distances) == 2
+
+    target_subsets = np.array([
+        np.random.choice(target.reset_index().index.values, size=100, replace=False),
+        np.random.choice(target.reset_index().index.values, size=100, replace=False),
+        np.random.choice(target.reset_index().index.values, size=100, replace=False)
+    ])
+    with pytest.raises(ValueError):
+        distances = gamma.distance(pool_subsets, target_subsets)
