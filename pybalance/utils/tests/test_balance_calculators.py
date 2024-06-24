@@ -253,21 +253,37 @@ def test_target_subsets():
     d2 = gamma.distance(pool, target)
     assert d1 == d2
 
-    pool_subsets = np.array([
-        np.random.choice(pool.reset_index().index.values, size=200, replace=False),
-        np.random.choice(pool.reset_index().index.values, size=200, replace=False)
-    ])
-    target_subsets = np.array([
-        np.random.choice(target.reset_index().index.values, size=100, replace=False),
-        np.random.choice(target.reset_index().index.values, size=100, replace=False)
-    ])
+    pool_subsets = np.array(
+        [
+            np.random.choice(pool.reset_index().index.values, size=200, replace=False),
+            np.random.choice(pool.reset_index().index.values, size=200, replace=False),
+        ]
+    )
+    target_subsets = np.array(
+        [
+            np.random.choice(
+                target.reset_index().index.values, size=100, replace=False
+            ),
+            np.random.choice(
+                target.reset_index().index.values, size=100, replace=False
+            ),
+        ]
+    )
     distances = gamma.distance(pool_subsets, target_subsets)
     assert len(distances) == 2
 
-    target_subsets = np.array([
-        np.random.choice(target.reset_index().index.values, size=100, replace=False),
-        np.random.choice(target.reset_index().index.values, size=100, replace=False),
-        np.random.choice(target.reset_index().index.values, size=100, replace=False)
-    ])
+    target_subsets = np.array(
+        [
+            np.random.choice(
+                target.reset_index().index.values, size=100, replace=False
+            ),
+            np.random.choice(
+                target.reset_index().index.values, size=100, replace=False
+            ),
+            np.random.choice(
+                target.reset_index().index.values, size=100, replace=False
+            ),
+        ]
+    )
     with pytest.raises(ValueError):
         distances = gamma.distance(pool_subsets, target_subsets)
