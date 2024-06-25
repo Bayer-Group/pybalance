@@ -301,17 +301,17 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="k">def</span> <span class="nf">_fetch_pool_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_fetch_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset_populations</span><span class="p">,</span> <span class="n">full_population_data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subset_populations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">subset_populations</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-                <span class="n">candidate_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-                    <span class="n">candidate_populations</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subset_populations</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+                <span class="n">subset_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                    <span class="n">subset_populations</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span>
                 <span class="p">)</span>
-            <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">candidate_populations</span><span class="p">]</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">full_population_data</span><span class="p">[</span><span class="n">subset_populations</span><span class="p">]</span>
 
-        <span class="c1"># features has shape n_candidate_populations x n_patients x n_features</span>
+        <span class="c1"># features has shape n_subset_populations x n_patients x n_features</span>
         <span class="c1"># note that using the reshape() method works for both numpy and pytorch</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -333,39 +333,56 @@
 
     <span class="nd">@reshape_output</span>
     <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">target_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute overall distance (aka &quot;mismatch&quot;, aka &quot;loss&quot;) between input</span>
 <span class="sd">        candidate populations. The per-feature loss is aggregated using a vector</span>
 <span class="sd">        norm specified by order specified in __init__().</span>
 
-<span class="sd">        :candidate_populations: Populations for which to compute the mismatch.</span>
+<span class="sd">        :pool_subsets: Subsets of the pool population for which to compute the mismatch.</span>
 <span class="sd">            Input can be either a single pandas dataframe containing all the</span>
 <span class="sd">            required feature data or a 2-dimensional integer array whose entries</span>
 <span class="sd">            are the indices of patients in the pool. In the latter case, the</span>
 <span class="sd">            array should be an array of shape n_candidate_populations x</span>
 <span class="sd">            candidate_population_size that indexes the patient pool (passed</span>
 <span class="sd">            during __init__()). The first dimension may be omitted if only one</span>
-<span class="sd">            candidate population is present.</span>
+<span class="sd">            subset population is present.</span>
+<span class="sd">        :target_subsets: Subsets of the target population. If an index array, must</span>
+<span class="sd">            have same last dimension as pool_subsets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">per_feature_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="n">per_feature_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
         <span class="c1"># Since feature_weights sum to 1, sum is actually a weighted mean</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feature_weights</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">per_feature_loss</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
         <span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">):</span>
-        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BaseBalanceCalculator.per_feature_loss"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseBalanceCalculator.per_feature_loss">[docs]</a>    <span class="k">def</span> <span class="nf">per_feature_loss</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">target_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute mismatch (aka &quot;distance&quot;, aka &quot;loss&quot;) on a per-feature basis for</span>
 <span class="sd">        a set of candidate populations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_pool_features</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_features</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target_subsets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_features</span><span class="p">(</span><span class="n">target_subsets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+            <span class="n">target_std</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">target_mean</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pool</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Number of subset populations must be same for pool and target!&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">target_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span>
+            <span class="n">target_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span>
 
         <span class="c1"># NaNs can arise when the pool and target both have zero variance. If</span>
         <span class="c1"># they have zero variance and are the same value (e.g. pool all 0s and</span>
@@ -378,9 +395,9 @@
         <span class="c1"># __init__() of the possibility of this arising.</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">standardize_difference</span><span class="p">:</span>
-            <span class="n">norm</span> <span class="o">*=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-6</span>
+            <span class="n">norm</span> <span class="o">*=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">target_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-6</span>
 
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">((</span><span class="n">pool</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">((</span><span class="n">pool</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="BetaBalance"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BetaBalance">[docs]</a><span class="k">class</span> <span class="nc">BetaBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
@@ -533,9 +550,11 @@
 
     <span class="nd">@reshape_output</span>
     <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">target_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="n">per_feature_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="n">per_feature_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feature_weights</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">per_feature_loss</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
@@ -714,25 +733,29 @@
     <span class="k">def</span> <span class="nf">_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">_to_list</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># If the user passes a pandas DataFrame, the DataFrame is assumed to</span>
         <span class="c1"># represent feature data for only one population and no need for</span>
         <span class="c1"># batching; just pass on to the base class. Otherwise, assume</span>
-        <span class="c1"># candidate_populations refers to patient indices.</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="c1"># pool_subsets refers to patient indices.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">target_subsets</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_subsets</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;target_subsets must be of same datatype as pool_subsets if both are passed&quot;</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
 
         <span class="c1"># If the user passes a list, convert it to the underlying backend array</span>
         <span class="c1"># type for further processing.</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">candidate_populations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">_to_array</span><span class="p">(</span>
-                <span class="n">candidate_populations</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">pool_subsets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">_to_array</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_subsets</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">target_subsets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">_to_array</span><span class="p">(</span><span class="n">target_subsets</span><span class="p">)</span>
 
         <span class="c1"># If array has only one dimension, no need for batching, just pass along</span>
         <span class="c1"># to base class.</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_populations</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool_subsets</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
 
         <span class="c1"># Get batch size according to number of size of target population</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">_get_batch_size</span><span class="p">(</span>
@@ -741,25 +764,29 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size_gb</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># From here on, can assume candidate_populations is a 2D array of</span>
+        <span class="c1"># From here on, can assume pool_subsets is a 2D array of</span>
         <span class="c1"># patient indices with the 0th dimension corresponding to the</span>
-        <span class="c1"># candidate_population and the 1st dimension corresponding to patient.</span>
-        <span class="n">n_remaining</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="c1"># pool_subsets and the 1st dimension corresponding to patient.</span>
+        <span class="n">n_remaining</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">)</span>
         <span class="n">distances</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="n">n_remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">N</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">n_remaining</span><span class="p">)</span>
-            <span class="n">cps</span> <span class="o">=</span> <span class="n">candidate_populations</span><span class="p">[</span><span class="n">j</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="n">N</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="n">distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">cps</span><span class="p">))</span>
+            <span class="n">_pool</span> <span class="o">=</span> <span class="n">pool_subsets</span><span class="p">[</span><span class="n">j</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="n">N</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">target_subsets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_target</span> <span class="o">=</span> <span class="n">target_subsets</span><span class="p">[</span><span class="n">j</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="n">N</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_target</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">_pool</span><span class="p">,</span> <span class="n">_target</span><span class="p">))</span>
             <span class="n">n_remaining</span> <span class="o">-=</span> <span class="n">N</span>
             <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">distances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">_finalize_batches</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">distances</span>
 
-    <span class="k">def</span> <span class="nf">balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">):</span>
-        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span></div>
 
 
 <span class="c1">#</span>

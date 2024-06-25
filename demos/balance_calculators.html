@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fit Balance Calculator &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=001aa760"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Propensity Score Matcher" href="ps_matcher.html" />
+    <link rel="prev" title="Matching Data" href="matching_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="matching_data.html">Matching Data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Fit Balance Calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Compute-the-balance-between-pool-and-target">Compute the balance between pool and target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Compute-the-balance-between-subset-of-pool-and-target">Compute the balance between subset of pool and target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Compute-the-balance-between-several-subsets-simultaneously">Compute the balance between several subsets simultaneously</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Basic-Genetic-Optimizer">Basic Genetic Optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ps_matcher.html">Propensity Score Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ea_matcher.html">Genetic Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lp_matcher.html">Constraint Satisfaction Matcher</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
+      <li class="breadcrumb-item active">Fit Balance Calculator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/demos/balance_calculators.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pybalance.utils.balance_calculators</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pybalance.utils</span> <span class="kn">import</span> <span class="n">MatchingData</span>
+<span class="kn">from</span> <span class="nn">pybalance.sim</span> <span class="kn">import</span> <span class="n">load_paper_dataset</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span><span class="n">load_paper_dataset</span><span class="p">()</span>
+<span class="n">m</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+        <b>Headers Numeric: </b><br>
+        ['age', 'height', 'weight']<br><br>
+        <b>Headers Categoric: </b><br>
+        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
+        <b>Populations</b> <br>
+        ['pool', 'target'] <br>
+        <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>height</th>
+      <th>weight</th>
+      <th>gender</th>
+      <th>haircolor</th>
+      <th>country</th>
+      <th>population</th>
+      <th>binary_0</th>
+      <th>binary_1</th>
+      <th>binary_2</th>
+      <th>binary_3</th>
+      <th>patient_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>64.854093</td>
+      <td>189.466850</td>
+      <td>88.835049</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>135740</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>52.571993</td>
+      <td>158.134940</td>
+      <td>94.215107</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>49288</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>25.828361</td>
+      <td>154.692482</td>
+      <td>94.226222</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>256676</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>70.177571</td>
+      <td>160.536632</td>
+      <td>94.244356</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>338287</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>73.779164</td>
+      <td>153.551419</td>
+      <td>86.161814</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>72849</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>274995</th>
+      <td>62.547794</td>
+      <td>186.005015</td>
+      <td>50.975051</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>579081</td>
+    </tr>
+    <tr>
+      <th>274996</th>
+      <td>69.879934</td>
+      <td>142.371386</td>
+      <td>100.138389</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>569939</td>
+    </tr>
+    <tr>
+      <th>274997</th>
+      <td>56.921402</td>
+      <td>130.639589</td>
+      <td>108.745182</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>target</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>532419</td>
+    </tr>
+    <tr>
+      <th>274998</th>
+      <td>34.082754</td>
+      <td>174.764051</td>
+      <td>67.998396</td>
+      <td>0.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>target</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>566266</td>
+    </tr>
+    <tr>
+      <th>274999</th>
+      <td>60.981259</td>
+      <td>137.419436</td>
+      <td>89.897817</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>target</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>544231</td>
+    </tr>
+  </tbody>
+</table>
+<p>275000 rows × 12 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>N</th>
+    </tr>
+    <tr>
+      <th>population</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>pool</th>
+      <td>250000</td>
+    </tr>
+    <tr>
+      <th>target</th>
+      <td>25000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<section id="Fit-Balance-Calculator">
+<h1>Fit Balance Calculator<a class="headerlink" href="#Fit-Balance-Calculator" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Balance calculators in general are &quot;fit&quot; to the whole population data</span>
+<span class="c1"># Fitting here means fitting preprocessors (e.g. what bins to use when binning</span>
+<span class="c1"># is involved). It&#39;s important to fit once so that all calls to distance()</span>
+<span class="c1"># can be compared meaningfully.</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="n">target</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Compute-the-balance-between-pool-and-target">
+<h1>Compute the balance between pool and target<a class="headerlink" href="#Compute-the-balance-between-pool-and-target" title="Permalink to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor(0.2353, dtype=torch.float64)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Specifying target is optional</span>
+<span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor(0.2353, dtype=torch.float64)
+</pre></div></div>
+</div>
+</section>
+<section id="Compute-the-balance-between-subset-of-pool-and-target">
+<h1>Compute the balance between subset of pool and target<a class="headerlink" href="#Compute-the-balance-between-subset-of-pool-and-target" title="Permalink to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor(0.2366, dtype=torch.float64)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Can also take subsets of the target</span>
+<span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span> <span class="n">target</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor(0.2669, dtype=torch.float64)
+</pre></div></div>
+</div>
+</section>
+<section id="Compute-the-balance-between-several-subsets-simultaneously">
+<h1>Compute the balance between several subsets simultaneously<a class="headerlink" href="#Compute-the-balance-between-several-subsets-simultaneously" title="Permalink to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pool_subsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="p">])</span>
+<span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([0.2404, 0.2418], dtype=torch.float64)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pool_subsets</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">target_subsets</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/gmema/src/pybalance/pybalance/utils/balance_calculators.py:224: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_new.cpp:278.)
+  subset_populations = torch.tensor(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([0.2602, 0.2757], dtype=torch.float64)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Must have same number of subsets! This will throw an error:</span>
+<span class="n">pool_subsets</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">target_subsets</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of subset populations must be same for pool and target!
+</pre></div></div>
+</div>
+</section>
+<section id="Basic-Genetic-Optimizer">
+<h1>Basic Genetic Optimizer<a class="headerlink" href="#Basic-Genetic-Optimizer" title="Permalink to this heading"></a></h1>
+<p>Here is a very basic, un-optimized implementation of genetic matching! It’s not very smart, because it doesn’t mix the good populations. This is just an illustration of using the balance calculator.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_subsets</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">pool_size</span><span class="p">,</span> <span class="n">target_size</span><span class="p">,</span> <span class="n">n_subsets</span><span class="p">):</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+    <span class="n">pool_subsets</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_subsets</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">target_subsets</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">target_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_subsets</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span>
+
+
+<span class="n">pool_size</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">target_size</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">n_subsets</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">best_match</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">best_distance</span> <span class="o">=</span> <span class="mi">100000</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span> <span class="o">=</span> <span class="n">get_subsets</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">pool_size</span><span class="p">,</span> <span class="n">target_size</span><span class="p">,</span> <span class="n">n_subsets</span><span class="p">)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
+    <span class="n">this_best_distance</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">this_best_distance</span> <span class="o">&lt;</span> <span class="n">best_distance</span><span class="p">:</span>
+        <span class="n">best_distance</span> <span class="o">=</span> <span class="n">this_best_distance</span>
+        <span class="n">best_match_idx</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+        <span class="n">best_match</span> <span class="o">=</span> <span class="n">pool_subsets</span><span class="p">[</span><span class="n">best_match_idx</span><span class="p">],</span> <span class="n">target_subsets</span><span class="p">[</span><span class="n">best_match_idx</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">j</span> <span class="o">%</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Generation </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1"> / Best distance found </span><span class="si">{</span><span class="n">best_distance</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Generation 0 / Best distance found 0.215
+Generation 10 / Best distance found 0.215
+Generation 20 / Best distance found 0.211
+Generation 30 / Best distance found 0.211
+Generation 40 / Best distance found 0.208
+Generation 50 / Best distance found 0.208
+Generation 60 / Best distance found 0.208
+Generation 70 / Best distance found 0.208
+Generation 80 / Best distance found 0.208
+Generation 90 / Best distance found 0.208
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="matching_data.html" class="btn btn-neutral float-left" title="Matching Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ps_matcher.html" class="btn btn-neutral float-right" title="Propensity Score Matcher" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
