@@ -244,7 +244,6 @@ def test_gamma_is_area_between_cdfs():
 
 
 def test_target_subsets():
-
     matching_data = generate_toy_dataset()
     target, pool = split_target_pool(matching_data)
     gamma = BalanceCalculator(matching_data, "gamma", n_bins=20)
