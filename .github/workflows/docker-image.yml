@@ -3,22 +3,18 @@ name: Docker Image CI
 on: [push, pull_request]
 
 jobs:
-
   linting:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v3
-      -
-        name: Install Python 3.9 🐍
+      - name: Install Python 3.9 🐍
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-      -
-        name: Set up runner 📦
-        run: pip3 install black==23.1.0
-      -
-        name: "Black: Code Formatting 👮🏽‍♀️"
+          python-version: "3.9"
+      - name: Set up runner 📦
+        run: pip3 install black==24.4.2
+      - name: "Black: Code Formatting 👮🏽‍♀️"
         run: black --diff . && black -v --check .
 
   base_image:
@@ -29,16 +25,12 @@ jobs:
     steps:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v3
-      -
-        name: Create tag name 🆔
+      - name: Create tag name 🆔
         run: echo "DOCKER_TAG=$(echo "${{ github.ref_name }}" | sed -E 's/[^[:alnum:].-]+/-/g' | sed -E 's/^[^[:alnum:]]+//')" >> $GITHUB_ENV
-      -
-        name: docker
+      - name: docker
         run: docker build -t ${DOCKER_TAG} -f environments/Dockerfile .
-      -
-        name: Pytest
+      - name: Pytest
         run: docker run ${DOCKER_TAG} pytest
-
 
   base_image_gpu:
     name: Base Image for GPU environment
@@ -48,13 +40,9 @@ jobs:
     steps:
       - name: Checkout Repository 🛎️
         uses: actions/checkout@v3
-      -
-        name: Create tag name 🆔
+      - name: Create tag name 🆔
         run: echo "DOCKER_TAG=$(echo "${{ github.ref_name }}-gpu" | sed -E 's/[^[:alnum:].-]+/-/g' | sed -E 's/^[^[:alnum:]]+//')" >> $GITHUB_ENV
-      -
-        name: docker
+      - name: docker
         run: docker build -t ${DOCKER_TAG} -f environments/Dockerfile.gpu .
-      -
-        name: Pytest
+      - name: Pytest
         run: docker run ${DOCKER_TAG} pytest
-

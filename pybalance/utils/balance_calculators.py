@@ -216,17 +216,17 @@ class BaseBalanceCalculator:
         )
         return data
 
-    def _fetch_pool_features(self, candidate_populations):
-        if isinstance(candidate_populations, pd.DataFrame):
-            features = self._preprocess(candidate_populations)
+    def _fetch_features(self, subset_populations, full_population_data):
+        if isinstance(subset_populations, pd.DataFrame):
+            features = self._preprocess(subset_populations)
         else:
-            if not isinstance(candidate_populations, torch.Tensor):
-                candidate_populations = torch.tensor(
-                    candidate_populations, device=self.device, requires_grad=False
+            if not isinstance(subset_populations, torch.Tensor):
+                subset_populations = torch.tensor(
+                    subset_populations, device=self.device, requires_grad=False
                 )
-            features = self.pool[candidate_populations]
+            features = full_population_data[subset_populations]
 
-        # features has shape n_candidate_populations x n_patients x n_features
+        # features has shape n_subset_populations x n_patients x n_features
         # note that using the reshape() method works for both numpy and pytorch
         if len(features.shape) == 2:
             features = features.reshape(1, *features.shape)
@@ -248,39 +248,56 @@ class BaseBalanceCalculator:
 
     @reshape_output
     def distance(
-        self, candidate_populations: Union[pd.DataFrame, torch.Tensor, np.ndarray]
+        self,
+        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
+        target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
     ) -> torch.Tensor:
         """
         Compute overall distance (aka "mismatch", aka "loss") between input
         candidate populations. The per-feature loss is aggregated using a vector
         norm specified by order specified in __init__().
 
-        :candidate_populations: Populations for which to compute the mismatch.
+        :pool_subsets: Subsets of the pool population for which to compute the mismatch.
             Input can be either a single pandas dataframe containing all the
             required feature data or a 2-dimensional integer array whose entries
             are the indices of patients in the pool. In the latter case, the
             array should be an array of shape n_candidate_populations x
             candidate_population_size that indexes the patient pool (passed
             during __init__()). The first dimension may be omitted if only one
-            candidate population is present.
+            subset population is present.
+        :target_subsets: Subsets of the target population. If an index array, must
+            have same last dimension as pool_subsets.
         """
-        per_feature_loss = self.per_feature_loss(candidate_populations)
+        per_feature_loss = self.per_feature_loss(pool_subsets, target_subsets)
         # Since feature_weights sum to 1, sum is actually a weighted mean
         return torch.sum(
             self.feature_weights * torch.abs(per_feature_loss) ** self.order, dim=1
         ) ** (1.0 / self.order)
 
-    def balance(self, candidate_populations):
-        return -self.distance(candidate_populations)
+    def balance(self, pool_subsets, target_subsets=None):
+        return -self.distance(pool_subsets, target_subsets)
 
     def per_feature_loss(
-        self, candidate_populations: Union[pd.DataFrame, torch.Tensor, np.ndarray]
+        self,
+        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
+        target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
     ) -> torch.Tensor:
         """
         Compute mismatch (aka "distance", aka "loss") on a per-feature basis for
         a set of candidate populations.
         """
-        pool = self._fetch_pool_features(candidate_populations)
+        pool = self._fetch_features(pool_subsets, self.pool)
+        if target_subsets is not None:
+            target = self._fetch_features(target_subsets, self.target)
+            target_std = target.std(axis=1)
+            target_mean = target.mean(axis=1)
+            if not pool.shape[0] == target.shape[0]:
+                raise ValueError(
+                    "Number of subset populations must be same for pool and target!"
+                )
+        else:
+            target_std = self.target_std
+            target_mean = self.target_mean
 
         # NaNs can arise when the pool and target both have zero variance. If
         # they have zero variance and are the same value (e.g. pool all 0s and
@@ -293,9 +310,9 @@ class BaseBalanceCalculator:
         # __init__() of the possibility of this arising.
         norm = 1
         if self.standardize_difference:
-            norm *= torch.sqrt(pool.std(axis=1) ** 2 + self.target_std**2) + 1e-6
+            norm *= torch.sqrt(pool.std(axis=1) ** 2 + target_std**2) + 1e-6
 
-        return torch.nan_to_num((pool.mean(axis=1) - self.target_mean) / norm)
+        return torch.nan_to_num((pool.mean(axis=1) - target_mean) / norm)
 
 
 class BetaBalance(BaseBalanceCalculator):
@@ -448,9 +465,11 @@ class BetaMaxBalance(BaseBalanceCalculator):
 
     @reshape_output
     def distance(
-        self, candidate_populations: Union[pd.DataFrame, torch.Tensor, np.ndarray]
+        self,
+        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
+        target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
     ) -> torch.Tensor:
-        per_feature_loss = self.per_feature_loss(candidate_populations)
+        per_feature_loss = self.per_feature_loss(pool_subsets, target_subsets)
 
         return torch.max(
             self.feature_weights * torch.abs(per_feature_loss), dim=1
@@ -629,25 +648,29 @@ class BatchedBalanceCaclulator:
     def _to_list(self, candidate_populations):
         return self.balance_calculator._to_list(candidate_populations)
 
-    def distance(self, candidate_populations):
+    def distance(self, pool_subsets, target_subsets=None):
         # If the user passes a pandas DataFrame, the DataFrame is assumed to
         # represent feature data for only one population and no need for
         # batching; just pass on to the base class. Otherwise, assume
-        # candidate_populations refers to patient indices.
-        if isinstance(candidate_populations, pd.DataFrame):
-            return self.balance_calculator.distance(candidate_populations)
+        # pool_subsets refers to patient indices.
+        if isinstance(pool_subsets, pd.DataFrame):
+            if not (target_subsets is None or isinstance(target_subsets, pd.DataFrame)):
+                raise ValueError(
+                    "target_subsets must be of same datatype as pool_subsets if both are passed"
+                )
+            return self.balance_calculator.distance(pool_subsets, target_subsets)
 
         # If the user passes a list, convert it to the underlying backend array
         # type for further processing.
-        if isinstance(candidate_populations, list):
-            candidate_populations = self.balance_calculator._to_array(
-                candidate_populations
-            )
+        if isinstance(pool_subsets, list):
+            pool_subsets = self.balance_calculator._to_array(pool_subsets)
+        if isinstance(target_subsets, list):
+            target_subsets = self.balance_calculator._to_array(target_subsets)
 
         # If array has only one dimension, no need for batching, just pass along
         # to base class.
-        if len(candidate_populations.shape) == 1:
-            return self.balance_calculator.distance(candidate_populations)
+        if len(pool_subsets.shape) == 1:
+            return self.balance_calculator.distance(pool_subsets, target_subsets)
 
         # Get batch size according to number of size of target population
         batch_size = _get_batch_size(
@@ -656,25 +679,29 @@ class BatchedBalanceCaclulator:
             self.max_batch_size_gb,
         )
 
-        # From here on, can assume candidate_populations is a 2D array of
+        # From here on, can assume pool_subsets is a 2D array of
         # patient indices with the 0th dimension corresponding to the
-        # candidate_population and the 1st dimension corresponding to patient.
-        n_remaining = len(candidate_populations)
+        # pool_subsets and the 1st dimension corresponding to patient.
+        n_remaining = len(pool_subsets)
         distances = []
         j = 0
         while n_remaining > 0:
             N = min(batch_size, n_remaining)
-            cps = candidate_populations[j * batch_size : j * batch_size + N, :]
-            distances.append(self.balance_calculator.distance(cps))
+            _pool = pool_subsets[j * batch_size : j * batch_size + N, :]
+            if target_subsets is not None:
+                _target = target_subsets[j * batch_size : j * batch_size + N, :]
+            else:
+                _target = None
+            distances.append(self.balance_calculator.distance(_pool, _target))
             n_remaining -= N
             j += 1
 
         distances = self.balance_calculator._finalize_batches(distances)
-        assert len(distances) == len(candidate_populations)
+        assert len(distances) == len(pool_subsets)
         return distances
 
-    def balance(self, candidate_populations):
-        return -self.distance(candidate_populations)
+    def balance(self, pool_subsets, target_subsets=None):
+        return -self.distance(pool_subsets, target_subsets)
 
 
 #

@@ -152,9 +152,9 @@ def test_numeric_bins_encoder_feature_names():
     data = m.data
 
     # Add features that might confuse the regexp
-    data.loc[
-        :, "age"
-    ] = 1  # This will make the number of returned bins < number requested
+    data.loc[:, "age"] = (
+        1  # This will make the number of returned bins < number requested
+    )
     data.loc[:, "age_weight"] = data["age"] * data["weight"]
     data.loc[:, "age*weight"] = (
         data["age"] * data["weight"]
