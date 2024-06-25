@@ -477,3 +477,350 @@ class ConstraintSatisfactionMatcher(object):
     def get_best_match(self):
         _check_fitted(self)
         return self.best_match
+
+
+class CardinalityMatcher(object):
+    """
+    CardinalityMatcher implements a matcher that, rather than optimizing balance
+    subject to size constraints like ConstraintSatisfactionMatcher, optimizes 
+    matching size subject to balance constraints.
+    
+    See https://kosukeimai.github.io/MatchIt/reference/method_cardinality.html 
+    and references therein.    
+    
+    :param matching_data: A MatchingData object describing the pool and target
+        populations. See utils.matching_data.
+
+    :param objective: Matching objective to optimize. Technically, you can pass
+        any balance calculator, but this solver cannot handle non-linear
+        objective functions. The solver uses the preprocessing from the balance
+        calculator for setting up the problem; the balance calculator itself is
+        used to report the balance of generated matches but not in actually
+        finding solutions (since the CS solver needs a discretized objective
+        function). The solver will optimize the absolute mean difference on the
+        output features of the balance calculator's preprocessing.
+
+    :param match_size: How large the match population should be. If passed as a
+        float, interpreted to be a fraction of the target population.
+
+    :param time_limit: Time limit to stop solving in seconds (def: 180 sec).
+
+    :param num_workers: Number of workers to use to optimize objective. See
+        https://github.com/google/or-tools/blob/stable/ortools/sat/sat_parameters.proto#L556
+        for more detail.
+
+    :param ps_hinting: Compute a propensity score match and use the result as a
+        hint for the solver
+
+    :param verbose: Verbose solving.
+    """
+
+    def __init__(
+        self,
+        matching_data: MatchingData,
+        objective: Union[str, BaseBalanceCalculator] = "beta",
+        match_size: int = None,
+        time_limit: float = 180,
+        num_workers: int = 4,
+        ps_hinting: bool = False,
+        verbose: bool = True,
+    ):
+        self.matching_data = matching_data.copy()
+        self.orig_target, self.orig_pool = split_target_pool(self.matching_data)
+
+        if isinstance(objective, str):
+            self.balance_calculator = BalanceCalculator(self.matching_data, objective)
+            self.objective = objective
+        else:
+            self.balance_calculator = objective
+            self.objective = self.balance_calculator.name
+
+        target, pool = (
+            self.balance_calculator.target.cpu().numpy(),
+            self.balance_calculator.pool.cpu().numpy(),
+        )
+        # We will have to rescale everything to use an integer solver. If
+        # features are not normalized, then features with larger overall scale
+        # end up being emphasized more in the objective function.
+        scaler = MinMaxScaler()
+        target = scaler.fit_transform(target)
+        pool = scaler.transform(pool)
+        self.n_target, self.n_pool = len(target), len(pool)
+        self.n_features = len(target[0])
+        self.weights = self.get_weights()
+        self.scalefac = _get_scaling_factor(target * self.weights, pool * self.weights, tolerance=0.01)
+        self.target = (self.scalefac * target).astype(int).tolist()
+        self.pool = (self.scalefac * pool).astype(int).tolist()
+        # self.mut = self.target.mean(axis=0)
+        # self.sigmat = self.target.std(axis=0)
+
+        # ===== Sanity Check ======#
+        assert len(self.target[0]) == len(
+            self.pool[0]
+        ), "The number of features should be the same in both reference population and input!"
+        assert (
+            self.n_target < self.n_pool
+        ), "Number of patients in treatment arm should be equal or less then control."
+
+        self.match_size = match_size
+        self.time_limit = time_limit
+        self.num_workers = num_workers
+        self.ps_hinting = ps_hinting
+        self.verbose = verbose
+        self._check_params()
+
+        self.ref_features = [
+            sum([t[f] for t in self.target]) for f in range(self.n_features)
+        ]
+        self._reset_best_match()
+
+    def _check_params(self):
+        # set match size
+        if self.match_size is not None:
+            if not self.match_size <= self.n_target:
+                raise ValueError(
+                    "Match size must not be greater than target population size."
+                )
+            if self.match_size <= 1:
+                # Assume it represents a fraction of the target size
+                self.match_size = int(self.match_size * self.n_target)
+        else:
+            self.match_size = self.n_target
+
+    def get_params(self):
+        params = [
+            "objective",
+            "match_size",
+            "time_limit",
+            "num_workers",
+            "ps_hinting",
+            "verbose",
+        ]
+        return dict((p, getattr(self, p)) for p in params)
+
+    def _reset_best_match(self):
+        self.best_match = None
+        self.best_match_idx = None
+        self.best_score = np.inf
+
+    def get_weights(self):
+        if hasattr(self.balance_calculator.preprocessor, "feature_weights"):
+            weights = self.balance_calculator.preprocessor.feature_weights.cpu().numpy()
+            min_nonzero_weight = min([w for w in weights if w > 0])
+            weights = [int(10 * w / min_nonzero_weight) for w in weights]
+        else:
+            weights = [1] * self.n_features
+
+        headers = self.balance_calculator.preprocessor.output_headers["all"]
+        for feat, weight in zip(headers, weights):
+            logger.debug(f"Feature weights: {weight:6d} {feat}")
+
+        return weights
+
+    def _get_limits(self, f, match_size=None):
+        if match_size is None:
+            match_size = self.n_target
+
+        weight = self.weights[f]
+
+        # sort feature values ascending
+        pool_features = sorted([p[f] for p in self.pool])
+        min_pool_feature = sum(pool_features[:match_size])
+        max_pool_feature = sum(pool_features[-match_size:])
+
+        target_feature_values = sorted([p[f] for p in self.target])
+        min_target_feature = sum(target_feature_values[:match_size])
+        max_target_feature = sum(target_feature_values[-match_size:])
+
+        max_delta = weight * max(
+            abs(max_pool_feature - min_target_feature),
+            abs(max_target_feature - min_pool_feature),
+        )
+
+        if max_delta >= 2**50:
+            logger.warning(f"Inferred max_delta = {max_delta}.")
+            logger.warning(
+                "Feature dynamic range may exceed integer dynamic range and lead to suboptimal solutions."
+            )
+
+        min_feature = min(min_target_feature, min_pool_feature)
+        max_feature = max(max_target_feature, max_pool_feature)
+
+        feat = self.balance_calculator.preprocessor.output_headers["all"][f]
+        logger.debug(f"Feature limits:  [{min_feature}, {max_feature}] {feat}")
+
+        return min_feature, max_feature, max_delta
+
+    def match(self, threshold=0.1, hint: Optional[List[int]] = None) -> MatchingData:
+        """
+        Match populations passed during __init__(). Returns MatchingData
+        instance containing the matched pool and target populations.
+
+        :param hint: You can supply a "hint" as either (1) A list of indices to
+            the pool. It will be assumed that the entire target is used, or (2)
+            A list of two lists, the first list being the indices to the target,
+            and the second being the indices to the pool, or (3) by omitting the
+            hint altoghether and passing ps_hinting=True in __init__(). In case
+            (3), a propensity score model will be estimated on the fly and used
+            to create a match population as a hint to the solver.
+
+            I admit the interface here is a bit confusing. We will clean this
+            up in a later release.
+        """
+        time_limit = self.time_limit
+
+        logger.info(
+            f"Solving for match population with size = {self.match_size}. Will match on {self.n_features} dimensions ..."
+        )
+
+        # ========= Create Model===========#
+        model = cp_model.CpModel()
+
+        # ========= Variables===========#
+        # --- Binary flag for inclusion of patients ---------#
+        x = []  # pool
+        for i in range(self.n_pool):
+            x.append(model.NewBoolVar(f"x[{i}]"))
+
+        logger.info(f"Calculating bounds on feature variables ...")
+
+        abs_deltas = []
+        features = []
+        deltas = []
+        max_n = int(self.n_pool / self.n_target)
+        n = model.NewIntVar(1, max_n, f"n")
+
+        for i in range(self.n_features):
+            min_feature, max_feature, max_delta = self._get_limits(i, max_n * self.n_target)
+            abs_deltas.append(model.NewIntVar(0, max_delta, f"abs_deltas[{i}]"))
+            features.append(model.NewIntVar(min_feature, max_feature, f"features[{i}]"))
+            deltas.append(model.NewIntVar(-max_delta, max_delta, f"deltas[{i}]"))
+
+        logger.info(f"Applying constraints ...")
+
+        # ========= Constraints===========#
+        for j in range(self.n_features):
+            # --- aggregate for feature j ---------#
+            model.Add(
+                sum(self.pool[i][j] * x[i] for i in range(self.n_pool)) == features[j]
+            )
+            # --- Taxicab distance ---------#
+            model.Add(self.weights[j] * (features[j] - n * self.ref_features[j]) == deltas[j])
+            model.AddAbsEquality(abs_deltas[j], deltas[j])
+            model.Add(abs_deltas[j] <= n * int(self.n_target * self.scalefac * threshold) )
+
+        print(int(self.n_target * self.scalefac * threshold))
+
+        # --- Cardinality ---------#
+        model.Add( sum(x[i] for i in range(self.n_pool)) == n * self.n_target )
+
+        # ========= Hint! ==============#
+        if self.ps_hinting or hint is not None:
+            matching_data = self.matching_data.copy()
+            target, pool = split_target_pool(matching_data)
+            target_name = target[matching_data.population_col].unique()[0]
+            pool_name = pool[matching_data.population_col].unique()[0]
+
+            if hint is None:
+                logger.info("Training PS model as guide for solver ...")
+
+                target.loc[:, "ix"] = list(range(len(target)))
+                pool.loc[:, "ix"] = list(range(len(pool)))
+                matching_data = MatchingData(
+                    pd.concat([target, pool]), headers=self.matching_data.headers
+                )
+                ps_matcher = PropensityScoreMatcher(
+                    matching_data, objective=self.objective
+                )
+                ps_match = ps_matcher.match()
+
+                target_hint = (
+                    ps_match.data[ps_match.data.population == target_name]
+                    .ix.astype(int)
+                    .tolist()
+                )
+                pool_hint = (
+                    ps_match.data[ps_match.data.population == pool_name]
+                    .ix.astype(int)
+                    .tolist()
+                )
+            else:
+                if len(hint) == 2:
+                    target_hint, pool_hint = hint
+                else:
+                    target_hint = [1] * len(target)
+                    pool_hint = hint
+
+            # Kind of sanity check that the indices are aligned between what
+            # comes out of the PS solver and what we will apply as hints
+            obj = 0
+            for j in range(self.n_features):
+                feat = sum(self.pool[i][j] for i in pool_hint)
+                ref = sum(self.target[i][j] for i in target_hint)
+                delta = self.weights[j] * abs(feat - ref)
+                obj += delta
+            logger.info(f"Hint achieves objective value = {obj}.")
+
+            logger.info("Applying hints ...")
+            for i, var in enumerate(x):
+                if i in pool_hint:
+                    model.AddHint(var, 1)
+                else:
+                    model.AddHint(var, 0)
+
+            for i, var in enumerate(y):
+                if i in target_hint:
+                    model.AddHint(var, 1)
+                else:
+                    model.AddHint(var, 0)
+
+        # ========= Objective===========#
+        model.Minimize(- sum(x)  ) #+ sum(deltas) )
+
+        # ===== Creates a solver =======#
+        solver = cp_model.CpSolver()
+        if not time_limit is None:
+            solver.parameters.max_time_in_seconds = time_limit
+
+        solver.parameters.num_workers = min(
+            self.num_workers, multiprocessing.cpu_count()
+        )
+        if solver.parameters.num_workers != 1:
+            solver.parameters.log_search_progress = False
+            solver.parameters.share_objective_bounds = True
+            solver.parameters.share_level_zero_bounds = True
+
+        logger.info("Solving with %d workers ..." % solver.parameters.num_workers)
+        # ========= Solve===========#
+        # ----- Append the important stuff for printing -----#
+
+        if self.verbose:
+            solution_printer = SolutionPrinter(x, abs_deltas, self)
+            status = solver.SolveWithSolutionCallback(model, solution_printer)
+            logger.info("Status = %s" % solver.StatusName(status))
+            logger.info(
+                "Number of solutions found: %i" % solution_printer.solution_count()
+            )
+        else:
+            status = solver.Solve(model)
+
+        if solver.StatusName(status) in ["FEASIBLE", "OPTIMAL"]:
+            pool_indices = [j for j, i in enumerate(x) if solver.Value(i)]
+            pool = self.orig_pool.iloc[pool_indices]
+            # target_indices = [j for j, i in enumerate(y) if solver.Value(i)]
+            target = self.orig_target#.iloc[target_indices]
+            match = MatchingData(
+                data=pd.concat([target, pool]),
+                headers=self.matching_data.headers,
+                population_col=self.matching_data.population_col,
+            )
+        else:
+            match = self.matching_data
+
+        self.best_match = match
+
+        return match
+
+    def get_best_match(self):
+        _check_fitted(self)
+        return self.best_match
