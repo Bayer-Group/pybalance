@@ -653,9 +653,9 @@ class BatchedBalanceCaclulator:
         # represent feature data for only one population and no need for
         # batching; just pass on to the base class. Otherwise, assume
         # pool_subsets refers to patient indices.
-        if isinstance(pool_subsets, pd.DataFrame) and isinstance(
-            target_subsets, pd.DataFrame
-        ):
+        if isinstance(pool_subsets, pd.DataFrame):
+            if not (target_subsets is  None or isinstance(target_subsets, pd.DataFrame)):
+                raise ValueError('target_subsets must be of same datatype as pool_subsets if both are passed')
             return self.balance_calculator.distance(pool_subsets, target_subsets)
 
         # If the user passes a list, convert it to the underlying backend array
