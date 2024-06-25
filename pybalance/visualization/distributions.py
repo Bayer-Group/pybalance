@@ -198,6 +198,12 @@ def plot_binary_features(
 
     :param plot_params: Parameters passed on to seaborn routines.
     """
+    # FIXME this should be renamed to something like plot_difference_binary_features
+    if len(matching_data.populations) < 2:
+        raise ValueError(
+            "plot_binary_features() only implemented for MatchingData with >= 2 populations."
+        )
+
     if reference_population is None:
         reference_population = _get_reference_population(matching_data)
 
