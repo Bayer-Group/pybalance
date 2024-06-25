@@ -652,16 +652,18 @@ class BatchedBalanceCaclulator:
         # If the user passes a pandas DataFrame, the DataFrame is assumed to
         # represent feature data for only one population and no need for
         # batching; just pass on to the base class. Otherwise, assume
-        # candidate_populations refers to patient indices.
-        if isinstance(pool_subsets, pd.DataFrame):
+        # pool_subsets refers to patient indices.
+        if isinstance(pool_subsets, pd.DataFrame) and isinstance(
+            target_subsets, pd.DataFrame
+        ):
             return self.balance_calculator.distance(pool_subsets, target_subsets)
 
         # If the user passes a list, convert it to the underlying backend array
         # type for further processing.
         if isinstance(pool_subsets, list):
-            candidate_populations = self.balance_calculator._to_array(
-                candidate_populations
-            )
+            pool_subsets = self.balance_calculator._to_array(pool_subsets)
+        if isinstance(target_subsets, list):
+            target_subsets = self.balance_calculator._to_array(target_subsets)
 
         # If array has only one dimension, no need for batching, just pass along
         # to base class.
