@@ -283,6 +283,12 @@
 
 <span class="sd">    :param plot_params: Parameters passed on to seaborn routines.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># FIXME this should be renamed to something like plot_difference_binary_features</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;plot_binary_features() only implemented for MatchingData with &gt;= 2 populations.&quot;</span>
+        <span class="p">)</span>
+
     <span class="k">if</span> <span class="n">reference_population</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">reference_population</span> <span class="o">=</span> <span class="n">_get_reference_population</span><span class="p">(</span><span class="n">matching_data</span><span class="p">)</span>
 
