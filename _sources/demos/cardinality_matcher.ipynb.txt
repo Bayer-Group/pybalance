@@ -1,6 +1,14 @@
 {
  "cells": [
   {
+   "cell_type": "markdown",
+   "id": "5dacbe5f-0aa3-4b43-bfb1-cc58f02a7ded",
+   "metadata": {},
+   "source": [
+    "# Cardinality matching"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 1,
    "id": "47d6b3c6-2bc8-4091-8108-ae6f8f2167a9",
@@ -263,7 +271,7 @@
    "id": "4e699cd6-9f4c-4493-a261-0a704f288c64",
    "metadata": {},
    "source": [
-    "# Solve for largest subset of pool subject to balance constraint"
+    "## Optimize pool size subject to balance constraint"
    ]
   },
   {
@@ -427,7 +435,7 @@
    "id": "ce715a25-d006-419d-ab1b-c6dfe3e77c29",
    "metadata": {},
    "source": [
-    "# Optimize match among all subsets of a fixed size with balance constraint"
+    "## Optimize balance with balance constraint"
    ]
   },
   {
@@ -548,7 +556,7 @@
    "id": "f6461053-c41c-472a-ad31-57245b690d42",
    "metadata": {},
    "source": [
-    "# Optimize match among all subsets of a fixed size without balance constraint"
+    "## Optimize balance without balance constraint"
    ]
   },
   {

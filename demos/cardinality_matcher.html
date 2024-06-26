@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solve for largest subset of pool subject to balance constraint &mdash; PyBalance</title>
+  <title>Cardinality matching &mdash; PyBalance</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
@@ -76,7 +76,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Solve for largest subset of pool subject to balance constraint</li>
+      <li class="breadcrumb-item active">Cardinality matching</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/demos/cardinality_matcher.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,7 +86,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="nbinput nblast docutils container">
+  <section id="Cardinality-matching">
+<h1>Cardinality matching<a class="headerlink" href="#Cardinality-matching" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -330,8 +332,8 @@
 <p>16000 rows × 12 columns</p>
 </div></div>
 </div>
-<section id="Solve-for-largest-subset-of-pool-subject-to-balance-constraint">
-<h1>Solve for largest subset of pool subject to balance constraint<a class="headerlink" href="#Solve-for-largest-subset-of-pool-subject-to-balance-constraint" title="Permalink to this heading"></a></h1>
+<section id="Optimize-pool-size-subject-to-balance-constraint">
+<h2>Optimize pool size subject to balance constraint<a class="headerlink" href="#Optimize-pool-size-subject-to-balance-constraint" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -464,19 +466,19 @@ tensor(0.0500)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_6_0.png" src="../_images/demos_cardinality_matcher_6_0.png" />
+<img alt="../_images/demos_cardinality_matcher_7_0.png" src="../_images/demos_cardinality_matcher_7_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_6_1.png" src="../_images/demos_cardinality_matcher_6_1.png" />
+<img alt="../_images/demos_cardinality_matcher_7_1.png" src="../_images/demos_cardinality_matcher_7_1.png" />
 </div>
 </div>
 </section>
-<section id="Optimize-match-among-all-subsets-of-a-fixed-size-with-balance-constraint">
-<h1>Optimize match among all subsets of a fixed size with balance constraint<a class="headerlink" href="#Optimize-match-among-all-subsets-of-a-fixed-size-with-balance-constraint" title="Permalink to this heading"></a></h1>
+<section id="Optimize-balance-with-balance-constraint">
+<h2>Optimize balance with balance constraint<a class="headerlink" href="#Optimize-balance-with-balance-constraint" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -569,19 +571,19 @@ INFO:pybalance.lp.matcher:Number of solutions found: 6
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_9_0.png" src="../_images/demos_cardinality_matcher_9_0.png" />
+<img alt="../_images/demos_cardinality_matcher_10_0.png" src="../_images/demos_cardinality_matcher_10_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_9_1.png" src="../_images/demos_cardinality_matcher_9_1.png" />
+<img alt="../_images/demos_cardinality_matcher_10_1.png" src="../_images/demos_cardinality_matcher_10_1.png" />
 </div>
 </div>
 </section>
-<section id="Optimize-match-among-all-subsets-of-a-fixed-size-without-balance-constraint">
-<h1>Optimize match among all subsets of a fixed size without balance constraint<a class="headerlink" href="#Optimize-match-among-all-subsets-of-a-fixed-size-without-balance-constraint" title="Permalink to this heading"></a></h1>
+<section id="Optimize-balance-without-balance-constraint">
+<h2>Optimize balance without balance constraint<a class="headerlink" href="#Optimize-balance-without-balance-constraint" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
@@ -708,14 +710,14 @@ INFO:pybalance.lp.matcher:Number of solutions found: 11
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_12_0.png" src="../_images/demos_cardinality_matcher_12_0.png" />
+<img alt="../_images/demos_cardinality_matcher_13_0.png" src="../_images/demos_cardinality_matcher_13_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_12_1.png" src="../_images/demos_cardinality_matcher_12_1.png" />
+<img alt="../_images/demos_cardinality_matcher_13_1.png" src="../_images/demos_cardinality_matcher_13_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -746,6 +748,7 @@ INFO:pybalance.utils.preprocess:Discretized weight with bins [50.01, 61.67, 73.3
 tensor(0.0500)
 </pre></div></div>
 </div>
+</section>
 </section>
 
 

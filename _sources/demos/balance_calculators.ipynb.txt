@@ -1,6 +1,14 @@
 {
  "cells": [
   {
+   "cell_type": "markdown",
+   "id": "f21133df-9ed8-4757-8963-6e2176c3128e",
+   "metadata": {},
+   "source": [
+    "# Balance Calculators"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 1,
    "id": "b83085cf-5a4d-4db3-85ff-317d6e376735",
@@ -313,7 +321,7 @@
    "id": "3eddef9b-b87d-4a0c-ae51-17d204422be9",
    "metadata": {},
    "source": [
-    "# Fit Balance Calculator"
+    "## Fit Balance Calculator"
    ]
   },
   {
@@ -336,7 +344,7 @@
    "id": "3d588103-f175-43f8-9ab5-38b0a186bb04",
    "metadata": {},
    "source": [
-    "# Compute the balance between pool and target"
+    "## Balance between pool and target"
    ]
   },
   {
@@ -387,7 +395,7 @@
    "id": "ceb3e196-21c8-43ad-83f3-12686008bb27",
    "metadata": {},
    "source": [
-    "# Compute the balance between subset of pool and target"
+    "## Balance between subset of pool and target"
    ]
   },
   {
@@ -438,7 +446,7 @@
    "id": "9cb4fcef-14a0-4344-a28a-601911160219",
    "metadata": {},
    "source": [
-    "# Compute the balance between several subsets simultaneously"
+    "## Balance between several subsets simultaneously"
    ]
   },
   {
@@ -539,7 +547,7 @@
    "id": "63857014-b52b-40d9-8d7b-208c7b981129",
    "metadata": {},
    "source": [
-    "# Basic Genetic Optimizer"
+    "## Basic Genetic Optimizer"
    ]
   },
   {

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fit Balance Calculator &mdash; PyBalance</title>
+  <title>Balance Calculators &mdash; PyBalance</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
@@ -54,11 +54,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="matching_data.html">Matching Data</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Fit Balance Calculator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Compute-the-balance-between-pool-and-target">Compute the balance between pool and target</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Compute-the-balance-between-subset-of-pool-and-target">Compute the balance between subset of pool and target</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Compute-the-balance-between-several-subsets-simultaneously">Compute the balance between several subsets simultaneously</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Basic-Genetic-Optimizer">Basic Genetic Optimizer</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Balance Calculators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Fit-Balance-Calculator">Fit Balance Calculator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Balance-between-pool-and-target">Balance between pool and target</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Balance-between-subset-of-pool-and-target">Balance between subset of pool and target</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Balance-between-several-subsets-simultaneously">Balance between several subsets simultaneously</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Basic-Genetic-Optimizer">Basic Genetic Optimizer</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="ps_matcher.html">Propensity Score Matcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ea_matcher.html">Genetic Matcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lp_matcher.html">Constraint Satisfaction Matcher</a></li>
@@ -90,7 +93,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
-      <li class="breadcrumb-item active">Fit Balance Calculator</li>
+      <li class="breadcrumb-item active">Balance Calculators</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/demos/balance_calculators.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -100,7 +103,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="nbinput nblast docutils container">
+  <section id="Balance-Calculators">
+<h1>Balance Calculators<a class="headerlink" href="#Balance-Calculators" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -385,7 +390,7 @@
 </div></div>
 </div>
 <section id="Fit-Balance-Calculator">
-<h1>Fit Balance Calculator<a class="headerlink" href="#Fit-Balance-Calculator" title="Permalink to this heading"></a></h1>
+<h2>Fit Balance Calculator<a class="headerlink" href="#Fit-Balance-Calculator" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
@@ -400,8 +405,8 @@
 </div>
 </div>
 </section>
-<section id="Compute-the-balance-between-pool-and-target">
-<h1>Compute the balance between pool and target<a class="headerlink" href="#Compute-the-balance-between-pool-and-target" title="Permalink to this heading"></a></h1>
+<section id="Balance-between-pool-and-target">
+<h2>Balance between pool and target<a class="headerlink" href="#Balance-between-pool-and-target" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
@@ -438,8 +443,8 @@ tensor(0.2353, dtype=torch.float64)
 </pre></div></div>
 </div>
 </section>
-<section id="Compute-the-balance-between-subset-of-pool-and-target">
-<h1>Compute the balance between subset of pool and target<a class="headerlink" href="#Compute-the-balance-between-subset-of-pool-and-target" title="Permalink to this heading"></a></h1>
+<section id="Balance-between-subset-of-pool-and-target">
+<h2>Balance between subset of pool and target<a class="headerlink" href="#Balance-between-subset-of-pool-and-target" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
@@ -476,8 +481,8 @@ tensor(0.2669, dtype=torch.float64)
 </pre></div></div>
 </div>
 </section>
-<section id="Compute-the-balance-between-several-subsets-simultaneously">
-<h1>Compute the balance between several subsets simultaneously<a class="headerlink" href="#Compute-the-balance-between-several-subsets-simultaneously" title="Permalink to this heading"></a></h1>
+<section id="Balance-between-several-subsets-simultaneously">
+<h2>Balance between several subsets simultaneously<a class="headerlink" href="#Balance-between-several-subsets-simultaneously" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
@@ -564,7 +569,7 @@ Number of subset populations must be same for pool and target!
 </div>
 </section>
 <section id="Basic-Genetic-Optimizer">
-<h1>Basic Genetic Optimizer<a class="headerlink" href="#Basic-Genetic-Optimizer" title="Permalink to this heading"></a></h1>
+<h2>Basic Genetic Optimizer<a class="headerlink" href="#Basic-Genetic-Optimizer" title="Permalink to this heading"></a></h2>
 <p>Here is a very basic, un-optimized implementation of genetic matching! It’s not very smart, because it doesn’t mix the good populations. This is just an illustration of using the balance calculator.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
@@ -627,6 +632,7 @@ Generation 90 / Best distance found 0.208
 </pre></div>
 </div>
 </div>
+</section>
 </section>
 
 
