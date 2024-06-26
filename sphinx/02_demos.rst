@@ -9,3 +9,4 @@ Demos
    demos/ps_matcher.ipynb
    demos/ea_matcher.ipynb
    demos/lp_matcher.ipynb
+   demos/card_matcher.ipynb
