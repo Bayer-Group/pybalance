@@ -24,7 +24,9 @@
         <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API documentation" href="../03_api.html" />
+    <link rel="prev" title="Constraint Satisfaction Matcher" href="lp_matcher.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,10 +49,23 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../02_demos.html">Demos</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="matching_data.html">Matching Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="balance_calculators.html">Balance Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ps_matcher.html">Propensity Score Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ea_matcher.html">Genetic Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lp_matcher.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Cardinality matching</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-pool-size-subject-to-balance-constraint">Optimize pool size subject to balance constraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-balance-with-balance-constraint">Optimize balance with balance constraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-balance-without-balance-constraint">Optimize balance without balance constraint</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -76,9 +91,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
       <li class="breadcrumb-item active">Cardinality matching</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/demos/cardinality_matcher.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/demos/card_matcher.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -466,14 +482,14 @@ tensor(0.0500)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_7_0.png" src="../_images/demos_cardinality_matcher_7_0.png" />
+<img alt="../_images/demos_card_matcher_7_0.png" src="../_images/demos_card_matcher_7_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_7_1.png" src="../_images/demos_cardinality_matcher_7_1.png" />
+<img alt="../_images/demos_card_matcher_7_1.png" src="../_images/demos_card_matcher_7_1.png" />
 </div>
 </div>
 </section>
@@ -571,14 +587,14 @@ INFO:pybalance.lp.matcher:Number of solutions found: 6
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_10_0.png" src="../_images/demos_cardinality_matcher_10_0.png" />
+<img alt="../_images/demos_card_matcher_10_0.png" src="../_images/demos_card_matcher_10_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_10_1.png" src="../_images/demos_cardinality_matcher_10_1.png" />
+<img alt="../_images/demos_card_matcher_10_1.png" src="../_images/demos_card_matcher_10_1.png" />
 </div>
 </div>
 </section>
@@ -710,14 +726,14 @@ INFO:pybalance.lp.matcher:Number of solutions found: 11
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_13_0.png" src="../_images/demos_cardinality_matcher_13_0.png" />
+<img alt="../_images/demos_card_matcher_13_0.png" src="../_images/demos_card_matcher_13_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_cardinality_matcher_13_1.png" src="../_images/demos_cardinality_matcher_13_1.png" />
+<img alt="../_images/demos_card_matcher_13_1.png" src="../_images/demos_card_matcher_13_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -754,7 +770,10 @@ tensor(0.0500)
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lp_matcher.html" class="btn btn-neutral float-left" title="Constraint Satisfaction Matcher" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../03_api.html" class="btn btn-neutral float-right" title="API documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
