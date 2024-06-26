@@ -800,80 +800,48 @@ can only handle linear objective functions; see “objective” parameter below.
 <p>The constraints and optimization target are specified to the solver via the
 options pool_size, target_size, and max_mismatch. The behavior of the solver is
 as given in the table below:</p>
-<section id="pool-size-target-size-max-mismatch-optimize">
-<h4>pool_size   target_size     max_mismatch    optimize<a class="headerlink" href="#pool-size-target-size-max-mismatch-optimize" title="Permalink to this heading"></a></h4>
-<dl class="simple">
-<dt>N           N               Y               pool_size subject to target_size = n_target</dt><dd><p>and balance constraints</p>
-</dd>
-<dt>Y           Y               Y               balance subject to size and balance</dt><dd><p>constraints</p>
-</dd>
-</dl>
-<p>Y           Y               N               balance subject to size constraints
-N           N               N               balance subject to size constraints; default</p>
-<blockquote>
-<div><p>to pool_size = target_size = n_target</p>
-</div></blockquote>
-<p>Y           N               N               not suported
-N           Y               N               not suported
-——————————————————————————</p>
 <p>Optimizing pool_size subject to balance constraint is known as “cardinality
 matching”. See <a class="reference external" href="https://kosukeimai.github.io/MatchIt/reference/method_cardinality.html">https://kosukeimai.github.io/MatchIt/reference/method_cardinality.html</a>
 and references therein.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param matching_data<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A MatchingData object describing the pool and target
-populations. See utils.matching_data.</p>
-</dd>
-<dt class="field-even">param objective<span class="colon">:</span></dt>
-<dd class="field-even"><p>Matching objective to optimize. Technically, you can pass
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matching_data</strong> (<a class="reference internal" href="#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a>) – A MatchingData object describing the pool and target
+populations. See utils.matching_data.</p></li>
+<li><p><strong>objective</strong> (<em>str</em><em> | </em><a class="reference internal" href="#pybalance.utils.BaseBalanceCalculator" title="pybalance.utils.balance_calculators.BaseBalanceCalculator"><em>BaseBalanceCalculator</em></a>) – Matching objective to optimize. Technically, you can pass
 any balance calculator, but this solver cannot handle non-linear
 objective functions. The solver uses the preprocessing from the balance
 calculator for setting up the problem; the balance calculator itself is
 used to report the balance of generated matches but not in actually
 finding solutions (since the CS solver needs a discretized objective
 function). The solver will optimize the absolute mean difference on the
-output features of the balance calculator’s preprocessing.</p>
-</dd>
-<dt class="field-odd">param match_size<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of samples to include in the matched population.
+output features of the balance calculator’s preprocessing.</p></li>
+<li><p><strong>match_size</strong> (<em>int</em><em> | </em><em>None</em>) – Number of samples to include in the matched population.
 If match_size &lt; size of target population, then the target is subsetted
 to be the same size, that is, pool_size = target_size = match_size. If
 match_size &gt;= size of target population, then the full target is used
 and only the pool is subsetted, that is, pool_size = match_size and
 target_size = n_target. This option cannot be used in combination
 with pool_size or target_size. This option is deprecated and will be
-removed in a later release.</p>
-</dd>
-<dt class="field-even">param pool_size<span class="colon">:</span></dt>
-<dd class="field-even"><p>Number of samples to include from the pool in the matched
+removed in a later release.</p></li>
+<li><p><strong>pool_size</strong> (<em>int</em><em> | </em><em>None</em>) – Number of samples to include from the pool in the matched
 population. Must be less than the size of the pool. If pool_size is not set,
 then max_mismatch and target_size must be set and pool_size will be optimized
-subject to the target_size and max_mismatch constraints.</p>
-</dd>
-<dt class="field-odd">param target_size<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of samples to include from the target in the matched
+subject to the target_size and max_mismatch constraints.</p></li>
+<li><p><strong>target_size</strong> (<em>int</em><em> | </em><em>None</em>) – Number of samples to include from the target in the matched
 population. Must be less than or equal to the size of the target.
 If target_size is not set,then max_mismatch and pool_size must be set and
 target_size will be optimized subject to the pool_size and max_mismatch
-constraints.</p>
-</dd>
-<dt class="field-even">param max_mismatch<span class="colon">:</span></dt>
-<dd class="field-even"><p>Maximum allowable absolute mean difference for any feature.</p>
-</dd>
-<dt class="field-odd">param time_limit<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Time limit to stop solving in seconds (def: 180 sec).</p>
-</dd>
-<dt class="field-even">param num_workers<span class="colon">:</span></dt>
-<dd class="field-even"><p>Number of workers to use to optimize objective. See
+constraints.</p></li>
+<li><p><strong>max_mismatch</strong> (<em>float</em><em> | </em><em>None</em>) – Maximum allowable absolute mean difference for any feature.</p></li>
+<li><p><strong>time_limit</strong> (<em>float</em>) – Time limit to stop solving in seconds (def: 180 sec).</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers to use to optimize objective. See
 <a class="reference external" href="https://github.com/google/or-tools/blob/stable/ortools/sat/sat_parameters.proto#L556">https://github.com/google/or-tools/blob/stable/ortools/sat/sat_parameters.proto#L556</a>
-for more detail.</p>
-</dd>
-<dt class="field-odd">param ps_hinting<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Compute a propensity score match and use the result as a
-hint for the solver</p>
-</dd>
-<dt class="field-even">param verbose<span class="colon">:</span></dt>
-<dd class="field-even"><p>Verbose solving.</p>
+for more detail.</p></li>
+<li><p><strong>ps_hinting</strong> (<em>bool</em>) – Compute a propensity score match and use the result as a
+hint for the solver</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Verbose solving.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
@@ -900,9 +868,6 @@ up in a later release.</p>
 </dl>
 </dd></dl>
 
-</section>
-<dl class="field-list simple">
-</dl>
 </dd></dl>
 
 </section>
