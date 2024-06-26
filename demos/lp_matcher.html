@@ -388,7 +388,7 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:65] Scaling features by factor 110.41 in order to use integer solver with &lt;= 0.6431% loss.
+INFO [matcher.py:65] Scaling features by factor 240.00 in order to use integer solver with &lt;= 0.2841% loss.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -398,7 +398,9 @@ INFO [matcher.py:65] Scaling features by factor 110.41 in order to use integer s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 {&#39;objective&#39;: &#39;beta&#39;,
- &#39;match_size&#39;: 1000,
+ &#39;pool_size&#39;: 1000,
+ &#39;target_size&#39;: 1000,
+ &#39;max_mismatch&#39;: None,
  &#39;time_limit&#39;: 360,
  &#39;num_workers&#39;: 4,
  &#39;ps_hinting&#39;: False,
@@ -418,145 +420,183 @@ INFO [matcher.py:65] Scaling features by factor 110.41 in order to use integer s
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 15 dimensions ...
-INFO [matcher.py:335] Calculating bounds on feature variables ...
-INFO [matcher.py:350] Applying constraints ...
-INFO [matcher.py:446] Solving with 4 workers ...
-INFO [matcher.py:89] Initial balance score: 0.2328
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 1, time = 0.02 m
-INFO [matcher.py:100] Objective:        207734.0
-INFO [matcher.py:113] Balance:  0.2298
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 2, time = 0.03 m
-INFO [matcher.py:100] Objective:        207713.0
-INFO [matcher.py:113] Balance:  0.2297
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 3, time = 0.04 m
-INFO [matcher.py:100] Objective:        207689.0
-INFO [matcher.py:113] Balance:  0.2296
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 4, time = 0.04 m
-INFO [matcher.py:100] Objective:        207630.0
-INFO [matcher.py:113] Balance:  0.2296
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 5, time = 0.04 m
-INFO [matcher.py:100] Objective:        207593.0
-INFO [matcher.py:113] Balance:  0.2295
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 6, time = 0.05 m
-INFO [matcher.py:100] Objective:        207488.0
-INFO [matcher.py:113] Balance:  0.2294
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 7, time = 0.06 m
-INFO [matcher.py:100] Objective:        207381.0
-INFO [matcher.py:113] Balance:  0.2293
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 8, time = 0.06 m
-INFO [matcher.py:100] Objective:        10433.0
-INFO [matcher.py:113] Balance:  0.0105
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 9, time = 0.08 m
-INFO [matcher.py:100] Objective:        10229.0
-INFO [matcher.py:113] Balance:  0.0124
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 10, time = 0.10 m
-INFO [matcher.py:100] Objective:        10173.0
-INFO [matcher.py:113] Balance:  0.0123
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 11, time = 0.11 m
-INFO [matcher.py:100] Objective:        10168.0
-INFO [matcher.py:113] Balance:  0.0123
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 12, time = 0.13 m
-INFO [matcher.py:100] Objective:        10165.0
-INFO [matcher.py:113] Balance:  0.0122
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 13, time = 0.14 m
-INFO [matcher.py:100] Objective:        10137.0
-INFO [matcher.py:113] Balance:  0.0102
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 14, time = 0.17 m
-INFO [matcher.py:100] Objective:        10132.0
-INFO [matcher.py:113] Balance:  0.0123
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 15, time = 0.19 m
-INFO [matcher.py:100] Objective:        10129.0
-INFO [matcher.py:113] Balance:  0.0122
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 16, time = 0.29 m
-INFO [matcher.py:100] Objective:        10128.0
-INFO [matcher.py:113] Balance:  0.0122
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 17, time = 0.39 m
-INFO [matcher.py:100] Objective:        10127.0
-INFO [matcher.py:113] Balance:  0.0102
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 18, time = 0.51 m
-INFO [matcher.py:100] Objective:        10125.0
-INFO [matcher.py:113] Balance:  0.0122
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 19, time = 0.70 m
-INFO [matcher.py:100] Objective:        10124.0
-INFO [matcher.py:113] Balance:  0.0122
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 20, time = 0.93 m
-INFO [matcher.py:100] Objective:        10123.0
-INFO [matcher.py:113] Balance:  0.0104
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 21, time = 1.85 m
-INFO [matcher.py:100] Objective:        10121.0
-INFO [matcher.py:113] Balance:  0.0104
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 22, time = 3.52 m
-INFO [matcher.py:100] Objective:        10120.0
-INFO [matcher.py:113] Balance:  0.0102
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:453] Status = OPTIMAL
-INFO [matcher.py:454] Number of solutions found: 22
+INFO [matcher.py:418] Solving for match population with pool size = 1000 and target size = 1000 subject to None balance constraint.
+INFO [matcher.py:421] Matching on 15 dimensions ...
+INFO [matcher.py:428] Building model variables and constraints ...
+INFO [matcher.py:437] Calculating bounds on feature variables ...
+INFO [matcher.py:527] Applying size constraints on pool and target ...
+INFO [matcher.py:611] Solving with 4 workers ...
+INFO [matcher.py:90] Initial balance score: 0.2328
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 1, time = 0.02 m
+INFO [matcher.py:101] Objective:        452948000.0
+INFO [matcher.py:120] Balance (beta):   0.2298
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 2, time = 0.03 m
+INFO [matcher.py:101] Objective:        452876000.0
+INFO [matcher.py:120] Balance (beta):   0.2297
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 3, time = 0.04 m
+INFO [matcher.py:101] Objective:        452777000.0
+INFO [matcher.py:120] Balance (beta):   0.2297
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 4, time = 0.04 m
+INFO [matcher.py:101] Objective:        452736000.0
+INFO [matcher.py:120] Balance (beta):   0.2296
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 5, time = 0.04 m
+INFO [matcher.py:101] Objective:        452730000.0
+INFO [matcher.py:120] Balance (beta):   0.2296
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 6, time = 0.05 m
+INFO [matcher.py:101] Objective:        452596000.0
+INFO [matcher.py:120] Balance (beta):   0.2295
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 7, time = 0.05 m
+INFO [matcher.py:101] Objective:        452537000.0
+INFO [matcher.py:120] Balance (beta):   0.2294
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 8, time = 0.06 m
+INFO [matcher.py:101] Objective:        452040000.0
+INFO [matcher.py:120] Balance (beta):   0.2291
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 9, time = 0.08 m
+INFO [matcher.py:101] Objective:        451825000.0
+INFO [matcher.py:120] Balance (beta):   0.2289
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 10, time = 0.08 m
+INFO [matcher.py:101] Objective:        451808000.0
+INFO [matcher.py:120] Balance (beta):   0.2289
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 11, time = 0.08 m
+INFO [matcher.py:101] Objective:        451755000.0
+INFO [matcher.py:120] Balance (beta):   0.2289
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 12, time = 0.08 m
+INFO [matcher.py:101] Objective:        22699000.0
+INFO [matcher.py:120] Balance (beta):   0.0104
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 13, time = 0.10 m
+INFO [matcher.py:101] Objective:        22422000.0
+INFO [matcher.py:120] Balance (beta):   0.0124
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 14, time = 0.12 m
+INFO [matcher.py:101] Objective:        22306000.0
+INFO [matcher.py:120] Balance (beta):   0.0124
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 15, time = 0.13 m
+INFO [matcher.py:101] Objective:        22291000.0
+INFO [matcher.py:120] Balance (beta):   0.0124
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 16, time = 0.14 m
+INFO [matcher.py:101] Objective:        22121000.0
+INFO [matcher.py:120] Balance (beta):   0.0122
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 17, time = 0.16 m
+INFO [matcher.py:101] Objective:        22119000.0
+INFO [matcher.py:120] Balance (beta):   0.0102
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 18, time = 0.21 m
+INFO [matcher.py:101] Objective:        22103000.0
+INFO [matcher.py:120] Balance (beta):   0.0121
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 19, time = 0.23 m
+INFO [matcher.py:101] Objective:        22101000.0
+INFO [matcher.py:120] Balance (beta):   0.0122
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 20, time = 0.25 m
+INFO [matcher.py:101] Objective:        22099000.0
+INFO [matcher.py:120] Balance (beta):   0.0122
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 21, time = 0.27 m
+INFO [matcher.py:101] Objective:        22088000.0
+INFO [matcher.py:120] Balance (beta):   0.0122
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 22, time = 0.55 m
+INFO [matcher.py:101] Objective:        22084000.0
+INFO [matcher.py:120] Balance (beta):   0.0122
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 23, time = 3.16 m
+INFO [matcher.py:101] Objective:        22083000.0
+INFO [matcher.py:120] Balance (beta):   0.0101
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 24, time = 5.78 m
+INFO [matcher.py:101] Objective:        22082000.0
+INFO [matcher.py:120] Balance (beta):   0.0102
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:618] Status = FEASIBLE
+INFO [matcher.py:619] Number of solutions found: 24
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -694,34 +734,49 @@ INFO [matcher.py:454] Number of solutions found: 22
       <td>...</td>
     </tr>
     <tr>
-      <th>9975</th>
-      <td>51.242281</td>
-      <td>130.812647</td>
-      <td>87.967028</td>
-      <td>1.0</td>
-      <td>0</td>
-      <td>4</td>
+      <th>9933</th>
+      <td>68.194783</td>
+      <td>127.495418</td>
+      <td>69.177329</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>5</td>
       <td>pool</td>
       <td>1</td>
-      <td>0</td>
       <td>1</td>
       <td>0</td>
-      <td>9975</td>
+      <td>0</td>
+      <td>9933</td>
     </tr>
     <tr>
-      <th>9977</th>
-      <td>56.698850</td>
-      <td>169.861617</td>
-      <td>99.292786</td>
-      <td>0.0</td>
+      <th>9946</th>
+      <td>22.630370</td>
+      <td>185.351623</td>
+      <td>117.381552</td>
+      <td>1.0</td>
+      <td>1</td>
       <td>2</td>
-      <td>4</td>
       <td>pool</td>
+      <td>1</td>
       <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9946</td>
+    </tr>
+    <tr>
+      <th>9955</th>
+      <td>56.736759</td>
+      <td>161.612045</td>
+      <td>72.288182</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>pool</td>
       <td>1</td>
       <td>0</td>
       <td>1</td>
-      <td>9977</td>
+      <td>1</td>
+      <td>9955</td>
     </tr>
     <tr>
       <th>9981</th>
@@ -752,21 +807,6 @@ INFO [matcher.py:454] Number of solutions found: 22
       <td>0</td>
       <td>1</td>
       <td>9982</td>
-    </tr>
-    <tr>
-      <th>9995</th>
-      <td>45.215942</td>
-      <td>186.043723</td>
-      <td>115.100146</td>
-      <td>1.0</td>
-      <td>0</td>
-      <td>2</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>9995</td>
     </tr>
   </tbody>
 </table>
@@ -917,34 +957,49 @@ INFO [matcher.py:454] Number of solutions found: 22
       <td>...</td>
     </tr>
     <tr>
-      <th>9975</th>
-      <td>51.242281</td>
-      <td>130.812647</td>
-      <td>87.967028</td>
-      <td>1.0</td>
-      <td>0</td>
-      <td>4</td>
+      <th>9933</th>
+      <td>68.194783</td>
+      <td>127.495418</td>
+      <td>69.177329</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>5</td>
       <td>pool</td>
       <td>1</td>
-      <td>0</td>
       <td>1</td>
       <td>0</td>
-      <td>9975</td>
+      <td>0</td>
+      <td>9933</td>
     </tr>
     <tr>
-      <th>9977</th>
-      <td>56.698850</td>
-      <td>169.861617</td>
-      <td>99.292786</td>
-      <td>0.0</td>
+      <th>9946</th>
+      <td>22.630370</td>
+      <td>185.351623</td>
+      <td>117.381552</td>
+      <td>1.0</td>
+      <td>1</td>
       <td>2</td>
-      <td>4</td>
       <td>pool</td>
+      <td>1</td>
       <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>9946</td>
+    </tr>
+    <tr>
+      <th>9955</th>
+      <td>56.736759</td>
+      <td>161.612045</td>
+      <td>72.288182</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>pool</td>
       <td>1</td>
       <td>0</td>
       <td>1</td>
-      <td>9977</td>
+      <td>1</td>
+      <td>9955</td>
     </tr>
     <tr>
       <th>9981</th>
@@ -975,21 +1030,6 @@ INFO [matcher.py:454] Number of solutions found: 22
       <td>0</td>
       <td>1</td>
       <td>9982</td>
-    </tr>
-    <tr>
-      <th>9995</th>
-      <td>45.215942</td>
-      <td>186.043723</td>
-      <td>115.100146</td>
-      <td>1.0</td>
-      <td>0</td>
-      <td>2</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>9995</td>
     </tr>
   </tbody>
 </table>
@@ -1060,7 +1100,7 @@ INFO [preprocess.py:442] Added cross term binary_1 * binary_3 to matching featur
 INFO [preprocess.py:442] Added cross term binary_2 * binary_3 to matching features.
 INFO [preprocess.py:442] Added cross term binary_2 * height to matching features.
 INFO [preprocess.py:442] Added cross term binary_0 * binary_2 to matching features.
-INFO [matcher.py:65] Scaling features by factor 158.99 in order to use integer solver with &lt;= 0.8895% loss.
+INFO [matcher.py:65] Scaling features by factor 240.00 in order to use integer solver with &lt;= 0.3751% loss.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1070,7 +1110,9 @@ INFO [matcher.py:65] Scaling features by factor 158.99 in order to use integer s
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 {&#39;objective&#39;: &#39;beta_x&#39;,
- &#39;match_size&#39;: 1000,
+ &#39;pool_size&#39;: 1000,
+ &#39;target_size&#39;: 1000,
+ &#39;max_mismatch&#39;: None,
  &#39;time_limit&#39;: 360,
  &#39;num_workers&#39;: 4,
  &#39;ps_hinting&#39;: True,
@@ -1090,17 +1132,20 @@ INFO [matcher.py:65] Scaling features by factor 158.99 in order to use integer s
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 25 dimensions ...
-INFO [matcher.py:335] Calculating bounds on feature variables ...
-INFO [matcher.py:350] Applying constraints ...
-INFO [matcher.py:378] Training PS model as guide for solver ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/pybalance/lp/matcher.py:380: SettingWithCopyWarning:
+INFO [matcher.py:418] Solving for match population with pool size = 1000 and target size = 1000 subject to None balance constraint.
+INFO [matcher.py:421] Matching on 25 dimensions ...
+INFO [matcher.py:428] Building model variables and constraints ...
+INFO [matcher.py:437] Calculating bounds on feature variables ...
+INFO [matcher.py:527] Applying size constraints on pool and target ...
+INFO [matcher.py:533] Applying hint ...
+INFO [matcher.py:540] Training PS model as guide for solver ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/pybalance/lp/matcher.py:542: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   target.loc[:, &#34;ix&#34;] = list(range(len(target)))
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/pybalance/lp/matcher.py:381: SettingWithCopyWarning:
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/pybalance/lp/matcher.py:543: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
@@ -1116,10 +1161,10 @@ INFO [preprocess.py:442] Added cross term binary_1 * binary_3 to matching featur
 INFO [preprocess.py:442] Added cross term binary_2 * binary_3 to matching features.
 INFO [preprocess.py:442] Added cross term binary_2 * height to matching features.
 INFO [preprocess.py:442] Added cross term binary_0 * binary_2 to matching features.
-INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.001 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.000 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: SGDClassifier
-INFO [matcher.py:139]   * alpha: 0.10453554731869287
+INFO [matcher.py:139]   * alpha: 0.1045355473186929
 INFO [matcher.py:139]   * class_weight: None
 INFO [matcher.py:139]   * early_stopping: False
 INFO [matcher.py:139]   * fit_intercept: False
@@ -1143,7 +1188,7 @@ INFO [matcher.py:141]   Solution time: 0.003 min
 INFO [matcher.py:180] Training model LogisticRegression (iter 3/50, 0.003 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: LogisticRegression
-INFO [matcher.py:139]   * C: 0.7627616953429357
+INFO [matcher.py:139]   * C: 0.7627616953429366
 INFO [matcher.py:139]   * fit_intercept: True
 INFO [matcher.py:139]   * max_iter: 500
 INFO [matcher.py:139]   * penalty: l2
@@ -1153,7 +1198,7 @@ INFO [matcher.py:141]   Solution time: 0.006 min
 INFO [matcher.py:180] Training model LogisticRegression (iter 4/50, 0.006 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: LogisticRegression
-INFO [matcher.py:139]   * C: 0.015804928600429948
+INFO [matcher.py:139]   * C: 0.015804928600429955
 INFO [matcher.py:139]   * fit_intercept: True
 INFO [matcher.py:139]   * max_iter: 500
 INFO [matcher.py:139]   * penalty: l2
@@ -1161,56 +1206,56 @@ INFO [matcher.py:139]   * solver: saga
 INFO [matcher.py:140]   Score (beta_x): 0.0615
 INFO [matcher.py:141]   Solution time: 0.007 min
 INFO [matcher.py:180] Training model LogisticRegression (iter 5/50, 0.007 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 6/50, 0.022 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 6/50, 0.024 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 7/50, 0.040 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 7/50, 0.044 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 8/50, 0.058 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.059 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 8/50, 0.065 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.066 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.074 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 11/50, 0.090 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 12/50, 0.091 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 13/50, 0.102 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.083 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 11/50, 0.102 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 12/50, 0.103 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 13/50, 0.115 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model SGDClassifier (iter 14/50, 0.120 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 15/50, 0.121 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 16/50, 0.123 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model SGDClassifier (iter 14/50, 0.137 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 15/50, 0.138 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 16/50, 0.139 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model SGDClassifier (iter 17/50, 0.141 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 18/50, 0.142 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 19/50, 0.143 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 20/50, 0.144 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 21/50, 0.145 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model SGDClassifier (iter 17/50, 0.161 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 18/50, 0.162 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 19/50, 0.163 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 20/50, 0.164 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 21/50, 0.165 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.163 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 23/50, 0.164 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 24/50, 0.165 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.166 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 26/50, 0.167 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 27/50, 0.172 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 28/50, 0.173 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.186 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 23/50, 0.187 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 24/50, 0.188 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.189 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 26/50, 0.190 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 27/50, 0.195 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 28/50, 0.196 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model SGDClassifier (iter 29/50, 0.187 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 30/50, 0.188 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 31/50, 0.201 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model SGDClassifier (iter 29/50, 0.216 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 30/50, 0.217 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 31/50, 0.232 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model SGDClassifier (iter 32/50, 0.220 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 33/50, 0.221 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 34/50, 0.222 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 32/50, 0.254 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 33/50, 0.255 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 34/50, 0.258 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: SGDClassifier
-INFO [matcher.py:139]   * alpha: 0.026061113485170782
+INFO [matcher.py:139]   * alpha: 0.02606111348517078
 INFO [matcher.py:139]   * class_weight: balanced
 INFO [matcher.py:139]   * early_stopping: True
 INFO [matcher.py:139]   * fit_intercept: False
@@ -1218,30 +1263,30 @@ INFO [matcher.py:139]   * loss: log_loss
 INFO [matcher.py:139]   * max_iter: 1500
 INFO [matcher.py:139]   * penalty: l2
 INFO [matcher.py:140]   Score (beta_x): 0.0603
-INFO [matcher.py:141]   Solution time: 0.223 min
-INFO [matcher.py:180] Training model SGDClassifier (iter 35/50, 0.223 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 36/50, 0.224 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:141]   Solution time: 0.259 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 35/50, 0.259 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 36/50, 0.260 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 37/50, 0.243 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 38/50, 0.245 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 39/50, 0.246 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 37/50, 0.282 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 38/50, 0.284 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 39/50, 0.285 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 40/50, 0.264 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 41/50, 0.278 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.286 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 43/50, 0.288 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 44/50, 0.289 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 45/50, 0.300 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 46/50, 0.305 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 47/50, 0.306 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 48/50, 0.307 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.308 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 50/50, 0.309 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 40/50, 0.306 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 41/50, 0.322 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.331 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 43/50, 0.333 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 44/50, 0.334 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 45/50, 0.346 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 46/50, 0.352 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 47/50, 0.353 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 48/50, 0.354 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.355 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 50/50, 0.356 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: SGDClassifier
-INFO [matcher.py:139]   * alpha: 0.026061113485170782
+INFO [matcher.py:139]   * alpha: 0.02606111348517078
 INFO [matcher.py:139]   * class_weight: balanced
 INFO [matcher.py:139]   * early_stopping: True
 INFO [matcher.py:139]   * fit_intercept: False
@@ -1249,715 +1294,1308 @@ INFO [matcher.py:139]   * loss: log_loss
 INFO [matcher.py:139]   * max_iter: 1500
 INFO [matcher.py:139]   * penalty: l2
 INFO [matcher.py:140]   Score (beta_x): 0.0603
-INFO [matcher.py:141]   Solution time: 0.223 min
-INFO [matcher.py:415] Hint achieves objective value = 97213.
-INFO [matcher.py:417] Applying hints ...
-INFO [matcher.py:446] Solving with 4 workers ...
-INFO [matcher.py:89] Initial balance score: 0.2324
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 1, time = 0.05 m
-INFO [matcher.py:100] Objective:        97213.0
-INFO [matcher.py:113] Balance:  0.0603
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 2, time = 0.06 m
-INFO [matcher.py:100] Objective:        97192.0
-INFO [matcher.py:113] Balance:  0.0604
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 3, time = 0.06 m
-INFO [matcher.py:100] Objective:        97172.0
-INFO [matcher.py:113] Balance:  0.0604
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 4, time = 0.06 m
-INFO [matcher.py:100] Objective:        97154.0
-INFO [matcher.py:113] Balance:  0.0604
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 5, time = 0.06 m
-INFO [matcher.py:100] Objective:        97118.0
-INFO [matcher.py:113] Balance:  0.0603
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 6, time = 0.07 m
-INFO [matcher.py:100] Objective:        96362.0
-INFO [matcher.py:113] Balance:  0.0599
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 7, time = 0.07 m
-INFO [matcher.py:100] Objective:        96278.0
-INFO [matcher.py:113] Balance:  0.0598
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 8, time = 0.07 m
-INFO [matcher.py:100] Objective:        96248.0
-INFO [matcher.py:113] Balance:  0.0598
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 9, time = 0.07 m
-INFO [matcher.py:100] Objective:        96125.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 10, time = 0.08 m
-INFO [matcher.py:100] Objective:        96108.0
-INFO [matcher.py:113] Balance:  0.0599
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 11, time = 0.08 m
-INFO [matcher.py:100] Objective:        96090.0
-INFO [matcher.py:113] Balance:  0.0598
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 12, time = 0.08 m
-INFO [matcher.py:100] Objective:        96054.0
-INFO [matcher.py:113] Balance:  0.0598
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 13, time = 0.09 m
-INFO [matcher.py:100] Objective:        95990.0
-INFO [matcher.py:113] Balance:  0.0598
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 14, time = 0.09 m
-INFO [matcher.py:100] Objective:        95973.0
-INFO [matcher.py:113] Balance:  0.0599
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 15, time = 0.09 m
-INFO [matcher.py:100] Objective:        95955.0
-INFO [matcher.py:113] Balance:  0.0599
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 16, time = 0.11 m
-INFO [matcher.py:100] Objective:        95835.0
-INFO [matcher.py:113] Balance:  0.0598
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 17, time = 0.12 m
-INFO [matcher.py:100] Objective:        95820.0
-INFO [matcher.py:113] Balance:  0.0599
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 18, time = 0.12 m
-INFO [matcher.py:100] Objective:        95818.0
-INFO [matcher.py:113] Balance:  0.0599
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 19, time = 0.14 m
-INFO [matcher.py:100] Objective:        95782.0
-INFO [matcher.py:113] Balance:  0.0598
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 20, time = 0.15 m
-INFO [matcher.py:100] Objective:        95767.0
-INFO [matcher.py:113] Balance:  0.0600
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 21, time = 0.18 m
-INFO [matcher.py:100] Objective:        95616.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 22, time = 0.19 m
-INFO [matcher.py:100] Objective:        95540.0
-INFO [matcher.py:113] Balance:  0.0596
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 23, time = 0.20 m
-INFO [matcher.py:100] Objective:        95525.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 24, time = 0.20 m
-INFO [matcher.py:100] Objective:        95420.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 25, time = 0.23 m
-INFO [matcher.py:100] Objective:        95367.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 26, time = 0.23 m
-INFO [matcher.py:100] Objective:        95302.0
-INFO [matcher.py:113] Balance:  0.0596
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 27, time = 0.23 m
-INFO [matcher.py:100] Objective:        95272.0
-INFO [matcher.py:113] Balance:  0.0596
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 28, time = 0.24 m
-INFO [matcher.py:100] Objective:        95200.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 29, time = 0.25 m
-INFO [matcher.py:100] Objective:        95185.0
-INFO [matcher.py:113] Balance:  0.0596
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 30, time = 0.27 m
-INFO [matcher.py:100] Objective:        95167.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 31, time = 0.27 m
-INFO [matcher.py:100] Objective:        95166.0
-INFO [matcher.py:113] Balance:  0.0598
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 32, time = 0.27 m
-INFO [matcher.py:100] Objective:        95098.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 33, time = 0.27 m
-INFO [matcher.py:100] Objective:        95073.0
-INFO [matcher.py:113] Balance:  0.0597
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 34, time = 0.28 m
-INFO [matcher.py:100] Objective:        94920.0
-INFO [matcher.py:113] Balance:  0.0596
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 35, time = 0.28 m
-INFO [matcher.py:100] Objective:        94896.0
-INFO [matcher.py:113] Balance:  0.0596
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 36, time = 0.33 m
-INFO [matcher.py:100] Objective:        94746.0
-INFO [matcher.py:113] Balance:  0.0595
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 37, time = 0.34 m
-INFO [matcher.py:100] Objective:        94722.0
-INFO [matcher.py:113] Balance:  0.0596
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 38, time = 0.34 m
-INFO [matcher.py:100] Objective:        94697.0
-INFO [matcher.py:113] Balance:  0.0595
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 39, time = 0.34 m
-INFO [matcher.py:100] Objective:        94652.0
-INFO [matcher.py:113] Balance:  0.0595
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 40, time = 0.35 m
-INFO [matcher.py:100] Objective:        94544.0
-INFO [matcher.py:113] Balance:  0.0594
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 41, time = 0.35 m
-INFO [matcher.py:100] Objective:        94515.0
-INFO [matcher.py:113] Balance:  0.0595
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 42, time = 0.37 m
-INFO [matcher.py:100] Objective:        93901.0
-INFO [matcher.py:113] Balance:  0.0591
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 43, time = 0.46 m
-INFO [matcher.py:100] Objective:        93721.0
-INFO [matcher.py:113] Balance:  0.0592
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 44, time = 0.63 m
-INFO [matcher.py:100] Objective:        93717.0
-INFO [matcher.py:113] Balance:  0.0591
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 45, time = 0.77 m
-INFO [matcher.py:100] Objective:        93699.0
-INFO [matcher.py:113] Balance:  0.0591
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 46, time = 0.78 m
-INFO [matcher.py:100] Objective:        93583.0
-INFO [matcher.py:113] Balance:  0.0591
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 47, time = 0.78 m
-INFO [matcher.py:100] Objective:        93568.0
-INFO [matcher.py:113] Balance:  0.0590
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 48, time = 0.79 m
-INFO [matcher.py:100] Objective:        93532.0
-INFO [matcher.py:113] Balance:  0.0590
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 49, time = 0.79 m
-INFO [matcher.py:100] Objective:        93530.0
-INFO [matcher.py:113] Balance:  0.0590
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 50, time = 0.79 m
-INFO [matcher.py:100] Objective:        93521.0
-INFO [matcher.py:113] Balance:  0.0590
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 51, time = 0.81 m
-INFO [matcher.py:100] Objective:        93413.0
-INFO [matcher.py:113] Balance:  0.0590
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 52, time = 0.82 m
-INFO [matcher.py:100] Objective:        93382.0
-INFO [matcher.py:113] Balance:  0.0591
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 53, time = 0.82 m
-INFO [matcher.py:100] Objective:        93348.0
-INFO [matcher.py:113] Balance:  0.0591
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 54, time = 0.82 m
-INFO [matcher.py:100] Objective:        93296.0
-INFO [matcher.py:113] Balance:  0.0590
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 55, time = 0.83 m
-INFO [matcher.py:100] Objective:        93180.0
-INFO [matcher.py:113] Balance:  0.0590
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 56, time = 0.83 m
-INFO [matcher.py:100] Objective:        93159.0
-INFO [matcher.py:113] Balance:  0.0589
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 57, time = 0.84 m
-INFO [matcher.py:100] Objective:        93107.0
-INFO [matcher.py:113] Balance:  0.0589
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 58, time = 0.84 m
-INFO [matcher.py:100] Objective:        93031.0
-INFO [matcher.py:113] Balance:  0.0589
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 59, time = 0.85 m
-INFO [matcher.py:100] Objective:        93006.0
-INFO [matcher.py:113] Balance:  0.0589
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 60, time = 0.86 m
-INFO [matcher.py:100] Objective:        92967.0
-INFO [matcher.py:113] Balance:  0.0588
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 61, time = 0.86 m
-INFO [matcher.py:100] Objective:        92961.0
-INFO [matcher.py:113] Balance:  0.0588
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 62, time = 0.86 m
-INFO [matcher.py:100] Objective:        92924.0
-INFO [matcher.py:113] Balance:  0.0589
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 63, time = 0.87 m
-INFO [matcher.py:100] Objective:        92875.0
-INFO [matcher.py:113] Balance:  0.0588
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 64, time = 0.87 m
-INFO [matcher.py:100] Objective:        92809.0
-INFO [matcher.py:113] Balance:  0.0589
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 65, time = 0.87 m
-INFO [matcher.py:100] Objective:        92788.0
-INFO [matcher.py:113] Balance:  0.0589
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 66, time = 0.91 m
-INFO [matcher.py:100] Objective:        92715.0
-INFO [matcher.py:113] Balance:  0.0588
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 67, time = 0.91 m
-INFO [matcher.py:100] Objective:        92675.0
-INFO [matcher.py:113] Balance:  0.0588
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 68, time = 0.91 m
-INFO [matcher.py:100] Objective:        92650.0
-INFO [matcher.py:113] Balance:  0.0587
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 69, time = 0.92 m
-INFO [matcher.py:100] Objective:        92605.0
-INFO [matcher.py:113] Balance:  0.0587
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 70, time = 0.92 m
-INFO [matcher.py:100] Objective:        92577.0
-INFO [matcher.py:113] Balance:  0.0588
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 71, time = 0.92 m
-INFO [matcher.py:100] Objective:        92557.0
-INFO [matcher.py:113] Balance:  0.0587
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 72, time = 0.93 m
-INFO [matcher.py:100] Objective:        92519.0
-INFO [matcher.py:113] Balance:  0.0587
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 73, time = 0.93 m
-INFO [matcher.py:100] Objective:        92447.0
-INFO [matcher.py:113] Balance:  0.0587
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 74, time = 0.94 m
-INFO [matcher.py:100] Objective:        92432.0
-INFO [matcher.py:113] Balance:  0.0587
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 75, time = 0.96 m
-INFO [matcher.py:100] Objective:        92347.0
-INFO [matcher.py:113] Balance:  0.0587
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 76, time = 0.96 m
-INFO [matcher.py:100] Objective:        92035.0
-INFO [matcher.py:113] Balance:  0.0583
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 77, time = 0.99 m
-INFO [matcher.py:100] Objective:        91762.0
-INFO [matcher.py:113] Balance:  0.0585
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 78, time = 1.00 m
-INFO [matcher.py:100] Objective:        91550.0
-INFO [matcher.py:113] Balance:  0.0583
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 79, time = 1.01 m
-INFO [matcher.py:100] Objective:        91417.0
-INFO [matcher.py:113] Balance:  0.0583
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 80, time = 1.01 m
-INFO [matcher.py:100] Objective:        91286.0
-INFO [matcher.py:113] Balance:  0.0582
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 81, time = 1.01 m
-INFO [matcher.py:100] Objective:        91280.0
-INFO [matcher.py:113] Balance:  0.0583
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 82, time = 1.02 m
-INFO [matcher.py:100] Objective:        91277.0
-INFO [matcher.py:113] Balance:  0.0583
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 83, time = 1.02 m
-INFO [matcher.py:100] Objective:        91233.0
-INFO [matcher.py:113] Balance:  0.0583
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 84, time = 1.02 m
-INFO [matcher.py:100] Objective:        91230.0
-INFO [matcher.py:113] Balance:  0.0583
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 85, time = 1.02 m
-INFO [matcher.py:100] Objective:        91222.0
-INFO [matcher.py:113] Balance:  0.0582
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 86, time = 1.03 m
-INFO [matcher.py:100] Objective:        91220.0
-INFO [matcher.py:113] Balance:  0.0582
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 87, time = 1.04 m
-INFO [matcher.py:100] Objective:        91214.0
-INFO [matcher.py:113] Balance:  0.0582
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 88, time = 1.04 m
-INFO [matcher.py:100] Objective:        91213.0
-INFO [matcher.py:113] Balance:  0.0582
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 89, time = 1.05 m
-INFO [matcher.py:100] Objective:        91195.0
-INFO [matcher.py:113] Balance:  0.0582
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 90, time = 1.06 m
-INFO [matcher.py:100] Objective:        91124.0
-INFO [matcher.py:113] Balance:  0.0582
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 91, time = 1.06 m
-INFO [matcher.py:100] Objective:        90978.0
-INFO [matcher.py:113] Balance:  0.0581
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 92, time = 1.08 m
-INFO [matcher.py:100] Objective:        90961.0
-INFO [matcher.py:113] Balance:  0.0580
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 93, time = 1.08 m
-INFO [matcher.py:100] Objective:        90916.0
-INFO [matcher.py:113] Balance:  0.0580
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 94, time = 1.08 m
-INFO [matcher.py:100] Objective:        90868.0
-INFO [matcher.py:113] Balance:  0.0580
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 95, time = 1.10 m
-INFO [matcher.py:100] Objective:        90846.0
-INFO [matcher.py:113] Balance:  0.0579
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 96, time = 1.11 m
-INFO [matcher.py:100] Objective:        90808.0
-INFO [matcher.py:113] Balance:  0.0579
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 97, time = 1.15 m
-INFO [matcher.py:100] Objective:        90612.0
-INFO [matcher.py:113] Balance:  0.0578
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 98, time = 1.15 m
-INFO [matcher.py:100] Objective:        90547.0
-INFO [matcher.py:113] Balance:  0.0577
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 99, time = 1.16 m
-INFO [matcher.py:100] Objective:        90514.0
-INFO [matcher.py:113] Balance:  0.0578
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 100, time = 1.16 m
-INFO [matcher.py:100] Objective:        90502.0
-INFO [matcher.py:113] Balance:  0.0577
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 101, time = 1.17 m
-INFO [matcher.py:100] Objective:        90454.0
-INFO [matcher.py:113] Balance:  0.0577
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 102, time = 1.22 m
-INFO [matcher.py:100] Objective:        90048.0
-INFO [matcher.py:113] Balance:  0.0575
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 103, time = 1.22 m
-INFO [matcher.py:100] Objective:        89983.0
-INFO [matcher.py:113] Balance:  0.0574
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 104, time = 1.24 m
-INFO [matcher.py:100] Objective:        89952.0
-INFO [matcher.py:113] Balance:  0.0575
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 105, time = 1.24 m
-INFO [matcher.py:100] Objective:        89938.0
-INFO [matcher.py:113] Balance:  0.0574
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 106, time = 1.24 m
-INFO [matcher.py:100] Objective:        89827.0
-INFO [matcher.py:113] Balance:  0.0574
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 107, time = 1.25 m
-INFO [matcher.py:100] Objective:        89556.0
-INFO [matcher.py:113] Balance:  0.0573
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 108, time = 1.26 m
-INFO [matcher.py:100] Objective:        88638.0
-INFO [matcher.py:113] Balance:  0.0568
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 109, time = 1.41 m
-INFO [matcher.py:100] Objective:        88144.0
-INFO [matcher.py:113] Balance:  0.0567
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 110, time = 1.49 m
-INFO [matcher.py:100] Objective:        87463.0
-INFO [matcher.py:113] Balance:  0.0561
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 111, time = 1.57 m
-INFO [matcher.py:100] Objective:        86971.0
-INFO [matcher.py:113] Balance:  0.0559
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 112, time = 1.74 m
-INFO [matcher.py:100] Objective:        86313.0
-INFO [matcher.py:113] Balance:  0.0556
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 113, time = 1.89 m
-INFO [matcher.py:100] Objective:        86304.0
-INFO [matcher.py:113] Balance:  0.0556
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 114, time = 2.01 m
-INFO [matcher.py:100] Objective:        35917.0
-INFO [matcher.py:113] Balance:  0.0310
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 115, time = 2.52 m
-INFO [matcher.py:100] Objective:        35907.0
-INFO [matcher.py:113] Balance:  0.0310
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 116, time = 2.53 m
-INFO [matcher.py:100] Objective:        35896.0
-INFO [matcher.py:113] Balance:  0.0310
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 117, time = 4.39 m
-INFO [matcher.py:100] Objective:        35895.0
-INFO [matcher.py:113] Balance:  0.0310
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:453] Status = FEASIBLE
-INFO [matcher.py:454] Number of solutions found: 117
+INFO [matcher.py:141]   Solution time: 0.259 min
+INFO [matcher.py:577] Hint achieves objective value = 147332.
+INFO [matcher.py:579] Applying hints ...
+INFO [matcher.py:611] Solving with 4 workers ...
+INFO [matcher.py:90] Initial balance score: 0.2324
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 1, time = 0.08 m
+INFO [matcher.py:101] Objective:        147332000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0603
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 2, time = 0.08 m
+INFO [matcher.py:101] Objective:        147176000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0601
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 3, time = 0.09 m
+INFO [matcher.py:101] Objective:        147050000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0601
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 4, time = 0.09 m
+INFO [matcher.py:101] Objective:        147002000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0601
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 5, time = 0.09 m
+INFO [matcher.py:101] Objective:        146721000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0601
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 6, time = 0.10 m
+INFO [matcher.py:101] Objective:        145561000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0596
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 7, time = 0.10 m
+INFO [matcher.py:101] Objective:        145369000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0596
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 8, time = 0.12 m
+INFO [matcher.py:101] Objective:        145229000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0596
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 9, time = 0.13 m
+INFO [matcher.py:101] Objective:        145192000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0595
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 10, time = 0.13 m
+INFO [matcher.py:101] Objective:        145144000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0596
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 11, time = 0.14 m
+INFO [matcher.py:101] Objective:        145129000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0595
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 12, time = 0.14 m
+INFO [matcher.py:101] Objective:        144996000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0595
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 13, time = 0.16 m
+INFO [matcher.py:101] Objective:        144843000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0594
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 14, time = 0.16 m
+INFO [matcher.py:101] Objective:        144588000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0594
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 15, time = 0.20 m
+INFO [matcher.py:101] Objective:        144406000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0594
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 16, time = 0.21 m
+INFO [matcher.py:101] Objective:        144195000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0593
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 17, time = 0.23 m
+INFO [matcher.py:101] Objective:        143827000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0593
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 18, time = 0.23 m
+INFO [matcher.py:101] Objective:        143679000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0592
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 19, time = 0.25 m
+INFO [matcher.py:101] Objective:        143649000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0591
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 20, time = 0.27 m
+INFO [matcher.py:101] Objective:        143574000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0591
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 21, time = 0.27 m
+INFO [matcher.py:101] Objective:        143526000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0592
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 22, time = 0.27 m
+INFO [matcher.py:101] Objective:        143245000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0591
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 23, time = 0.30 m
+INFO [matcher.py:101] Objective:        142588000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0589
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 24, time = 0.31 m
+INFO [matcher.py:101] Objective:        142455000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0589
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 25, time = 0.34 m
+INFO [matcher.py:101] Objective:        141967000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0588
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 26, time = 0.35 m
+INFO [matcher.py:101] Objective:        141924000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0588
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 27, time = 0.35 m
+INFO [matcher.py:101] Objective:        141829000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0587
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 28, time = 0.36 m
+INFO [matcher.py:101] Objective:        141681000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0587
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 29, time = 0.38 m
+INFO [matcher.py:101] Objective:        141606000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0587
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 30, time = 0.38 m
+INFO [matcher.py:101] Objective:        141322000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0585
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 31, time = 0.39 m
+INFO [matcher.py:101] Objective:        141285000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0585
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 32, time = 0.40 m
+INFO [matcher.py:101] Objective:        141229000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0586
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 33, time = 0.43 m
+INFO [matcher.py:101] Objective:        141161000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0586
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 34, time = 0.44 m
+INFO [matcher.py:101] Objective:        140938000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0584
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 35, time = 0.44 m
+INFO [matcher.py:101] Objective:        140793000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0584
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 36, time = 0.44 m
+INFO [matcher.py:101] Objective:        140697000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0584
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 37, time = 0.45 m
+INFO [matcher.py:101] Objective:        140642000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0584
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 38, time = 0.45 m
+INFO [matcher.py:101] Objective:        140592000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0584
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 39, time = 0.47 m
+INFO [matcher.py:101] Objective:        140562000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0583
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 40, time = 0.47 m
+INFO [matcher.py:101] Objective:        140520000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0583
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 41, time = 0.62 m
+INFO [matcher.py:101] Objective:        140167000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0582
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 42, time = 0.65 m
+INFO [matcher.py:101] Objective:        140140000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0583
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 43, time = 0.66 m
+INFO [matcher.py:101] Objective:        140132000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0583
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 44, time = 0.68 m
+INFO [matcher.py:101] Objective:        139980000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0583
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 45, time = 0.68 m
+INFO [matcher.py:101] Objective:        139917000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0583
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 46, time = 0.68 m
+INFO [matcher.py:101] Objective:        139651000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0582
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 47, time = 0.70 m
+INFO [matcher.py:101] Objective:        139638000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0583
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 48, time = 0.72 m
+INFO [matcher.py:101] Objective:        139610000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0583
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 49, time = 0.74 m
+INFO [matcher.py:101] Objective:        139189000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0581
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 50, time = 0.76 m
+INFO [matcher.py:101] Objective:        139131000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0580
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 51, time = 0.76 m
+INFO [matcher.py:101] Objective:        138919000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0580
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 52, time = 0.76 m
+INFO [matcher.py:101] Objective:        138885000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0580
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 53, time = 0.77 m
+INFO [matcher.py:101] Objective:        138879000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0580
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 54, time = 0.80 m
+INFO [matcher.py:101] Objective:        138853000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0579
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 55, time = 0.83 m
+INFO [matcher.py:101] Objective:        138782000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0579
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 56, time = 0.83 m
+INFO [matcher.py:101] Objective:        138716000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0579
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 57, time = 0.85 m
+INFO [matcher.py:101] Objective:        138683000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0579
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 58, time = 0.85 m
+INFO [matcher.py:101] Objective:        138483000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0579
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 59, time = 0.88 m
+INFO [matcher.py:101] Objective:        137815000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0576
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 60, time = 0.88 m
+INFO [matcher.py:101] Objective:        137752000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0576
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 61, time = 0.88 m
+INFO [matcher.py:101] Objective:        137486000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0575
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 62, time = 0.89 m
+INFO [matcher.py:101] Objective:        137401000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0575
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 63, time = 0.90 m
+INFO [matcher.py:101] Objective:        137333000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0575
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 64, time = 0.93 m
+INFO [matcher.py:101] Objective:        137132000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 65, time = 0.93 m
+INFO [matcher.py:101] Objective:        137105000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 66, time = 0.93 m
+INFO [matcher.py:101] Objective:        137099000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 67, time = 0.98 m
+INFO [matcher.py:101] Objective:        137080000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0575
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 68, time = 0.98 m
+INFO [matcher.py:101] Objective:        137005000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 69, time = 0.99 m
+INFO [matcher.py:101] Objective:        136985000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 70, time = 1.04 m
+INFO [matcher.py:101] Objective:        136974000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 71, time = 1.04 m
+INFO [matcher.py:101] Objective:        136947000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 72, time = 1.11 m
+INFO [matcher.py:101] Objective:        136838000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 73, time = 1.21 m
+INFO [matcher.py:101] Objective:        136729000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0573
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 74, time = 1.25 m
+INFO [matcher.py:101] Objective:        136654000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 75, time = 1.25 m
+INFO [matcher.py:101] Objective:        136559000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 76, time = 1.26 m
+INFO [matcher.py:101] Objective:        136503000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0573
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 77, time = 1.26 m
+INFO [matcher.py:101] Objective:        136457000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0573
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 78, time = 1.26 m
+INFO [matcher.py:101] Objective:        136435000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0573
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 79, time = 1.37 m
+INFO [matcher.py:101] Objective:        136386000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0574
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 80, time = 1.38 m
+INFO [matcher.py:101] Objective:        136349000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0573
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 81, time = 1.38 m
+INFO [matcher.py:101] Objective:        136313000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0573
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 82, time = 1.39 m
+INFO [matcher.py:101] Objective:        136286000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0573
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 83, time = 1.39 m
+INFO [matcher.py:101] Objective:        136020000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0573
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 84, time = 1.43 m
+INFO [matcher.py:101] Objective:        135535000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0570
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 85, time = 1.48 m
+INFO [matcher.py:101] Objective:        135513000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0570
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 86, time = 1.49 m
+INFO [matcher.py:101] Objective:        135473000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0570
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 87, time = 1.49 m
+INFO [matcher.py:101] Objective:        135452000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0570
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 88, time = 1.53 m
+INFO [matcher.py:101] Objective:        135375000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0570
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 89, time = 1.54 m
+INFO [matcher.py:101] Objective:        135312000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0569
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 90, time = 1.55 m
+INFO [matcher.py:101] Objective:        134988000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0568
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 91, time = 1.59 m
+INFO [matcher.py:101] Objective:        134977000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0568
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 92, time = 1.60 m
+INFO [matcher.py:101] Objective:        134937000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0568
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 93, time = 1.60 m
+INFO [matcher.py:101] Objective:        134931000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0568
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 94, time = 1.62 m
+INFO [matcher.py:101] Objective:        134909000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0567
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 95, time = 1.68 m
+INFO [matcher.py:101] Objective:        134887000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0566
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 96, time = 1.69 m
+INFO [matcher.py:101] Objective:        134614000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0566
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 97, time = 1.69 m
+INFO [matcher.py:101] Objective:        134579000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0566
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 98, time = 1.69 m
+INFO [matcher.py:101] Objective:        134522000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0566
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 99, time = 1.70 m
+INFO [matcher.py:101] Objective:        134400000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0565
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 100, time = 1.70 m
+INFO [matcher.py:101] Objective:        134234000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0565
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 101, time = 1.71 m
+INFO [matcher.py:101] Objective:        134107000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0564
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 102, time = 1.75 m
+INFO [matcher.py:101] Objective:        133877000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0564
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 103, time = 1.75 m
+INFO [matcher.py:101] Objective:        133872000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0564
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 104, time = 1.79 m
+INFO [matcher.py:101] Objective:        133834000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0562
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 105, time = 1.81 m
+INFO [matcher.py:101] Objective:        133706000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0561
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 106, time = 1.86 m
+INFO [matcher.py:101] Objective:        133469000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0560
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 107, time = 1.89 m
+INFO [matcher.py:101] Objective:        133214000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0559
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 108, time = 1.89 m
+INFO [matcher.py:101] Objective:        133090000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0559
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 109, time = 1.89 m
+INFO [matcher.py:101] Objective:        133063000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0559
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 110, time = 1.90 m
+INFO [matcher.py:101] Objective:        133033000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0559
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 111, time = 1.92 m
+INFO [matcher.py:101] Objective:        133028000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0559
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 112, time = 1.92 m
+INFO [matcher.py:101] Objective:        133008000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0558
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 113, time = 1.93 m
+INFO [matcher.py:101] Objective:        132983000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0559
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 114, time = 1.93 m
+INFO [matcher.py:101] Objective:        132978000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0559
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 115, time = 1.98 m
+INFO [matcher.py:101] Objective:        132841000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0558
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 116, time = 1.98 m
+INFO [matcher.py:101] Objective:        132785000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0558
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 117, time = 1.98 m
+INFO [matcher.py:101] Objective:        132779000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0558
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 118, time = 2.04 m
+INFO [matcher.py:101] Objective:        132600000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0557
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 119, time = 2.05 m
+INFO [matcher.py:101] Objective:        132480000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0557
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 120, time = 2.05 m
+INFO [matcher.py:101] Objective:        132453000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0557
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 121, time = 2.06 m
+INFO [matcher.py:101] Objective:        132264000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 122, time = 2.17 m
+INFO [matcher.py:101] Objective:        132136000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0557
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 123, time = 2.21 m
+INFO [matcher.py:101] Objective:        132122000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0557
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 124, time = 2.22 m
+INFO [matcher.py:101] Objective:        132117000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0557
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 125, time = 2.23 m
+INFO [matcher.py:101] Objective:        132079000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0557
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 126, time = 2.33 m
+INFO [matcher.py:101] Objective:        132025000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 127, time = 2.35 m
+INFO [matcher.py:101] Objective:        132007000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 128, time = 2.35 m
+INFO [matcher.py:101] Objective:        131985000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 129, time = 2.35 m
+INFO [matcher.py:101] Objective:        131979000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 130, time = 2.37 m
+INFO [matcher.py:101] Objective:        131957000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 131, time = 2.42 m
+INFO [matcher.py:101] Objective:        131715000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 132, time = 2.49 m
+INFO [matcher.py:101] Objective:        131695000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 133, time = 2.51 m
+INFO [matcher.py:101] Objective:        131689000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 134, time = 2.53 m
+INFO [matcher.py:101] Objective:        131687000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 135, time = 2.53 m
+INFO [matcher.py:101] Objective:        131585000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 136, time = 2.54 m
+INFO [matcher.py:101] Objective:        131572000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 137, time = 2.54 m
+INFO [matcher.py:101] Objective:        131526000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 138, time = 2.54 m
+INFO [matcher.py:101] Objective:        131488000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0556
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 139, time = 2.60 m
+INFO [matcher.py:101] Objective:        131421000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 140, time = 2.61 m
+INFO [matcher.py:101] Objective:        131418000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 141, time = 2.63 m
+INFO [matcher.py:101] Objective:        131344000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 142, time = 2.63 m
+INFO [matcher.py:101] Objective:        131338000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 143, time = 2.64 m
+INFO [matcher.py:101] Objective:        131174000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0555
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 144, time = 2.64 m
+INFO [matcher.py:101] Objective:        131116000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 145, time = 2.76 m
+INFO [matcher.py:101] Objective:        131101000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 146, time = 2.76 m
+INFO [matcher.py:101] Objective:        131083000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 147, time = 2.76 m
+INFO [matcher.py:101] Objective:        131069000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 148, time = 2.77 m
+INFO [matcher.py:101] Objective:        131061000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 149, time = 2.77 m
+INFO [matcher.py:101] Objective:        131055000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 150, time = 2.77 m
+INFO [matcher.py:101] Objective:        131053000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 151, time = 2.78 m
+INFO [matcher.py:101] Objective:        131017000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0554
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 152, time = 2.80 m
+INFO [matcher.py:101] Objective:        130827000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0553
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 153, time = 2.81 m
+INFO [matcher.py:101] Objective:        130822000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0553
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 154, time = 2.83 m
+INFO [matcher.py:101] Objective:        130586000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0553
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 155, time = 2.84 m
+INFO [matcher.py:101] Objective:        130560000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0552
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 156, time = 2.86 m
+INFO [matcher.py:101] Objective:        130554000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0553
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 157, time = 2.86 m
+INFO [matcher.py:101] Objective:        130462000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0553
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 158, time = 2.87 m
+INFO [matcher.py:101] Objective:        130390000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0552
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 159, time = 2.91 m
+INFO [matcher.py:101] Objective:        130376000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0552
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 160, time = 2.96 m
+INFO [matcher.py:101] Objective:        130053000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0552
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 161, time = 2.96 m
+INFO [matcher.py:101] Objective:        130016000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0551
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 162, time = 2.96 m
+INFO [matcher.py:101] Objective:        129852000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0551
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 163, time = 2.97 m
+INFO [matcher.py:101] Objective:        129796000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0551
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 164, time = 2.97 m
+INFO [matcher.py:101] Objective:        129752000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0551
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 165, time = 2.98 m
+INFO [matcher.py:101] Objective:        129638000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0550
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 166, time = 3.02 m
+INFO [matcher.py:101] Objective:        129415000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0550
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 167, time = 3.08 m
+INFO [matcher.py:101] Objective:        129413000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0549
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 168, time = 3.08 m
+INFO [matcher.py:101] Objective:        129338000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0549
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 169, time = 3.11 m
+INFO [matcher.py:101] Objective:        129216000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0548
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 170, time = 3.20 m
+INFO [matcher.py:101] Objective:        129055000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0539
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 171, time = 3.26 m
+INFO [matcher.py:101] Objective:        129023000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0548
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 172, time = 3.27 m
+INFO [matcher.py:101] Objective:        128812000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0548
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 173, time = 3.27 m
+INFO [matcher.py:101] Objective:        128809000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0547
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 174, time = 3.28 m
+INFO [matcher.py:101] Objective:        128793000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0547
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 175, time = 3.38 m
+INFO [matcher.py:101] Objective:        128688000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0547
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 176, time = 3.39 m
+INFO [matcher.py:101] Objective:        128255000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0546
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 177, time = 3.55 m
+INFO [matcher.py:101] Objective:        128243000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0553
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 178, time = 3.56 m
+INFO [matcher.py:101] Objective:        127543000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0550
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 179, time = 4.02 m
+INFO [matcher.py:101] Objective:        127017000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0547
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 180, time = 4.49 m
+INFO [matcher.py:101] Objective:        127008000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0546
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 181, time = 4.72 m
+INFO [matcher.py:101] Objective:        126858000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0545
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 182, time = 4.93 m
+INFO [matcher.py:101] Objective:        125797000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0539
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 183, time = 5.12 m
+INFO [matcher.py:101] Objective:        125342000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0539
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 184, time = 5.18 m
+INFO [matcher.py:101] Objective:        54272000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0309
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 185, time = 5.36 m
+INFO [matcher.py:101] Objective:        54271000.0
+INFO [matcher.py:120] Balance (beta_x): 0.0309
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:618] Status = FEASIBLE
+INFO [matcher.py:619] Number of solutions found: 185
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2221,7 +2859,7 @@ INFO [matcher.py:454] Number of solutions found: 117
 INFO [preprocess.py:335] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
 INFO [preprocess.py:335] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
 INFO [preprocess.py:335] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
-INFO [matcher.py:65] Scaling features by factor 2.00 in order to use integer solver with &lt;= 0.0000% loss.
+INFO [matcher.py:65] Scaling features by factor 200.00 in order to use integer solver with &lt;= 0.0000% loss.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2231,7 +2869,9 @@ INFO [matcher.py:65] Scaling features by factor 2.00 in order to use integer sol
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 {&#39;objective&#39;: &#39;gamma&#39;,
- &#39;match_size&#39;: 1000,
+ &#39;pool_size&#39;: 1000,
+ &#39;target_size&#39;: 1000,
+ &#39;max_mismatch&#39;: None,
  &#39;time_limit&#39;: 360,
  &#39;num_workers&#39;: 4,
  &#39;ps_hinting&#39;: True,
@@ -2251,17 +2891,20 @@ INFO [matcher.py:65] Scaling features by factor 2.00 in order to use integer sol
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:319] Solving for match population with size = 1000. Will match on 27 dimensions ...
-INFO [matcher.py:335] Calculating bounds on feature variables ...
-INFO [matcher.py:350] Applying constraints ...
-INFO [matcher.py:378] Training PS model as guide for solver ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/pybalance/lp/matcher.py:380: SettingWithCopyWarning:
+INFO [matcher.py:418] Solving for match population with pool size = 1000 and target size = 1000 subject to None balance constraint.
+INFO [matcher.py:421] Matching on 27 dimensions ...
+INFO [matcher.py:428] Building model variables and constraints ...
+INFO [matcher.py:437] Calculating bounds on feature variables ...
+INFO [matcher.py:527] Applying size constraints on pool and target ...
+INFO [matcher.py:533] Applying hint ...
+INFO [matcher.py:540] Training PS model as guide for solver ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/pybalance/lp/matcher.py:542: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
   target.loc[:, &#34;ix&#34;] = list(range(len(target)))
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/pybalance/lp/matcher.py:381: SettingWithCopyWarning:
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/pybalance/lp/matcher.py:543: SettingWithCopyWarning:
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
@@ -2270,10 +2913,10 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 INFO [preprocess.py:335] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
 INFO [preprocess.py:335] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
 INFO [preprocess.py:335] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
-INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.000 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 1/50, 0.001 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: SGDClassifier
-INFO [matcher.py:139]   * alpha: 4.774501445415407
+INFO [matcher.py:139]   * alpha: 4.774501445415405
 INFO [matcher.py:139]   * class_weight: None
 INFO [matcher.py:139]   * early_stopping: True
 INFO [matcher.py:139]   * fit_intercept: False
@@ -2285,7 +2928,7 @@ INFO [matcher.py:141]   Solution time: 0.002 min
 INFO [matcher.py:180] Training model LogisticRegression (iter 2/50, 0.002 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: LogisticRegression
-INFO [matcher.py:139]   * C: 0.05854199518952411
+INFO [matcher.py:139]   * C: 0.058541995189524146
 INFO [matcher.py:139]   * fit_intercept: False
 INFO [matcher.py:139]   * max_iter: 500
 INFO [matcher.py:139]   * penalty: l2
@@ -2295,7 +2938,7 @@ INFO [matcher.py:141]   Solution time: 0.003 min
 INFO [matcher.py:180] Training model LogisticRegression (iter 3/50, 0.003 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: LogisticRegression
-INFO [matcher.py:139]   * C: 0.09099552707413873
+INFO [matcher.py:139]   * C: 0.0909955270741388
 INFO [matcher.py:139]   * fit_intercept: True
 INFO [matcher.py:139]   * max_iter: 500
 INFO [matcher.py:139]   * penalty: l1
@@ -2305,246 +2948,262 @@ INFO [matcher.py:141]   Solution time: 0.005 min
 INFO [matcher.py:180] Training model SGDClassifier (iter 4/50, 0.005 min) ...
 INFO [matcher.py:180] Training model SGDClassifier (iter 5/50, 0.006 min) ...
 INFO [matcher.py:180] Training model LogisticRegression (iter 6/50, 0.007 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: LogisticRegression
-INFO [matcher.py:139]   * C: 0.15085738749804517
+INFO [matcher.py:139]   * C: 0.15085738749804528
 INFO [matcher.py:139]   * fit_intercept: False
 INFO [matcher.py:139]   * max_iter: 500
 INFO [matcher.py:139]   * penalty: l1
 INFO [matcher.py:139]   * solver: saga
 INFO [matcher.py:140]   Score (gamma): 0.0347
-INFO [matcher.py:141]   Solution time: 0.028 min
-INFO [matcher.py:180] Training model SGDClassifier (iter 7/50, 0.028 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 8/50, 0.029 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.030 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.033 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:141]   Solution time: 0.030 min
+INFO [matcher.py:180] Training model SGDClassifier (iter 7/50, 0.030 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 8/50, 0.031 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 9/50, 0.033 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 10/50, 0.036 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: LogisticRegression
-INFO [matcher.py:139]   * C: 22.703034120730198
+INFO [matcher.py:139]   * C: 22.70303412073022
 INFO [matcher.py:139]   * fit_intercept: False
 INFO [matcher.py:139]   * max_iter: 500
 INFO [matcher.py:139]   * penalty: l1
 INFO [matcher.py:139]   * solver: saga
 INFO [matcher.py:140]   Score (gamma): 0.0331
-INFO [matcher.py:141]   Solution time: 0.053 min
-INFO [matcher.py:180] Training model LogisticRegression (iter 11/50, 0.053 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 12/50, 0.062 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 13/50, 0.063 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:141]   Solution time: 0.057 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 11/50, 0.057 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 12/50, 0.066 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 13/50, 0.067 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 14/50, 0.082 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 15/50, 0.085 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 16/50, 0.086 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 17/50, 0.087 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 18/50, 0.089 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 19/50, 0.090 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 14/50, 0.086 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 15/50, 0.089 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 16/50, 0.090 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 17/50, 0.091 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 18/50, 0.094 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 19/50, 0.095 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: LogisticRegression
-INFO [matcher.py:139]   * C: 0.796468661160752
+INFO [matcher.py:139]   * C: 0.7964686611607528
 INFO [matcher.py:139]   * fit_intercept: False
 INFO [matcher.py:139]   * max_iter: 500
 INFO [matcher.py:139]   * penalty: l1
 INFO [matcher.py:139]   * solver: saga
 INFO [matcher.py:140]   Score (gamma): 0.0308
-INFO [matcher.py:141]   Solution time: 0.110 min
-INFO [matcher.py:180] Training model LogisticRegression (iter 20/50, 0.110 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:141]   Solution time: 0.115 min
+INFO [matcher.py:180] Training model LogisticRegression (iter 20/50, 0.116 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 21/50, 0.129 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.130 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 23/50, 0.131 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 21/50, 0.135 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 22/50, 0.136 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 23/50, 0.137 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model SGDClassifier (iter 24/50, 0.152 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.153 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 26/50, 0.154 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 27/50, 0.165 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 28/50, 0.166 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 29/50, 0.167 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 30/50, 0.172 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 31/50, 0.173 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 32/50, 0.174 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 33/50, 0.177 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model SGDClassifier (iter 24/50, 0.158 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 25/50, 0.159 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 26/50, 0.160 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 27/50, 0.172 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 28/50, 0.173 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 29/50, 0.174 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 30/50, 0.179 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 31/50, 0.180 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 32/50, 0.181 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 33/50, 0.184 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model LogisticRegression (iter 34/50, 0.197 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 35/50, 0.206 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 36/50, 0.207 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 37/50, 0.208 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 38/50, 0.209 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 39/50, 0.219 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 40/50, 0.220 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 41/50, 0.221 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.227 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 43/50, 0.228 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 44/50, 0.229 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 45/50, 0.230 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 46/50, 0.231 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 47/50, 0.232 min) ...
-INFO [matcher.py:180] Training model LogisticRegression (iter 48/50, 0.234 min) ...
-/opt/miniconda3/envs/pybalance/lib/python3.10/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:180] Training model LogisticRegression (iter 34/50, 0.205 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 35/50, 0.214 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 36/50, 0.215 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 37/50, 0.216 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 38/50, 0.217 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 39/50, 0.227 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 40/50, 0.228 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 41/50, 0.229 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 42/50, 0.235 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 43/50, 0.236 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 44/50, 0.237 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 45/50, 0.238 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 46/50, 0.239 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 47/50, 0.240 min) ...
+INFO [matcher.py:180] Training model LogisticRegression (iter 48/50, 0.242 min) ...
+/opt/miniconda3/envs/pybalance/lib/python3.9/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.254 min) ...
-INFO [matcher.py:180] Training model SGDClassifier (iter 50/50, 0.255 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 49/50, 0.264 min) ...
+INFO [matcher.py:180] Training model SGDClassifier (iter 50/50, 0.265 min) ...
 INFO [matcher.py:136] Best propensity score match found:
 INFO [matcher.py:137]   Model: LogisticRegression
-INFO [matcher.py:139]   * C: 0.796468661160752
+INFO [matcher.py:139]   * C: 0.7964686611607528
 INFO [matcher.py:139]   * fit_intercept: False
 INFO [matcher.py:139]   * max_iter: 500
 INFO [matcher.py:139]   * penalty: l1
 INFO [matcher.py:139]   * solver: saga
 INFO [matcher.py:140]   Score (gamma): 0.0308
-INFO [matcher.py:141]   Solution time: 0.110 min
-INFO [matcher.py:415] Hint achieves objective value = 1004.
-INFO [matcher.py:417] Applying hints ...
-INFO [matcher.py:446] Solving with 4 workers ...
-INFO [matcher.py:89] Initial balance score: 0.2110
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 1, time = 0.04 m
-INFO [matcher.py:100] Objective:        1156.0
-INFO [matcher.py:113] Balance:  0.0349
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 2, time = 0.08 m
-INFO [matcher.py:100] Objective:        1152.0
-INFO [matcher.py:113] Balance:  0.0348
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 3, time = 0.09 m
-INFO [matcher.py:100] Objective:        1102.0
-INFO [matcher.py:113] Balance:  0.0334
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 4, time = 0.10 m
-INFO [matcher.py:100] Objective:        1100.0
-INFO [matcher.py:113] Balance:  0.0334
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 5, time = 0.11 m
-INFO [matcher.py:100] Objective:        1064.0
-INFO [matcher.py:113] Balance:  0.0322
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 6, time = 0.11 m
-INFO [matcher.py:100] Objective:        1058.0
-INFO [matcher.py:113] Balance:  0.0321
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 7, time = 0.11 m
-INFO [matcher.py:100] Objective:        1056.0
-INFO [matcher.py:113] Balance:  0.0321
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 8, time = 0.12 m
-INFO [matcher.py:100] Objective:        1054.0
-INFO [matcher.py:113] Balance:  0.0320
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 9, time = 0.15 m
-INFO [matcher.py:100] Objective:        1052.0
-INFO [matcher.py:113] Balance:  0.0319
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 10, time = 0.15 m
-INFO [matcher.py:100] Objective:        1050.0
-INFO [matcher.py:113] Balance:  0.0319
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 11, time = 0.16 m
-INFO [matcher.py:100] Objective:        1048.0
-INFO [matcher.py:113] Balance:  0.0318
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 12, time = 0.18 m
-INFO [matcher.py:100] Objective:        1046.0
-INFO [matcher.py:113] Balance:  0.0318
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 13, time = 0.19 m
-INFO [matcher.py:100] Objective:        1044.0
-INFO [matcher.py:113] Balance:  0.0317
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 14, time = 0.23 m
-INFO [matcher.py:100] Objective:        1002.0
-INFO [matcher.py:113] Balance:  0.0301
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 15, time = 0.23 m
-INFO [matcher.py:100] Objective:        1000.0
-INFO [matcher.py:113] Balance:  0.0300
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 16, time = 0.24 m
-INFO [matcher.py:100] Objective:        994.0
-INFO [matcher.py:113] Balance:  0.0299
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 17, time = 0.25 m
-INFO [matcher.py:100] Objective:        928.0
-INFO [matcher.py:113] Balance:  0.0278
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 18, time = 0.25 m
-INFO [matcher.py:100] Objective:        926.0
-INFO [matcher.py:113] Balance:  0.0277
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 19, time = 0.26 m
-INFO [matcher.py:100] Objective:        920.0
-INFO [matcher.py:113] Balance:  0.0275
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 20, time = 0.28 m
-INFO [matcher.py:100] Objective:        190.0
-INFO [matcher.py:113] Balance:  0.0070
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 21, time = 0.28 m
-INFO [matcher.py:100] Objective:        188.0
-INFO [matcher.py:113] Balance:  0.0069
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 22, time = 0.29 m
-INFO [matcher.py:100] Objective:        186.0
-INFO [matcher.py:113] Balance:  0.0068
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:95] =========================================
-INFO [matcher.py:96] Solution 23, time = 0.30 m
-INFO [matcher.py:100] Objective:        184.0
-INFO [matcher.py:113] Balance:  0.0067
-INFO [matcher.py:116] Patients: 1000
-INFO [matcher.py:128]
-INFO [matcher.py:453] Status = OPTIMAL
-INFO [matcher.py:454] Number of solutions found: 23
+INFO [matcher.py:141]   Solution time: 0.115 min
+INFO [matcher.py:577] Hint achieves objective value = 100400.
+INFO [matcher.py:579] Applying hints ...
+INFO [matcher.py:611] Solving with 4 workers ...
+INFO [matcher.py:90] Initial balance score: 0.2110
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 1, time = 0.05 m
+INFO [matcher.py:101] Objective:        115600000.0
+INFO [matcher.py:120] Balance (gamma):  0.0349
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 2, time = 0.14 m
+INFO [matcher.py:101] Objective:        115400000.0
+INFO [matcher.py:120] Balance (gamma):  0.0349
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 3, time = 0.14 m
+INFO [matcher.py:101] Objective:        114600000.0
+INFO [matcher.py:120] Balance (gamma):  0.0346
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 4, time = 0.15 m
+INFO [matcher.py:101] Objective:        114400000.0
+INFO [matcher.py:120] Balance (gamma):  0.0346
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 5, time = 0.16 m
+INFO [matcher.py:101] Objective:        113800000.0
+INFO [matcher.py:120] Balance (gamma):  0.0344
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 6, time = 0.17 m
+INFO [matcher.py:101] Objective:        102000000.0
+INFO [matcher.py:120] Balance (gamma):  0.0310
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 7, time = 0.18 m
+INFO [matcher.py:101] Objective:        101400000.0
+INFO [matcher.py:120] Balance (gamma):  0.0308
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 8, time = 0.20 m
+INFO [matcher.py:101] Objective:        100800000.0
+INFO [matcher.py:120] Balance (gamma):  0.0306
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 9, time = 0.21 m
+INFO [matcher.py:101] Objective:        100400000.0
+INFO [matcher.py:120] Balance (gamma):  0.0305
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 10, time = 0.26 m
+INFO [matcher.py:101] Objective:        97800000.0
+INFO [matcher.py:120] Balance (gamma):  0.0300
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 11, time = 0.27 m
+INFO [matcher.py:101] Objective:        97200000.0
+INFO [matcher.py:120] Balance (gamma):  0.0298
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 12, time = 0.32 m
+INFO [matcher.py:101] Objective:        97000000.0
+INFO [matcher.py:120] Balance (gamma):  0.0298
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 13, time = 0.32 m
+INFO [matcher.py:101] Objective:        96600000.0
+INFO [matcher.py:120] Balance (gamma):  0.0297
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 14, time = 0.37 m
+INFO [matcher.py:101] Objective:        91000000.0
+INFO [matcher.py:120] Balance (gamma):  0.0282
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 15, time = 0.38 m
+INFO [matcher.py:101] Objective:        90800000.0
+INFO [matcher.py:120] Balance (gamma):  0.0282
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 16, time = 0.38 m
+INFO [matcher.py:101] Objective:        90600000.0
+INFO [matcher.py:120] Balance (gamma):  0.0281
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 17, time = 0.43 m
+INFO [matcher.py:101] Objective:        80800000.0
+INFO [matcher.py:120] Balance (gamma):  0.0249
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 18, time = 0.43 m
+INFO [matcher.py:101] Objective:        80600000.0
+INFO [matcher.py:120] Balance (gamma):  0.0248
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 19, time = 0.45 m
+INFO [matcher.py:101] Objective:        80400000.0
+INFO [matcher.py:120] Balance (gamma):  0.0247
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 20, time = 0.49 m
+INFO [matcher.py:101] Objective:        19000000.0
+INFO [matcher.py:120] Balance (gamma):  0.0070
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 21, time = 0.65 m
+INFO [matcher.py:101] Objective:        18800000.0
+INFO [matcher.py:120] Balance (gamma):  0.0069
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:96] =========================================
+INFO [matcher.py:97] Solution 22, time = 0.67 m
+INFO [matcher.py:101] Objective:        18400000.0
+INFO [matcher.py:120] Balance (gamma):  0.0068
+INFO [matcher.py:125] Patients (pool):  1000
+INFO [matcher.py:126] Patients (target):        1000
+INFO [matcher.py:140]
+INFO [matcher.py:618] Status = OPTIMAL
+INFO [matcher.py:619] Number of solutions found: 22
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2682,34 +3341,49 @@ INFO [matcher.py:454] Number of solutions found: 23
       <td>...</td>
     </tr>
     <tr>
-      <th>9948</th>
-      <td>32.893818</td>
-      <td>161.118343</td>
-      <td>105.629306</td>
-      <td>1.0</td>
-      <td>0</td>
-      <td>2</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>9948</td>
-    </tr>
-    <tr>
-      <th>9957</th>
-      <td>63.949429</td>
-      <td>170.485188</td>
-      <td>99.498013</td>
-      <td>1.0</td>
-      <td>2</td>
+      <th>9932</th>
+      <td>72.514956</td>
+      <td>159.248205</td>
+      <td>118.505187</td>
+      <td>0.0</td>
+      <td>1</td>
       <td>5</td>
       <td>pool</td>
-      <td>0</td>
-      <td>0</td>
+      <td>1</td>
       <td>1</td>
       <td>0</td>
-      <td>9957</td>
+      <td>1</td>
+      <td>9932</td>
+    </tr>
+    <tr>
+      <th>9933</th>
+      <td>68.194783</td>
+      <td>127.495418</td>
+      <td>69.177329</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>9933</td>
+    </tr>
+    <tr>
+      <th>9965</th>
+      <td>41.035792</td>
+      <td>130.021437</td>
+      <td>80.495109</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>9965</td>
     </tr>
     <tr>
       <th>9966</th>
@@ -2727,34 +3401,19 @@ INFO [matcher.py:454] Number of solutions found: 23
       <td>9966</td>
     </tr>
     <tr>
-      <th>9981</th>
-      <td>39.006118</td>
-      <td>133.419182</td>
-      <td>71.135407</td>
-      <td>0.0</td>
-      <td>1</td>
-      <td>4</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>9981</td>
-    </tr>
-    <tr>
-      <th>9983</th>
-      <td>68.616093</td>
-      <td>167.546870</td>
-      <td>58.683367</td>
+      <th>9984</th>
+      <td>57.366166</td>
+      <td>151.483411</td>
+      <td>82.271539</td>
       <td>1.0</td>
-      <td>0</td>
+      <td>2</td>
       <td>2</td>
       <td>pool</td>
       <td>0</td>
+      <td>1</td>
       <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>9983</td>
+      <td>1</td>
+      <td>9984</td>
     </tr>
   </tbody>
 </table>

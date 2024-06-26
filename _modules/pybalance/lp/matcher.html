@@ -114,7 +114,7 @@
 
 
 <span class="k">def</span> <span class="nf">_rescale_for_discretization</span><span class="p">(</span>
-    <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">pool</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">pool</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">min_factor</span><span class="o">=</span><span class="mi">100</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find a scale factor that allows one to convert datasets to integer datatypes</span>
@@ -134,7 +134,7 @@
     <span class="c1"># Ideally, no scaling is required at all, e.g., if everything is already</span>
     <span class="c1"># an integer. Start with an initial scaling of 1 and increase as needed</span>
     <span class="c1"># to find the right scale.</span>
-    <span class="n">scalefac</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">scalefac</span> <span class="o">=</span> <span class="n">min_factor</span>
 
     <span class="c1"># Keep increasing the scale factor until the (worst) truncation error is</span>
     <span class="c1"># less than the specified tolerance.</span>
@@ -154,15 +154,16 @@
     <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">scalefac</span> <span class="o">*</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="n">pool</span> <span class="o">=</span> <span class="p">(</span><span class="n">scalefac</span> <span class="o">*</span> <span class="n">pool</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">target</span><span class="p">,</span> <span class="n">pool</span>
+    <span class="k">return</span> <span class="n">target</span><span class="p">,</span> <span class="n">pool</span><span class="p">,</span> <span class="n">scalefac</span>
 
 
 <span class="k">class</span> <span class="nc">SolutionPrinter</span><span class="p">(</span><span class="n">cp_model</span><span class="o">.</span><span class="n">CpSolverSolutionCallback</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Print intermediate solutions.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">matcher</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">matcher</span><span class="p">):</span>
         <span class="n">cp_model</span><span class="o">.</span><span class="n">CpSolverSolutionCallback</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__ind</span> <span class="o">=</span> <span class="n">ind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pool</span> <span class="o">=</span> <span class="n">pool</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__target</span> <span class="o">=</span> <span class="n">target</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__deltas</span> <span class="o">=</span> <span class="n">deltas</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__solution_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -184,21 +185,32 @@
         <span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Objective:</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ObjectiveValue</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ind</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ind</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
-                <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="n">indices_pool</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pool</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pool</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                <span class="n">indices_pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="n">indices_target</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__target</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__target</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                <span class="n">indices_target</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;pool&quot;</span><span class="p">:</span> <span class="n">indices_pool</span><span class="p">,</span> <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">indices_target</span><span class="p">})</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># ---- Get indices of patients ----#</span>
 
-            <span class="n">balance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+            <span class="n">balance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">indices_pool</span><span class="p">,</span> <span class="n">indices_target</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">balance_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">balance</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Balance:</span><span class="se">\t</span><span class="si">{</span><span class="n">balance</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Balance (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">matcher</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">):</span><span class="se">\t</span><span class="si">{</span><span class="n">balance</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># ---- Print Deltas per feature ----#</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patients:</span><span class="se">\t</span><span class="si">{</span><span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__ind</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patients (pool):</span><span class="se">\t</span><span class="si">{</span><span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__pool</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Patients (target):</span><span class="se">\t</span><span class="si">{</span><span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__target</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># ---- Print Deltas per feature ----#</span>
         <span class="c1"># Don&#39;t touch this code. You may think it is written by a crazy person,</span>
@@ -220,7 +232,33 @@
 
 <div class="viewcode-block" id="ConstraintSatisfactionMatcher"><a class="viewcode-back" href="../../../03_api.html#pybalance.lp.ConstraintSatisfactionMatcher">[docs]</a><span class="k">class</span> <span class="nc">ConstraintSatisfactionMatcher</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Constructs the class patient selection class.</span>
+<span class="sd">    Population matching based on constraint satisfication formulation. This solver</span>
+<span class="sd">    can only handle linear objective functions; see &quot;objective&quot; parameter below.</span>
+
+<span class="sd">    The constraints and optimization target are specified to the solver via the</span>
+<span class="sd">    options pool_size, target_size, and max_mismatch. The behavior of the solver is</span>
+<span class="sd">    as given in the table below:</span>
+
+<span class="sd">    ------------------------------------------------------------------------------</span>
+<span class="sd">    pool_size   target_size     max_mismatch    optimize</span>
+<span class="sd">    ------------------------------------------------------------------------------</span>
+<span class="sd">    N           N               Y               pool_size subject to target_size = n_target</span>
+<span class="sd">                                                    and balance constraints</span>
+<span class="sd">    Y           Y               Y               balance subject to size and balance</span>
+<span class="sd">                                                    constraints</span>
+<span class="sd">    Y           Y               N               balance subject to size constraints</span>
+<span class="sd">    N           N               N               balance subject to size constraints; default</span>
+<span class="sd">                                                    to pool_size = target_size = n_target</span>
+<span class="sd">    ------------------------------------------------------------------------------</span>
+<span class="sd">    Y           N               Y               not suported</span>
+<span class="sd">    N           Y               Y               not suported</span>
+<span class="sd">    Y           N               N               not suported</span>
+<span class="sd">    N           Y               N               not suported</span>
+<span class="sd">    ------------------------------------------------------------------------------</span>
+
+<span class="sd">    Optimizing pool_size subject to balance constraint is known as &quot;cardinality</span>
+<span class="sd">    matching&quot;. See https://kosukeimai.github.io/MatchIt/reference/method_cardinality.html</span>
+<span class="sd">    and references therein.</span>
 
 <span class="sd">    :param matching_data: A MatchingData object describing the pool and target</span>
 <span class="sd">        populations. See utils.matching_data.</span>
@@ -234,8 +272,27 @@
 <span class="sd">        function). The solver will optimize the absolute mean difference on the</span>
 <span class="sd">        output features of the balance calculator&#39;s preprocessing.</span>
 
-<span class="sd">    :param match_size: How large the match population should be. If passed as a</span>
-<span class="sd">        float, interpreted to be a fraction of the target population.</span>
+<span class="sd">    :param match_size: Number of samples to include in the matched population.</span>
+<span class="sd">        If match_size &lt; size of target population, then the target is subsetted</span>
+<span class="sd">        to be the same size, that is, pool_size = target_size = match_size. If</span>
+<span class="sd">        match_size &gt;= size of target population, then the full target is used</span>
+<span class="sd">        and only the pool is subsetted, that is, pool_size = match_size and</span>
+<span class="sd">        target_size = n_target. This option cannot be used in combination</span>
+<span class="sd">        with pool_size or target_size. This option is deprecated and will be</span>
+<span class="sd">        removed in a later release.</span>
+
+<span class="sd">    :param pool_size: Number of samples to include from the pool in the matched</span>
+<span class="sd">        population. Must be less than the size of the pool. If pool_size is not set,</span>
+<span class="sd">        then max_mismatch and target_size must be set and pool_size will be optimized</span>
+<span class="sd">        subject to the target_size and max_mismatch constraints.</span>
+
+<span class="sd">    :param target_size: Number of samples to include from the target in the matched</span>
+<span class="sd">        population. Must be less than or equal to the size of the target.</span>
+<span class="sd">        If target_size is not set,then max_mismatch and pool_size must be set and</span>
+<span class="sd">        target_size will be optimized subject to the pool_size and max_mismatch</span>
+<span class="sd">        constraints.</span>
+
+<span class="sd">    :param max_mismatch: Maximum allowable absolute mean difference for any feature.</span>
 
 <span class="sd">    :param time_limit: Time limit to stop solving in seconds (def: 180 sec).</span>
 
@@ -253,7 +310,10 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
         <span class="n">objective</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseBalanceCalculator</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;beta&quot;</span><span class="p">,</span>
-        <span class="n">match_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">match_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pool_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_mismatch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">time_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span>
         <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
         <span class="n">ps_hinting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -282,7 +342,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">_rescale_for_discretization</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalefac</span> <span class="o">=</span> <span class="n">_rescale_for_discretization</span><span class="p">(</span>
             <span class="n">target</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">pool</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.01</span>
         <span class="p">)</span>
 
@@ -294,35 +354,79 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span>
         <span class="p">),</span> <span class="s2">&quot;Number of patients in treatment arm should be equal or less then control.&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">=</span> <span class="n">match_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pool_size_target_size</span><span class="p">(</span>
+            <span class="n">pool_size</span><span class="p">,</span> <span class="n">target_size</span><span class="p">,</span> <span class="n">match_size</span><span class="p">,</span> <span class="n">max_mismatch</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_mismatch</span> <span class="o">=</span> <span class="n">max_mismatch</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">=</span> <span class="n">time_limit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="n">num_workers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ps_hinting</span> <span class="o">=</span> <span class="n">ps_hinting</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_params</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">ref_features</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_features</span> <span class="o">=</span> <span class="p">[</span>
             <span class="nb">sum</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">)</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_best_match</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># set match size</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_get_pool_size_target_size</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pool_size</span><span class="p">,</span> <span class="n">target_size</span><span class="p">,</span> <span class="n">match_size</span><span class="p">,</span> <span class="n">max_mismatch</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">match_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Option match_size is deprecated and will be removed in a later release. Use pool_size and target_size instead.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">pool_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">target_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Match size must not be greater than target population size.&quot;</span>
+                    <span class="s2">&quot;Cannot use match_size in combination with pool_size or target_size.&quot;</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="c1"># Assume it represents a fraction of the target size</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match_size</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">:</span>
+                <span class="n">target_size</span> <span class="o">=</span> <span class="n">pool_size</span> <span class="o">=</span> <span class="n">match_size</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+                <span class="n">pool_size</span> <span class="o">=</span> <span class="n">match_size</span>
+
+        <span class="k">if</span> <span class="n">max_mismatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">target_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pool_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># solving for balance with size and balance constaints</span>
+                <span class="n">target_size</span> <span class="o">=</span> <span class="n">target_size</span>
+                <span class="n">pool_size</span> <span class="o">=</span> <span class="n">pool_size</span>
+            <span class="k">elif</span> <span class="n">target_size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pool_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># solving for size with balance constaints</span>
+                <span class="n">target_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+                <span class="n">pool_size</span> <span class="o">=</span> <span class="n">pool_size</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;If max_mismatch is passed, then either both or none of target_size and pool_size must be passed.&quot;</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+            <span class="k">if</span> <span class="n">target_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pool_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># solving for balance with size constaints</span>
+                <span class="n">target_size</span> <span class="o">=</span> <span class="n">target_size</span>
+                <span class="n">pool_size</span> <span class="o">=</span> <span class="n">pool_size</span>
+            <span class="k">elif</span> <span class="n">target_size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pool_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># solving for balance with size constaints</span>
+                <span class="n">target_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+                <span class="n">pool_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;If max_mismatch is passed, then either both or none of target_size and pool_size must be passed.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pool_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pool_size</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;pool_size must be less than the size of pool population&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target_size</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;target_size must be less than or equal to the size of target population&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pool_size</span><span class="p">,</span> <span class="n">target_size</span>
 
     <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;objective&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;match_size&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pool_size&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;target_size&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;max_mismatch&quot;</span><span class="p">,</span>
             <span class="s2">&quot;time_limit&quot;</span><span class="p">,</span>
             <span class="s2">&quot;num_workers&quot;</span><span class="p">,</span>
             <span class="s2">&quot;ps_hinting&quot;</span><span class="p">,</span>
@@ -349,18 +453,18 @@
 
         <span class="k">return</span> <span class="n">weights</span>
 
-    <span class="k">def</span> <span class="nf">_get_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">match_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">match_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">match_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">match_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
 
-        <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
         <span class="c1"># sort feature values ascending</span>
-        <span class="n">pool_features</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">])</span>
+        <span class="n">pool_features</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">])</span>
         <span class="n">min_pool_feature</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pool_features</span><span class="p">[:</span><span class="n">match_size</span><span class="p">])</span>
         <span class="n">max_pool_feature</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pool_features</span><span class="p">[</span><span class="o">-</span><span class="n">match_size</span><span class="p">:])</span>
 
-        <span class="n">target_feature_values</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
+        <span class="n">target_feature_values</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
         <span class="n">min_target_feature</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">target_feature_values</span><span class="p">[:</span><span class="n">match_size</span><span class="p">])</span>
         <span class="n">max_target_feature</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">target_feature_values</span><span class="p">[</span><span class="o">-</span><span class="n">match_size</span><span class="p">:])</span>
 
@@ -377,9 +481,6 @@
 
         <span class="n">min_feature</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_target_feature</span><span class="p">,</span> <span class="n">min_pool_feature</span><span class="p">)</span>
         <span class="n">max_feature</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_target_feature</span><span class="p">,</span> <span class="n">max_pool_feature</span><span class="p">)</span>
-
-        <span class="n">feat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">][</span><span class="n">f</span><span class="p">]</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Feature limits:  [</span><span class="si">{</span><span class="n">min_feature</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">max_feature</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="n">max_delta</span>
 
@@ -399,17 +500,17 @@
 <span class="sd">            I admit the interface here is a bit confusing. We will clean this</span>
 <span class="sd">            up in a later release.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">time_limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span>
-
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Solving for match population with size = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">match_size</span><span class="si">}</span><span class="s2">. Will match on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="si">}</span><span class="s2"> dimensions ...&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Solving for match population with pool size = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span><span class="si">}</span><span class="s2"> and target size = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target_size</span><span class="si">}</span><span class="s2"> subject to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_mismatch</span><span class="si">}</span><span class="s2"> balance constraint.&quot;</span>
         <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Matching on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="si">}</span><span class="s2"> dimensions ...&quot;</span><span class="p">)</span>
 
         <span class="c1"># ========= Create Model===========#</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">cp_model</span><span class="o">.</span><span class="n">CpModel</span><span class="p">()</span>
 
         <span class="c1"># ========= Variables===========#</span>
-        <span class="c1"># --- Binary flag for inclusion of patients ---------#</span>
+        <span class="c1"># Binary flag for inclusion of patients</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Building model variables and constraints ...&quot;</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># pool</span>
         <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># target</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">):</span>
@@ -417,43 +518,104 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">):</span>
             <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewBoolVar</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;y[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
 
+        <span class="c1"># Calculate some loose bounds for variables to make solver more efficient</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Calculating bounds on feature variables ...&quot;</span><span class="p">)</span>
-
-        <span class="n">abs_deltas</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ref_features</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">deltas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">bounds_abs_deltas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">bounds_features_min</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">bounds_features_max</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">):</span>
-            <span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="n">max_delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limits</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span><span class="p">)</span>
-            <span class="n">abs_deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;abs_deltas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
-            <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;features[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
-            <span class="n">deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="o">-</span><span class="n">max_delta</span><span class="p">,</span> <span class="n">max_delta</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;deltas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
-            <span class="n">ref_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ref_features[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+            <span class="n">min_feature</span><span class="p">,</span> <span class="n">max_feature</span><span class="p">,</span> <span class="n">max_delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limits</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">)</span>
+            <span class="n">bounds_features_min</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">min_feature</span><span class="p">))</span>
+            <span class="n">bounds_features_max</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_feature</span><span class="p">))</span>
+            <span class="c1"># I&#39;m less confident in the bounds here, bad bounds can lead to bad</span>
+            <span class="c1"># results and even infeasibility. We add a little padding factor</span>
+            <span class="n">bounds_abs_deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">*</span> <span class="n">max_delta</span><span class="p">)</span>
+
+            <span class="n">feat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Feature limits: [</span><span class="si">{</span><span class="n">bounds_features_min</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">bounds_features_max</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s2"> (max delta: </span><span class="si">{</span><span class="n">bounds_abs_deltas</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying constraints ...&quot;</span><span class="p">)</span>
+        <span class="c1"># Variables for calculating mean absolute difference per feature</span>
+        <span class="n">abs_deltas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">deltas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pool_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">target_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">):</span>
+
+            <span class="n">abs_deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">bounds_abs_deltas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;abs_deltas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">pool_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span>
+                    <span class="n">bounds_features_min</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">bounds_features_max</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="sa">f</span><span class="s2">&quot;pool_features[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span>
+                    <span class="o">-</span><span class="n">bounds_abs_deltas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">bounds_abs_deltas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;deltas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="c1"># If pool_size is not set, then we are solving for it. In this case, the target</span>
+            <span class="c1"># must be fixed to maintain linearity in the constraints.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">target_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span>
+                        <span class="n">bounds_features_min</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">bounds_features_max</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="sa">f</span><span class="s2">&quot;target_features[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_features</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">target_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span>  <span class="c1"># always a literal</span>
+        <span class="c1"># If pool_size is not set, then we are solving for it.</span>
+        <span class="c1"># Add size variables for pool</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pool_size</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">,</span> <span class="s2">&quot;n_pool&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pool_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span>
 
         <span class="c1"># ========= Constraints===========#</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">):</span>
             <span class="c1"># --- aggregate for feature j ---------#</span>
             <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
-                <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">))</span> <span class="o">==</span> <span class="n">features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">))</span>
+                <span class="o">==</span> <span class="n">pool_features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
                 <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">))</span>
-                <span class="o">==</span> <span class="n">ref_features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="o">==</span> <span class="n">target_features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="o">*</span> <span class="p">(</span><span class="n">target_size</span> <span class="o">*</span> <span class="n">pool_features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">pool_size</span> <span class="o">*</span> <span class="n">target_features</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="o">==</span> <span class="n">deltas</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="c1"># --- Taxicab distance ---------#</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">ref_features</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">==</span> <span class="n">deltas</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
             <span class="n">model</span><span class="o">.</span><span class="n">AddAbsEquality</span><span class="p">(</span><span class="n">abs_deltas</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">deltas</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_mismatch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Applying mismatch &lt;= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_mismatch</span><span class="si">}</span><span class="s2"> constraint on feature </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> ...&quot;</span>
+                <span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
+                    <span class="n">abs_deltas</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span>
+                    <span class="o">*</span> <span class="n">pool_size</span>
+                    <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalefac</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_mismatch</span><span class="p">)</span>
+                <span class="p">)</span>
 
         <span class="c1"># --- Cardinality ---------#</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">))</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">))</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_size</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying size constraints on pool and target ...&quot;</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">pool_size</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="n">target_size</span><span class="p">)</span>
 
         <span class="c1"># ========= Hint! ==============#</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ps_hinting</span> <span class="ow">or</span> <span class="n">hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying hint ...&quot;</span><span class="p">)</span>
             <span class="n">matching_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">target</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="n">matching_data</span><span class="p">)</span>
             <span class="n">target_name</span> <span class="o">=</span> <span class="n">target</span><span class="p">[</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
@@ -513,12 +675,15 @@
                     <span class="n">model</span><span class="o">.</span><span class="n">AddHint</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># ========= Objective===========#</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">abs_deltas</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">abs_deltas</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
         <span class="c1"># ===== Creates a solver =======#</span>
         <span class="n">solver</span> <span class="o">=</span> <span class="n">cp_model</span><span class="o">.</span><span class="n">CpSolver</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">time_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">max_time_in_seconds</span> <span class="o">=</span> <span class="n">time_limit</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">max_time_in_seconds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span>
 
         <span class="n">solver</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
@@ -533,7 +698,7 @@
         <span class="c1"># ----- Append the important stuff for printing -----#</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-            <span class="n">solution_printer</span> <span class="o">=</span> <span class="n">SolutionPrinter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">abs_deltas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">solution_printer</span> <span class="o">=</span> <span class="n">SolutionPrinter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">abs_deltas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
             <span class="n">status</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">Solve</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">solution_printer</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Status = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">solver</span><span class="o">.</span><span class="n">StatusName</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
