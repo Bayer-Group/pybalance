@@ -239,22 +239,18 @@
 <span class="sd">    options pool_size, target_size, and max_mismatch. The behavior of the solver is</span>
 <span class="sd">    as given in the table below:</span>
 
-<span class="sd">    +----------------------------------------------------------------------------------------+</span>
-<span class="sd">    |pool_size   |target_size    |max_mismatch   |optimize                                   |</span>
-<span class="sd">    +----------------------------------------------------------------------------------------+</span>
-<span class="sd">    |N           |N              |Y              |pool_size subject to target_size = n_target |</span>
-<span class="sd">    |            |               |               |      and balance constraints               |</span>
-<span class="sd">    |Y           |Y              |Y              |balance subject to size and balance         |</span>
-<span class="sd">    |            |               |               |      constraints                           |</span>
-<span class="sd">    |Y           |Y              |N              |balance subject to size constraints         |</span>
-<span class="sd">    |N           |N              |N              |balance subject to size constraints; default|</span>
-<span class="sd">    |            |               |               |     to pool_size = target_size = n_target  |</span>
-<span class="sd">    +----------------------------------------------------------------------------------------+</span>
-<span class="sd">    |Y           |N              |Y              |not suported                                |</span>
-<span class="sd">    |N           |Y              |Y              |not suported                                |</span>
-<span class="sd">    |Y           |N              |N              |not suported                                |</span>
-<span class="sd">    |N           |Y              |N              |not suported                                |</span>
-<span class="sd">    +----------------------------------------------------------------------------------------+</span>
+<span class="sd">    pool_size   target_size     max_mismatch    optimize</span>
+<span class="sd">    N           N               Y               pool_size subject to target_size = n_target</span>
+<span class="sd">                                                    and balance constraints</span>
+<span class="sd">    Y           Y               Y               balance subject to size and balance</span>
+<span class="sd">                                                    constraints</span>
+<span class="sd">    Y           Y               N               balance subject to size constraints</span>
+<span class="sd">    N           N               N               balance subject to size constraints; default</span>
+<span class="sd">                                                    to pool_size = target_size = n_target</span>
+<span class="sd">    Y           N               Y               not suported</span>
+<span class="sd">    N           Y               Y               not suported</span>
+<span class="sd">    Y           N               N               not suported</span>
+<span class="sd">    N           Y               N               not suported</span>
 
 <span class="sd">    Optimizing pool_size subject to balance constraint is known as &quot;cardinality</span>
 <span class="sd">    matching&quot;. See https://kosukeimai.github.io/MatchIt/reference/method_cardinality.html</span>
