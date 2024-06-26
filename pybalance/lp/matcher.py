@@ -154,22 +154,22 @@ class ConstraintSatisfactionMatcher(object):
     options pool_size, target_size, and max_mismatch. The behavior of the solver is
     as given in the table below:
 
-    ------------------------------------------------------------------------------
-    pool_size   target_size     max_mismatch    optimize
-    ------------------------------------------------------------------------------
-    N           N               Y               pool_size subject to target_size = n_target
-                                                    and balance constraints
-    Y           Y               Y               balance subject to size and balance
-                                                    constraints
-    Y           Y               N               balance subject to size constraints
-    N           N               N               balance subject to size constraints; default
-                                                    to pool_size = target_size = n_target
-    ------------------------------------------------------------------------------
-    Y           N               Y               not suported
-    N           Y               Y               not suported
-    Y           N               N               not suported
-    N           Y               N               not suported
-    ------------------------------------------------------------------------------
+    +----------------------------------------------------------------------------------------+
+    |pool_size   |target_size    |max_mismatch   |optimize                                   |
+    +----------------------------------------------------------------------------------------+
+    |N           |N              |Y              |pool_size subject to target_size = n_target |
+    |            |               |               |      and balance constraints               |
+    |Y           |Y              |Y              |balance subject to size and balance         |
+    |            |               |               |      constraints                           |
+    |Y           |Y              |N              |balance subject to size constraints         |
+    |N           |N              |N              |balance subject to size constraints; default|
+    |            |               |               |     to pool_size = target_size = n_target  |
+    +----------------------------------------------------------------------------------------+
+    |Y           |N              |Y              |not suported                                |
+    |N           |Y              |Y              |not suported                                |
+    |Y           |N              |N              |not suported                                |
+    |N           |Y              |N              |not suported                                |
+    +----------------------------------------------------------------------------------------+
 
     Optimizing pool_size subject to balance constraint is known as "cardinality
     matching". See https://kosukeimai.github.io/MatchIt/reference/method_cardinality.html
