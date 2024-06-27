@@ -154,16 +154,16 @@ class ConstraintSatisfactionMatcher(object):
     options pool_size, target_size, and max_mismatch. The behavior of the solver depends
     on which are these options are specified as given below:
 
-    (pool_size, target_size, max_mismatch) --> optimize balance subject to size and 
+    (pool_size, target_size, max_mismatch) --> optimize balance subject to size and
     balance constraints
-    
+
     (pool_size, target_size) --> optimize balance subject to size constraints
 
     (max_mismatch) --> optimize pool size subject to target_size = n_target and
     balance constraints
 
     () --> optimize balance subject to size constraints with pool_size = target_size = n_target
- 
+
     Optimizing pool_size subject to balance constraint is known as "cardinality
     matching". See https://kosukeimai.github.io/MatchIt/reference/method_cardinality.html
     and references therein.
