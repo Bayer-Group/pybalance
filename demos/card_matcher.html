@@ -59,8 +59,8 @@
 <li class="toctree-l2"><a class="reference internal" href="ea_matcher.html">Genetic Matcher</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lp_matcher.html">Constraint Satisfaction Matcher</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Cardinality matching</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Optimize-pool-size-subject-to-balance-constraint">Optimize pool size subject to balance constraint</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Optimize-balance-with-balance-constraint">Optimize balance with balance constraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-pool-size-with-balance-constraint">Optimize pool size with balance constraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Optimize-balance-with-size-and-balance-constraints">Optimize balance with size and balance constraints</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Optimize-balance-without-balance-constraint">Optimize balance without balance constraint</a></li>
 </ul>
 </li>
@@ -104,6 +104,16 @@
              
   <section id="Cardinality-matching">
 <h1>Cardinality matching<a class="headerlink" href="#Cardinality-matching" title="Permalink to this heading"></a></h1>
+<p>Cardinality matching is the process of finding the size of the largest subset <span class="math notranslate nohighlight">\(\hat{P}\)</span> of a pool of patient <span class="math notranslate nohighlight">\(P\)</span> within some “distance” of a given target population:</p>
+<p><span class="math">\begin{equation}
+\begin{aligned}
+& \underset{\hat{P}}{\text{maximize}}
+& & |\hat{P}| \\
+& \text{subject to}
+& & |\mu_{\hat{P},k} - \mu_{T,k}| \leq \delta \textrm{ for all }k
+\end{aligned}
+\end{equation}</span></p>
+<p>where <span class="math notranslate nohighlight">\(k\)</span> indexes the covariates of <span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(T\)</span>. In cardinality matching, at least as implemented here, we search only for the size of the largest subset. Then in a second step, we optimize the balance (distance) among all subsets of the determined size.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -348,15 +358,23 @@
 <p>16000 rows × 12 columns</p>
 </div></div>
 </div>
-<section id="Optimize-pool-size-subject-to-balance-constraint">
-<h2>Optimize pool size subject to balance constraint<a class="headerlink" href="#Optimize-pool-size-subject-to-balance-constraint" title="Permalink to this heading"></a></h2>
+<section id="Optimize-pool-size-with-balance-constraint">
+<h2>Optimize pool size with balance constraint<a class="headerlink" href="#Optimize-pool-size-with-balance-constraint" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that by default, gamma uses the standardized mean difference</span>
+<span class="c1"># to calculate distance. The ConstraintSatisfactionMatcher, however,</span>
+<span class="c1"># can only optimize linear objectives. It is not an error to pass</span>
+<span class="c1"># gamma with standardized_difference=True, at this is only affects</span>
+<span class="c1"># reporting, but to make the reporting consistent with what we&#39;re</span>
+<span class="c1"># optimizing, we explicitly pass standardized_difference=False here.</span>
+
+<span class="n">gamma</span> <span class="o">=</span> <span class="n">GammaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">standardize_difference</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">matcher</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
     <span class="n">matching_data</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
-    <span class="n">objective</span><span class="o">=</span><span class="s1">&#39;gamma&#39;</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="n">gamma</span><span class="p">,</span>
     <span class="n">max_mismatch</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
     <span class="n">time_limit</span><span class="o">=</span><span class="mi">600</span>
 <span class="p">)</span>
@@ -379,85 +397,83 @@ INFO:pybalance.lp.matcher:Building model variables and constraints ...
 INFO:pybalance.lp.matcher:Calculating bounds on feature variables ...
 INFO:pybalance.lp.matcher:Applying size constraints on pool and target ...
 INFO:pybalance.lp.matcher:Solving with 4 workers ...
-INFO:pybalance.lp.matcher:Initial balance score: 0.2095
+INFO:pybalance.lp.matcher:Initial balance score: 0.1236
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 1, time = 0.34 m
+INFO:pybalance.lp.matcher:Solution 1, time = 0.36 m
 INFO:pybalance.lp.matcher:Objective:    13153.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0117
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0068
 INFO:pybalance.lp.matcher:Patients (pool):      1847
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 2, time = 0.45 m
+INFO:pybalance.lp.matcher:Solution 2, time = 0.47 m
 INFO:pybalance.lp.matcher:Objective:    12981.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0280
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0163
 INFO:pybalance.lp.matcher:Patients (pool):      2019
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 3, time = 0.47 m
-INFO:pybalance.lp.matcher:Objective:    12979.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0382
-INFO:pybalance.lp.matcher:Patients (pool):      2021
+INFO:pybalance.lp.matcher:Solution 3, time = 0.53 m
+INFO:pybalance.lp.matcher:Objective:    12937.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0171
+INFO:pybalance.lp.matcher:Patients (pool):      2063
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 4, time = 0.49 m
-INFO:pybalance.lp.matcher:Objective:    12909.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0380
-INFO:pybalance.lp.matcher:Patients (pool):      2091
+INFO:pybalance.lp.matcher:Solution 4, time = 0.55 m
+INFO:pybalance.lp.matcher:Objective:    12910.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0178
+INFO:pybalance.lp.matcher:Patients (pool):      2090
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 5, time = 0.51 m
-INFO:pybalance.lp.matcher:Objective:    12879.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0383
-INFO:pybalance.lp.matcher:Patients (pool):      2121
+INFO:pybalance.lp.matcher:Solution 5, time = 0.98 m
+INFO:pybalance.lp.matcher:Objective:    12907.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0179
+INFO:pybalance.lp.matcher:Patients (pool):      2093
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 6, time = 0.85 m
-INFO:pybalance.lp.matcher:Objective:    12827.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0387
-INFO:pybalance.lp.matcher:Patients (pool):      2173
+INFO:pybalance.lp.matcher:Solution 6, time = 1.28 m
+INFO:pybalance.lp.matcher:Objective:    12906.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0250
+INFO:pybalance.lp.matcher:Patients (pool):      2094
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 7, time = 1.94 m
-INFO:pybalance.lp.matcher:Objective:    11000.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0648
-INFO:pybalance.lp.matcher:Patients (pool):      4000
+INFO:pybalance.lp.matcher:Solution 7, time = 2.22 m
+INFO:pybalance.lp.matcher:Objective:    12689.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0259
+INFO:pybalance.lp.matcher:Patients (pool):      2311
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 8, time = 2.10 m
+INFO:pybalance.lp.matcher:Solution 8, time = 2.39 m
+INFO:pybalance.lp.matcher:Objective:    12632.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0260
+INFO:pybalance.lp.matcher:Patients (pool):      2368
+INFO:pybalance.lp.matcher:Patients (target):    1000
+INFO:pybalance.lp.matcher:
+INFO:pybalance.lp.matcher:=========================================
+INFO:pybalance.lp.matcher:Solution 9, time = 2.39 m
 INFO:pybalance.lp.matcher:Objective:    10818.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0704
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0413
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:Status = FEASIBLE
-INFO:pybalance.lp.matcher:Number of solutions found: 8
+INFO:pybalance.lp.matcher:Number of solutions found: 9
 </pre></div></div>
 </div>
+<p>Note that as the optimization progresses, the size of the matched population increases and the balance also increases. This will generally be the case, since it is harder to find a larger set of patients (they have more degrees of freedom) that match a given target. Increased mismatch is the tradeoff of having a larger matched population.</p>
+<p>Let’s check that the found solution satisfies the balance constraint:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gamma</span> <span class="o">=</span> <span class="n">GammaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">standardize_difference</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">gamma</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">match_card</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gamma</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">match_card</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:pybalance.utils.preprocess:Discretized age with bins [18.02, 27.51, 37.01, 46.51, 56.0, 65.5, 75.0].
-INFO:pybalance.utils.preprocess:Discretized height with bins [125.0, 136.67, 148.33, 159.99, 171.66, 183.32, 194.99].
-INFO:pybalance.utils.preprocess:Discretized weight with bins [50.01, 61.67, 73.34, 85.0, 96.67, 108.33, 120.0].
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -482,26 +498,27 @@ tensor(0.0500)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_card_matcher_7_0.png" src="../_images/demos_card_matcher_7_0.png" />
+<img alt="../_images/demos_card_matcher_9_0.png" src="../_images/demos_card_matcher_9_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_card_matcher_7_1.png" src="../_images/demos_card_matcher_7_1.png" />
+<img alt="../_images/demos_card_matcher_9_1.png" src="../_images/demos_card_matcher_9_1.png" />
 </div>
 </div>
 </section>
-<section id="Optimize-balance-with-balance-constraint">
-<h2>Optimize balance with balance constraint<a class="headerlink" href="#Optimize-balance-with-balance-constraint" title="Permalink to this heading"></a></h2>
+<section id="Optimize-balance-with-size-and-balance-constraints">
+<h2>Optimize balance with size and balance constraints<a class="headerlink" href="#Optimize-balance-with-size-and-balance-constraints" title="Permalink to this heading"></a></h2>
+<p>Now that we have determined the optimal size of the matched population, let’s optimize the balance for all subsets of that size. For this, we create a second matcher object, setting size constraints and keeping the balance constraint (max_mismatch).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
     <span class="n">matching_data</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
-    <span class="n">objective</span><span class="o">=</span><span class="s1">&#39;gamma&#39;</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="n">gamma</span><span class="p">,</span>
     <span class="n">max_mismatch</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
     <span class="n">pool_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">match_card</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)),</span>
     <span class="n">target_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">match_card</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">)),</span>
@@ -516,9 +533,6 @@ tensor(0.0500)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:pybalance.utils.preprocess:Discretized age with bins [18.02, 27.51, 37.01, 46.51, 56.0, 65.5, 75.0].
-INFO:pybalance.utils.preprocess:Discretized height with bins [125.0, 136.67, 148.33, 159.99, 171.66, 183.32, 194.99].
-INFO:pybalance.utils.preprocess:Discretized weight with bins [50.01, 61.67, 73.34, 85.0, 96.67, 108.33, 120.0].
 INFO:pybalance.lp.matcher:Scaling features by factor 200.00 in order to use integer solver with &lt;= 0.0000% loss.
 INFO:pybalance.lp.matcher:Solving for match population with pool size = 4182 and target size = 1000 subject to 0.05 balance constraint.
 INFO:pybalance.lp.matcher:Matching on 27 dimensions ...
@@ -526,46 +540,46 @@ INFO:pybalance.lp.matcher:Building model variables and constraints ...
 INFO:pybalance.lp.matcher:Calculating bounds on feature variables ...
 INFO:pybalance.lp.matcher:Applying size constraints on pool and target ...
 INFO:pybalance.lp.matcher:Solving with 4 workers ...
-INFO:pybalance.lp.matcher:Initial balance score: 0.2095
+INFO:pybalance.lp.matcher:Initial balance score: 0.1236
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 1, time = 0.25 m
+INFO:pybalance.lp.matcher:Solution 1, time = 0.29 m
 INFO:pybalance.lp.matcher:Objective:    825443200.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0644
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0366
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 2, time = 0.31 m
+INFO:pybalance.lp.matcher:Solution 2, time = 0.37 m
 INFO:pybalance.lp.matcher:Objective:    825304800.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0644
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0365
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 3, time = 0.47 m
+INFO:pybalance.lp.matcher:Solution 3, time = 0.55 m
 INFO:pybalance.lp.matcher:Objective:    733533600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0557
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0325
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 4, time = 3.09 m
+INFO:pybalance.lp.matcher:Solution 4, time = 3.59 m
 INFO:pybalance.lp.matcher:Objective:    733527200.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0557
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0325
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 5, time = 3.59 m
+INFO:pybalance.lp.matcher:Solution 5, time = 4.10 m
 INFO:pybalance.lp.matcher:Objective:    733465600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0557
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0325
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 6, time = 3.73 m
+INFO:pybalance.lp.matcher:Solution 6, time = 4.24 m
 INFO:pybalance.lp.matcher:Objective:    733395200.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0557
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0325
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
@@ -587,26 +601,27 @@ INFO:pybalance.lp.matcher:Number of solutions found: 6
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_card_matcher_10_0.png" src="../_images/demos_card_matcher_10_0.png" />
+<img alt="../_images/demos_card_matcher_13_0.png" src="../_images/demos_card_matcher_13_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_card_matcher_10_1.png" src="../_images/demos_card_matcher_10_1.png" />
+<img alt="../_images/demos_card_matcher_13_1.png" src="../_images/demos_card_matcher_13_1.png" />
 </div>
 </div>
 </section>
 <section id="Optimize-balance-without-balance-constraint">
 <h2>Optimize balance without balance constraint<a class="headerlink" href="#Optimize-balance-without-balance-constraint" title="Permalink to this heading"></a></h2>
+<p>You can also remove the balance constraint, if you don’t care about individual mismatched features. Here we run a matcher fixed to the size of the optimal subset size but relax the mismatch constraint.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
     <span class="n">matching_data</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
-    <span class="n">objective</span><span class="o">=</span><span class="s1">&#39;gamma&#39;</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="n">gamma</span><span class="p">,</span>
     <span class="n">pool_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">match_card</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)),</span>
     <span class="n">target_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">match_card</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">)),</span>
     <span class="n">time_limit</span><span class="o">=</span><span class="mi">600</span>
@@ -620,9 +635,6 @@ INFO:pybalance.lp.matcher:Number of solutions found: 6
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:pybalance.utils.preprocess:Discretized age with bins [18.02, 27.51, 37.01, 46.51, 56.0, 65.5, 75.0].
-INFO:pybalance.utils.preprocess:Discretized height with bins [125.0, 136.67, 148.33, 159.99, 171.66, 183.32, 194.99].
-INFO:pybalance.utils.preprocess:Discretized weight with bins [50.01, 61.67, 73.34, 85.0, 96.67, 108.33, 120.0].
 INFO:pybalance.lp.matcher:Scaling features by factor 200.00 in order to use integer solver with &lt;= 0.0000% loss.
 INFO:pybalance.lp.matcher:Solving for match population with pool size = 4182 and target size = 1000 subject to None balance constraint.
 INFO:pybalance.lp.matcher:Matching on 27 dimensions ...
@@ -630,81 +642,81 @@ INFO:pybalance.lp.matcher:Building model variables and constraints ...
 INFO:pybalance.lp.matcher:Calculating bounds on feature variables ...
 INFO:pybalance.lp.matcher:Applying size constraints on pool and target ...
 INFO:pybalance.lp.matcher:Solving with 4 workers ...
-INFO:pybalance.lp.matcher:Initial balance score: 0.2095
+INFO:pybalance.lp.matcher:Initial balance score: 0.1236
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 1, time = 0.07 m
 INFO:pybalance.lp.matcher:Objective:    2127925600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1582
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0942
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 2, time = 0.11 m
 INFO:pybalance.lp.matcher:Objective:    2020125600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1489
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0895
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 3, time = 0.13 m
 INFO:pybalance.lp.matcher:Objective:    2019725600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1489
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0894
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 4, time = 0.20 m
 INFO:pybalance.lp.matcher:Objective:    2016325600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1487
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0893
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 5, time = 0.26 m
 INFO:pybalance.lp.matcher:Objective:    2015325600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1486
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0892
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 6, time = 0.32 m
 INFO:pybalance.lp.matcher:Objective:    2012125600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1483
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0891
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 7, time = 0.32 m
 INFO:pybalance.lp.matcher:Objective:    2011725600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1482
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0891
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 8, time = 0.34 m
 INFO:pybalance.lp.matcher:Objective:    2011525600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1482
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0891
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
 INFO:pybalance.lp.matcher:Solution 9, time = 0.36 m
 INFO:pybalance.lp.matcher:Objective:    2011325600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.1482
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0891
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 10, time = 0.66 m
+INFO:pybalance.lp.matcher:Solution 10, time = 0.65 m
 INFO:pybalance.lp.matcher:Objective:    478921600.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0346
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0212
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 11, time = 1.19 m
+INFO:pybalance.lp.matcher:Solution 11, time = 1.18 m
 INFO:pybalance.lp.matcher:Objective:    478920000.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0346
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0212
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
@@ -726,34 +738,24 @@ INFO:pybalance.lp.matcher:Number of solutions found: 11
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_card_matcher_13_0.png" src="../_images/demos_card_matcher_13_0.png" />
+<img alt="../_images/demos_card_matcher_17_0.png" src="../_images/demos_card_matcher_17_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/demos_card_matcher_13_1.png" src="../_images/demos_card_matcher_13_1.png" />
+<img alt="../_images/demos_card_matcher_17_1.png" src="../_images/demos_card_matcher_17_1.png" />
 </div>
 </div>
+<p>Note that the solution no longer satisfies the max_mismatch constraint.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">beta</span> <span class="o">=</span> <span class="n">GammaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">standardize_difference</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">beta</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">match_dist</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gamma</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">match_dist2</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO:pybalance.utils.preprocess:Discretized age with bins [18.02, 27.51, 37.01, 46.51, 56.0, 65.5, 75.0].
-INFO:pybalance.utils.preprocess:Discretized height with bins [125.0, 136.67, 148.33, 159.99, 171.66, 183.32, 194.99].
-INFO:pybalance.utils.preprocess:Discretized weight with bins [50.01, 61.67, 73.34, 85.0, 96.67, 108.33, 120.0].
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -761,7 +763,7 @@ INFO:pybalance.utils.preprocess:Discretized weight with bins [50.01, 61.67, 73.3
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor(0.0500)
+tensor(0.1696)
 </pre></div></div>
 </div>
 </section>

@@ -239,16 +239,16 @@
 <span class="sd">    options pool_size, target_size, and max_mismatch. The behavior of the solver depends</span>
 <span class="sd">    on which are these options are specified as given below:</span>
 
-<span class="sd">    (pool_size, target_size, max_mismatch) --&gt; optimize balance subject to size and </span>
+<span class="sd">    (pool_size, target_size, max_mismatch) --&gt; optimize balance subject to size and</span>
 <span class="sd">    balance constraints</span>
-<span class="sd">    </span>
+
 <span class="sd">    (pool_size, target_size) --&gt; optimize balance subject to size constraints</span>
 
 <span class="sd">    (max_mismatch) --&gt; optimize pool size subject to target_size = n_target and</span>
 <span class="sd">    balance constraints</span>
 
 <span class="sd">    () --&gt; optimize balance subject to size constraints with pool_size = target_size = n_target</span>
-<span class="sd"> </span>
+
 <span class="sd">    Optimizing pool_size subject to balance constraint is known as &quot;cardinality</span>
 <span class="sd">    matching&quot;. See https://kosukeimai.github.io/MatchIt/reference/method_cardinality.html</span>
 <span class="sd">    and references therein.</span>
