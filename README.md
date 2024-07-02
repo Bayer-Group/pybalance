@@ -50,6 +50,8 @@ about these methods, head on over to the
 [demos](https://bayer-group.github.io/pybalance/02_demos.html). Then give
 the code a spin for yourself by following the
 [installation instructions](https://bayer-group.github.io/pybalance/01_installation.html).
+Any questions or issues please feel free to open an [issue](https://github.com/Bayer-Group/pybalance/issues)
+or start a [discussion](https://github.com/Bayer-Group/pybalance/discussions).
 
 An application of this library to build an external control arm in a pharmaceutical
 setting is presented [here](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).
@@ -67,3 +69,8 @@ setting is presented [here](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352
 
 At the moment, `pybalance` only implements matching routines. Suport for weighting
 methods is on our roadmap and will appear in a future release.
+
+## Citation
+
+If you use `pybalance` for your research, please acknowledge this with a citation to
+our [paper](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).
