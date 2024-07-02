@@ -37,14 +37,17 @@ must be adjusted for as part of any causal inference analysis. That is where
 
 `pybalance` is a suite of tools in python for performing confounding adjustment
 in non-randomized populations. In `pybalance`, we start with measures of "balance"
-(how similar two populations are) and directly optimize this metric.
-This approach is different, and we think almost always better, from the well-known
-propensity score approach, in which the probability of treatment assignment
-is modelled.
+(how similar two populations are) and directly optimize this metric. This approach is
+different, and we think almost always better, from the well-known propensity score
+approach (see our [demo](https://bayer-group.github.io/pybalance/demos/ps_matcher.html)),
+in which the probability of treatment assignment is modelled, but balance metrics are
+almost always anyway implicitly defining the success criterion. Our approach here is to
+explicitly define and directly optimize the balance metric that is relevant for the
+given problem.
 
-The `pybalance` library implements several routines for optimizing the balance
-between non-random populations. To learn more about these methods, head on over
-to the [demos](https://bayer-group.github.io/pybalance/02_demos.html). Then give
+The `pybalance` library implements several routines for optimizing balance. To learn more
+about these methods, head on over to the
+[demos](https://bayer-group.github.io/pybalance/02_demos.html). Then give
 the code a spin for yourself by following the
 [installation instructions](https://bayer-group.github.io/pybalance/01_installation.html).
 
