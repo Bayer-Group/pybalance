@@ -1,4 +1,6 @@
-# Confounding Adjustment
+![](logo.png)
+
+## Confounding Adjustment
 
 In scientific experiments, researchers aim to identify cause and effect by
 holding all variables except one constant. Any difference in outcome can then
@@ -30,7 +32,7 @@ In general, any comparative analysis of two non-randomized population will diffe
 systematically in a number of covariate dimensions and these systematic differences
 must be adjusted for as part of any causal inference analysis.
 
-# PyBalance
+## PyBalance
 
 `pybalance` is a suite of tools in python for performing confounding adjustment
 in non-randomized populations. In `pybalance`, we start with measures of "balance"
@@ -48,7 +50,7 @@ the code a spin for yourself by following the
 An application of this library to build an external control arm in a pharmaceutical
 setting is presented [here](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).
 
-# Features
+## Features
 
 - Implements linear and non-linear optimization approaches for matching.
 - Utilizes integer program solvers and evolutionary solvers for optimization.
@@ -57,7 +59,7 @@ setting is presented [here](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352
 - Provides visualization tools for analysis.
 - Supports simulation of datasets for testing and demonstration purposes.
 
-# Limitations
+## Limitations
 
 At the moment, `pybalance` only implements matching routines. Suport for weighting
 methods is on our roadmap and will appear in a future release.
