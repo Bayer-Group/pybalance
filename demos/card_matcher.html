@@ -104,16 +104,16 @@
              
   <section id="Cardinality-matching">
 <h1>Cardinality matching<a class="headerlink" href="#Cardinality-matching" title="Permalink to this heading"></a></h1>
-<p>Cardinality matching is the process of finding the size of the largest subset <span class="math notranslate nohighlight">\(\hat{P}\)</span> of a pool of patient <span class="math notranslate nohighlight">\(P\)</span> within some “distance” of a given target population:</p>
+<p>Cardinality matching is the process of finding the size of the largest subset <span class="math notranslate nohighlight">\(\hat{P}\)</span> of a pool of patient <span class="math notranslate nohighlight">\(P\)</span> within some “distance” of a given target population <span class="math notranslate nohighlight">\(T\)</span>:</p>
 <p><span class="math">\begin{equation}
 \begin{aligned}
 & \underset{\hat{P}}{\text{maximize}}
 & & |\hat{P}| \\
 & \text{subject to}
-& & |\mu_{\hat{P},k} - \mu_{T,k}| \leq \delta \textrm{ for all }k
+& & |\mu_{\hat{P}k} - \mu_{Tk}| \leq \delta \textrm{ for all }k
 \end{aligned}
 \end{equation}</span></p>
-<p>where <span class="math notranslate nohighlight">\(k\)</span> indexes the covariates of <span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(T\)</span>. In cardinality matching, at least as implemented here, we search only for the size of the largest subset. Then in a second step, we optimize the balance (distance) among all subsets of the determined size.</p>
+<p>where <span class="math notranslate nohighlight">\(k\)</span> indexes the covariates of <span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(T\)</span>, and <span class="math notranslate nohighlight">\(\mu\)</span> denotes the means of the corresponding covariates. In cardinality matching, at least as implemented here, we search only for the size of the largest subset. Then in a second step, we optimize the balance (distance) among all subsets of the determined size.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -367,7 +367,7 @@
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that by default, gamma uses the standardized mean difference</span>
 <span class="c1"># to calculate distance. The ConstraintSatisfactionMatcher, however,</span>
 <span class="c1"># can only optimize linear objectives. It is not an error to pass</span>
-<span class="c1"># gamma with standardized_difference=True, at this is only affects</span>
+<span class="c1"># gamma with standardized_difference=True, as this is only affects</span>
 <span class="c1"># reporting, but to make the reporting consistent with what we&#39;re</span>
 <span class="c1"># optimizing, we explicitly pass standardized_difference=False here.</span>
 
@@ -399,63 +399,63 @@ INFO:pybalance.lp.matcher:Applying size constraints on pool and target ...
 INFO:pybalance.lp.matcher:Solving with 4 workers ...
 INFO:pybalance.lp.matcher:Initial balance score: 0.1236
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 1, time = 0.36 m
+INFO:pybalance.lp.matcher:Solution 1, time = 0.37 m
 INFO:pybalance.lp.matcher:Objective:    13153.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0068
 INFO:pybalance.lp.matcher:Patients (pool):      1847
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 2, time = 0.47 m
+INFO:pybalance.lp.matcher:Solution 2, time = 0.48 m
 INFO:pybalance.lp.matcher:Objective:    12981.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0163
 INFO:pybalance.lp.matcher:Patients (pool):      2019
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 3, time = 0.53 m
+INFO:pybalance.lp.matcher:Solution 3, time = 0.52 m
 INFO:pybalance.lp.matcher:Objective:    12937.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0171
 INFO:pybalance.lp.matcher:Patients (pool):      2063
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 4, time = 0.55 m
+INFO:pybalance.lp.matcher:Solution 4, time = 0.54 m
 INFO:pybalance.lp.matcher:Objective:    12910.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0178
 INFO:pybalance.lp.matcher:Patients (pool):      2090
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 5, time = 0.98 m
-INFO:pybalance.lp.matcher:Objective:    12907.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0179
-INFO:pybalance.lp.matcher:Patients (pool):      2093
-INFO:pybalance.lp.matcher:Patients (target):    1000
-INFO:pybalance.lp.matcher:
-INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 6, time = 1.28 m
+INFO:pybalance.lp.matcher:Solution 5, time = 0.55 m
 INFO:pybalance.lp.matcher:Objective:    12906.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0250
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0221
 INFO:pybalance.lp.matcher:Patients (pool):      2094
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 7, time = 2.22 m
-INFO:pybalance.lp.matcher:Objective:    12689.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0259
-INFO:pybalance.lp.matcher:Patients (pool):      2311
+INFO:pybalance.lp.matcher:Solution 6, time = 0.95 m
+INFO:pybalance.lp.matcher:Objective:    12874.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0221
+INFO:pybalance.lp.matcher:Patients (pool):      2126
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 8, time = 2.39 m
-INFO:pybalance.lp.matcher:Objective:    12632.0
-INFO:pybalance.lp.matcher:Balance (gamma):      0.0260
-INFO:pybalance.lp.matcher:Patients (pool):      2368
+INFO:pybalance.lp.matcher:Solution 7, time = 2.11 m
+INFO:pybalance.lp.matcher:Objective:    12650.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0241
+INFO:pybalance.lp.matcher:Patients (pool):      2350
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 9, time = 2.39 m
+INFO:pybalance.lp.matcher:Solution 8, time = 2.27 m
+INFO:pybalance.lp.matcher:Objective:    12580.0
+INFO:pybalance.lp.matcher:Balance (gamma):      0.0247
+INFO:pybalance.lp.matcher:Patients (pool):      2420
+INFO:pybalance.lp.matcher:Patients (target):    1000
+INFO:pybalance.lp.matcher:
+INFO:pybalance.lp.matcher:=========================================
+INFO:pybalance.lp.matcher:Solution 9, time = 2.27 m
 INFO:pybalance.lp.matcher:Objective:    10818.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0413
 INFO:pybalance.lp.matcher:Patients (pool):      4182
@@ -489,8 +489,12 @@ tensor(0.0500)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match_card</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match_card</span><span class="p">)</span>
+<span class="n">match_card</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
+<span class="n">match_card</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match_card</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match_card</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -542,42 +546,42 @@ INFO:pybalance.lp.matcher:Applying size constraints on pool and target ...
 INFO:pybalance.lp.matcher:Solving with 4 workers ...
 INFO:pybalance.lp.matcher:Initial balance score: 0.1236
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 1, time = 0.29 m
+INFO:pybalance.lp.matcher:Solution 1, time = 0.27 m
 INFO:pybalance.lp.matcher:Objective:    825443200.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0366
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 2, time = 0.37 m
+INFO:pybalance.lp.matcher:Solution 2, time = 0.34 m
 INFO:pybalance.lp.matcher:Objective:    825304800.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0365
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 3, time = 0.55 m
+INFO:pybalance.lp.matcher:Solution 3, time = 0.49 m
 INFO:pybalance.lp.matcher:Objective:    733533600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0325
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 4, time = 3.59 m
+INFO:pybalance.lp.matcher:Solution 4, time = 3.38 m
 INFO:pybalance.lp.matcher:Objective:    733527200.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0325
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 5, time = 4.10 m
+INFO:pybalance.lp.matcher:Solution 5, time = 3.92 m
 INFO:pybalance.lp.matcher:Objective:    733465600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0325
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 6, time = 4.24 m
+INFO:pybalance.lp.matcher:Solution 6, time = 4.07 m
 INFO:pybalance.lp.matcher:Objective:    733395200.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0325
 INFO:pybalance.lp.matcher:Patients (pool):      4182
@@ -591,9 +595,12 @@ INFO:pybalance.lp.matcher:Number of solutions found: 6
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match_dist</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match_dist</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">match_dist</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
+<span class="n">match_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match_dist</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match_dist</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -644,77 +651,77 @@ INFO:pybalance.lp.matcher:Applying size constraints on pool and target ...
 INFO:pybalance.lp.matcher:Solving with 4 workers ...
 INFO:pybalance.lp.matcher:Initial balance score: 0.1236
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 1, time = 0.07 m
+INFO:pybalance.lp.matcher:Solution 1, time = 0.08 m
 INFO:pybalance.lp.matcher:Objective:    2127925600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0942
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 2, time = 0.11 m
+INFO:pybalance.lp.matcher:Solution 2, time = 0.12 m
 INFO:pybalance.lp.matcher:Objective:    2020125600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0895
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 3, time = 0.13 m
+INFO:pybalance.lp.matcher:Solution 3, time = 0.14 m
 INFO:pybalance.lp.matcher:Objective:    2019725600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0894
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 4, time = 0.20 m
+INFO:pybalance.lp.matcher:Solution 4, time = 0.22 m
 INFO:pybalance.lp.matcher:Objective:    2016325600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0893
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 5, time = 0.26 m
+INFO:pybalance.lp.matcher:Solution 5, time = 0.28 m
 INFO:pybalance.lp.matcher:Objective:    2015325600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0892
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 6, time = 0.32 m
+INFO:pybalance.lp.matcher:Solution 6, time = 0.33 m
 INFO:pybalance.lp.matcher:Objective:    2012125600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0891
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 7, time = 0.32 m
+INFO:pybalance.lp.matcher:Solution 7, time = 0.34 m
 INFO:pybalance.lp.matcher:Objective:    2011725600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0891
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 8, time = 0.34 m
+INFO:pybalance.lp.matcher:Solution 8, time = 0.36 m
 INFO:pybalance.lp.matcher:Objective:    2011525600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0891
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 9, time = 0.36 m
+INFO:pybalance.lp.matcher:Solution 9, time = 0.38 m
 INFO:pybalance.lp.matcher:Objective:    2011325600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0891
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 10, time = 0.65 m
+INFO:pybalance.lp.matcher:Solution 10, time = 0.61 m
 INFO:pybalance.lp.matcher:Objective:    478921600.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0212
 INFO:pybalance.lp.matcher:Patients (pool):      4182
 INFO:pybalance.lp.matcher:Patients (target):    1000
 INFO:pybalance.lp.matcher:
 INFO:pybalance.lp.matcher:=========================================
-INFO:pybalance.lp.matcher:Solution 11, time = 1.18 m
+INFO:pybalance.lp.matcher:Solution 11, time = 1.05 m
 INFO:pybalance.lp.matcher:Objective:    478920000.0
 INFO:pybalance.lp.matcher:Balance (gamma):      0.0212
 INFO:pybalance.lp.matcher:Patients (pool):      4182
@@ -728,9 +735,12 @@ INFO:pybalance.lp.matcher:Number of solutions found: 11
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match_dist2</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match_dist2</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">match_dist2</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
+<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
+<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
+<span class="n">match_dist2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match_dist2</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match_dist2</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
