@@ -1,4 +1,4 @@
-![](logo.png)
+![https://bayer-group.github.io/pybalance/index.html](logo.png)
 
 ## Confounding Adjustment
 
@@ -8,15 +8,15 @@ be attributed to the manipulated variable.
 
 However, in many practical cases, it is not possible to control the variables
 of interest. For instance, it is unethical to conduct a randomized trial to test
-the effects of smoking on long-term health outcome; yet knowing the answer to this
-question is of extreme importance to policy makers, insurance companies and
+the effects of smoking on long-term health outcomes; yet the answer to this
+question is of extreme interest to policy makers, insurance companies and
 regulatory agencies. Similarly, in social science research, when studying the
 impact of education on income, researchers cannot manipulate individuals' education
 levels while holding all other variables constant.
 
 In these cases, observational data can form the basis for "natural experiments" but
 care must be taken in interpreting these data. One major issue with interpreting these
-data is known as confounding.
+data is known as "confounding".
 
 A classic example of confounding is the association between coffee consumption and
 heart disease. Initially, a study might find a positive correlation between high
@@ -28,9 +28,10 @@ coffee consumption and heart disease. To address this, researchers need to adjus
 smoking status and potentially other relevant variables to accurately assess the
 independent impact of coffee consumption on heart disease risk.
 
-In general, any comparative analysis of two non-randomized population will differ
+In general, any comparative analysis of two non-randomized populations will differ
 systematically in a number of covariate dimensions and these systematic differences
-must be adjusted for as part of any causal inference analysis.
+must be adjusted for as part of any causal inference analysis. That is where
+`pybalance` comes in.
 
 ## PyBalance
 
