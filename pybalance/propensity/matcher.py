@@ -108,6 +108,9 @@ class PropensityScoreMatcher:
         self.hyperparam_space = self.DEFAULT_HYPERPARAM_SPACE
         self.verbose = verbose
 
+        if caliper is not None and caliper <= 0:
+            raise ValueError("Caliper, if defined, must be greater than 0.")
+
         self.matching_data = matching_data.copy()
         self.target, self.pool = split_target_pool(matching_data)
         if isinstance(objective, str):
@@ -172,10 +175,6 @@ class PropensityScoreMatcher:
         X, y = self._preprocess_data_for_sklearn(self.matching_data)
         hyperparams = self._get_hyperparams(self.max_iter)
         for i, (model, params) in enumerate(hyperparams):
-            if (time.time() - t0) > self.time_limit:
-                logger.warning("Time limit exceeded. Stopping early.")
-                break
-
             clf = model(**params)
             logger.info(
                 f'Training model {str(clf).split("(")[0]} (iter {i + 1}/{self.max_iter}, {(time.time() - t0)/60:.3f} min) ...'
@@ -194,7 +193,6 @@ class PropensityScoreMatcher:
                 headers=self.matching_data.headers,
                 population_col=self.matching_data.population_col,
             )
-
             score = self.balance_calculator.distance(pool)
 
             if score < self.best_score:
@@ -202,6 +200,11 @@ class PropensityScoreMatcher:
                 self._update_best_match(
                     clf, params, match, score, ps_pool, ps_target, solution_time
                 )
+
+            # Put break at the end to ensure at least one iteration
+            if (time.time() - t0) > self.time_limit:
+                logger.warning("Time limit exceeded. Stopping early.")
+                break
 
         return self.get_best_match()
 
@@ -228,6 +231,7 @@ class PropensityScoreMatcher:
 
     def _get_hyperparams(self, n_iter):
         hyperparams = []
+        n_iter += 1
         n_models = len(self.hyperparam_space)
         for model, params in self.hyperparam_space.items():
             hyperparams.extend(
@@ -239,7 +243,7 @@ class PropensityScoreMatcher:
 
         np.random.shuffle(hyperparams)
 
-        return hyperparams
+        return hyperparams[:n_iter]
 
     def get_propensity_score(
         self, clf: BaseEstimator = None, matching_data: MatchingData = None
