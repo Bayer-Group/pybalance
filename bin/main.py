@@ -1,7 +1,14 @@
 import streamlit as st
+import pyarrow as pa
+import seaborn as sns
+
 from pybalance.propensity import PropensityScoreMatcher
 from pybalance.sim import generate_toy_dataset
-from pybalance.visualization import plot_numeric_features, plot_categoric_features, plot_per_feature_loss
+from pybalance.visualization import (
+    plot_numeric_features,
+    plot_categoric_features,
+    plot_per_feature_loss,
+)
 from pybalance.utils import BALANCE_CALCULATORS
 
 OBJECTIVES = list(BALANCE_CALCULATORS.keys())
@@ -42,6 +49,13 @@ time_limit = st.sidebar.number_input(
     help="Restrict hyperparameter search based on time in seconds",
 )
 method = st.sidebar.selectbox("Method", ["greedy", "linear_sum_assignment"])
+cumulative = st.sidebar.checkbox("Cumulative plots", value=False)
+if cumulative:
+    bins = 500
+else:
+    bins = 10
+
+palette = sns.color_palette("colorblind")
 
 # Update the parameters based on user input
 matching_data = generate_toy_dataset(n_pool, n_target, seed)
@@ -63,29 +77,71 @@ if st.sidebar.button("Match"):
     )
     matching_data.append(post_matching_data.data)
 
-hue_order += list( set(matching_data.populations) - set(hue_order) )
+balance_calculator = BALANCE_CALCULATORS[objective](pre_matching_data)
+st.sidebar.write(balance_calculator.__doc__)
+hue_order += list(set(matching_data.populations) - set(hue_order))
 
 # Display the figures
 if matching_data:
 
     tab1, tab2, tab3 = st.tabs(["Numeric", "Categoric", "SMD"])
-
     with tab1:
-        numeric_fig = plot_numeric_features(matching_data, col_wrap=2, height=6, hue_order=hue_order)
+
+        plot_vars = []
+        for i, col in enumerate(st.columns(len(matching_data.headers["numeric"]))):
+            with col:
+                col_name = matching_data.headers["numeric"][i]
+                if st.checkbox(col_name, value=True):
+                    plot_vars.append(col_name)
+        print("streamlit", plot_vars)
+        numeric_fig = plot_numeric_features(
+            matching_data,
+            col_wrap=2,
+            height=6,
+            hue_order=hue_order,
+            cumulative=cumulative,
+            bins=bins,
+            include_only=plot_vars,
+            # palette=palette,
+        )
         st.pyplot(numeric_fig)
+        st.write("---")
+        # import pdb
+        # pdb.set_trace()
+        summary = matching_data.describe_numeric().astype("object")
+        summary = summary[summary.index.get_level_values(0).isin(plot_vars)]
+        st.dataframe(summary, use_container_width=True)
 
     with tab2:
+        plot_vars = []
+        for i, col in enumerate(st.columns(len(matching_data.headers["categoric"]))):
+            with col:
+                col_name = matching_data.headers["categoric"][i]
+                if st.checkbox(col_name, value=True):
+                    plot_vars.append(col_name)
+
+        print("streamlit", plot_vars)
         categoric_fig = plot_categoric_features(
-            matching_data, col_wrap=2, height=6, include_binary=True, hue_order=hue_order
+            matching_data,
+            col_wrap=2,
+            height=6,
+            include_binary=True,
+            hue_order=hue_order,
+            include_only=plot_vars,
+            # palette=palette,
         )
         st.pyplot(categoric_fig)
+        st.write("---")
+        summary = matching_data.describe_categoric().astype("object")
+        summary = summary[summary.index.get_level_values(0).isin(plot_vars)]
+        st.dataframe(summary, use_container_width=True)
 
-    balance_calculator = BALANCE_CALCULATORS[objective](pre_matching_data)
     with tab3:
         categoric_fig = plot_per_feature_loss(
             matching_data,
             balance_calculator,
             hue_order=hue_order,
-            debin=False
+            debin=False,
+            # palette=palette,
         )
         st.pyplot(categoric_fig)
