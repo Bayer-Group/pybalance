@@ -30,3 +30,4 @@ COPY --from=build-env /build /pybalance
 # expose jupyter
 EXPOSE 8888
 EXPOSE 8080
+EXPOSE 8501
