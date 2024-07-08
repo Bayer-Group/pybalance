@@ -196,7 +196,7 @@ if not st.session_state.get("first_run", True):
 
         hue_order += list(set(matching_data.populations) - set(hue_order))
         print("populations", hue_order)
-        tab1, tab2, tab3 = st.tabs(["Numeric", "Categoric", "SMD"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Numeric", "Categoric", "SMD", "Summary"])
         with tab1:
 
             plot_vars = []
@@ -223,7 +223,6 @@ if not st.session_state.get("first_run", True):
             summary = matching_data.describe_numeric().astype("object")
             summary = summary[summary.index.get_level_values(0).isin(plot_vars)]
             st.dataframe(summary, use_container_width=True)
-            st.dataframe(matching_data.counts(), use_container_width=True)
 
         with tab2:
             plot_vars = []
@@ -260,3 +259,7 @@ if not st.session_state.get("first_run", True):
                 # palette=palette,
             )
             st.pyplot(categoric_fig)
+
+        with tab4:
+            st.markdown(matching_data._repr_html_(), unsafe_allow_html=True)
+            st.dataframe(matching_data.counts(), use_container_width=True)
