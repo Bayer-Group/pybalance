@@ -317,7 +317,7 @@ class BaseBalanceCalculator:
 
 class BetaBalance(BaseBalanceCalculator):
     """
-    BetaBalance computes the balance between two populatiosn as the mean
+    BetaBalance computes the balance between two populations as the mean
     absolute standardized mean difference across all features. Uses
     StandardMatchingPreprocessor as the preprocessor. In this preprocessor,
     numeric variables are left unchanged, while categorical variables are
