@@ -17,3 +17,5 @@ docs/*
 .idea
 .idea/*
 venv/*
+kubernetes
+kubernetes/*

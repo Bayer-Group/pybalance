@@ -113,6 +113,8 @@ class PropensityScoreMatcher:
 
         self.matching_data = matching_data.copy()
         self.target, self.pool = split_target_pool(matching_data)
+        print(f"self.target: {self.target}")
+        print(f"self.pool: {self.pool}")
         if isinstance(objective, str):
             self.balance_calculator = BalanceCalculator(self.matching_data, objective)
             self.objective = objective

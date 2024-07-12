@@ -21,3 +21,5 @@ s3fs
 
 # streamlit installation
 streamlit
+fastapi==0.111.0
+uvicorn[standard]==0.30.1

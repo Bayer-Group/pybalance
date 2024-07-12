@@ -1,3 +1,11 @@
+import sys
+import os
+
+# Assuming 'pybalance' directory is at the same level as 'streamlit_app.py'
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from typing import Any, Dict
+
 import streamlit as st
 import pandas as pd
 import seaborn as sns
@@ -10,6 +18,8 @@ from pybalance.visualization import (
     plot_per_feature_loss,
 )
 from pybalance.utils import BALANCE_CALCULATORS, split_target_pool, MatchingData
+import requests
+import json
 
 OBJECTIVES = list(BALANCE_CALCULATORS.keys())
 OBJECTIVES.remove("base")
@@ -24,13 +34,15 @@ st.markdown(
 placeholder = st.empty()
 
 
-def generate_data():
-    print("Generating data!")
+def generate_data(n_pool: int, n_target: int):
+    print("Inside Generating data...")
     seed = 45
-    n_pool, n_target = st.session_state["n_pool"], st.session_state["n_target"]
+    # n_pool, n_target = st.session_state["n_pool"], st.session_state["n_target"]
     matching_data = generate_toy_dataset(n_pool, n_target, seed)
-    st.session_state["matching_data"] = matching_data
-    st.session_state["first_run"] = False
+
+    # st.session_state["first_run"] = False
+    print(matching_data.head(5))
+    return matching_data.to_dict()
 
 
 def load_data():
@@ -59,32 +71,29 @@ def load_data():
     st.session_state["matching_data"] = matching_data
 
 
-def match():
-
+def match(payload: Dict, objective: str, max_iter: int = 100):
+    print("Inside Matching data...")
+    matching_data_recreated = MatchingData.from_dict(payload)
     # Create an instance of PropensityScoreMatcher
-    max_iter = st.session_state.get("max_iter", 100)
     method = "greedy"
-    objective = st.session_state.get("objective")
-    matching_data = st.session_state.get("matching_data").copy()
-    matcher = PropensityScoreMatcher(
-        matching_data, objective, None, max_iter, time_limit, method
-    )
-
+    matcher = PropensityScoreMatcher(matching_data_recreated, objective, None, max_iter, 10, method)
+    print(f"matcher {matcher}")
     # Call the match() method
     post_matching_data = matcher.match()
     post_matching_data.data.loc[:, "population"] = (
-        post_matching_data["population"] + " (postmatch)"
+            post_matching_data["population"] + " (postmatch)"
     )
     st.session_state["post_matching_data"] = post_matching_data
+    print(f"post_matching_data {post_matching_data}")
+    return post_matching_data.to_dict()
 
 
 def load_front_page():
-
     st.markdown("<h5>Generate a simulated dataset</h5>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
-        st.number_input(
+        n_pool = st.number_input(
             "Pool size",
             min_value=1,
             step=1000,
@@ -93,7 +102,7 @@ def load_front_page():
             help="Number of patients in the pool (by convention, larger) population",
         )
     with col2:
-        st.number_input(
+        n_target = st.number_input(
             "Target size",
             min_value=1,
             step=100,
@@ -101,7 +110,26 @@ def load_front_page():
             key="n_target",
             help="Number of patients in the target (by convention, smaller) population",
         )
-    st.button("Generate", on_click=generate_data)
+
+    if st.button("Generate"):
+        # Prepare the payload
+        payload = {
+            "n_pool": n_pool,
+            "n_target": n_target
+        }
+
+        # Call the FastAPI endpoint
+        response = requests.post("http://localhost:8000/generate_data", json=payload)
+
+        if response.status_code == 200:
+            matching_data_json = response.json()
+            st.session_state["matching_data"] = matching_data_json
+            # matching_instance = MatchingData.from_json(matching_data_json)
+            st.session_state["first_run"] = False
+            st.success("Data generated successfully")
+            st.rerun()  # Force the script to rerun
+        else:
+            st.error("Failed to generate data")
 
     st.write("---")
     st.markdown("<h5>Upload your own data</h5>", unsafe_allow_html=True)
@@ -135,6 +163,7 @@ if not st.session_state.get("first_run", True):
     with placeholder.container():
 
         matching_data = st.session_state.get("matching_data").copy()
+        matching_data = MatchingData.from_dict(matching_data)
         target, pool = split_target_pool(matching_data)
 
         # Create a sidebar for inputting parameters
@@ -185,7 +214,28 @@ if not st.session_state.get("first_run", True):
         hue_order = list(matching_data.populations)
 
         # Create a button to trigger the match() method
-        st.sidebar.button("Match", on_click=match)
+        if st.sidebar.button("Match"):
+            if "matching_data" in st.session_state:
+                matching_data_str = st.session_state["matching_data"]
+                payload = {
+                    "matching_data": matching_data_str,
+                    "objective": st.session_state.get("objective"),
+                    "max_iter": st.session_state.get("max_iter")
+                }
+
+                # Call the FastAPI endpoint
+                response = requests.post("http://localhost:8000/match", json=payload)
+
+                if response.status_code == 200:
+                    post_matching_data_json = response.json().get("post_matching_data")
+                    post_matching_instance = MatchingData.from_json(post_matching_data_json)
+                    st.session_state["post_matching_instance"] = post_matching_instance
+                    st.success("Data matched successfully")
+                else:
+                    st.error("Failed to match data")
+            else:
+                st.error("No matching data found. Generate data first.")
+        # st.sidebar.button("Match", on_click=match)
 
         balance_calculator = BALANCE_CALCULATORS[objective](matching_data)
         st.sidebar.write(balance_calculator.__doc__)
@@ -227,7 +277,7 @@ if not st.session_state.get("first_run", True):
         with tab2:
             plot_vars = []
             for i, col in enumerate(
-                st.columns(len(matching_data.headers["categoric"]))
+                    st.columns(len(matching_data.headers["categoric"]))
             ):
                 with col:
                     col_name = matching_data.headers["categoric"][i]

@@ -65,6 +65,13 @@ setting is presented [here](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352
 - Provides visualization tools for analysis.
 - Supports simulation of datasets for testing and demonstration purposes.
 
+## Running Streamlit Demos
+
+1. Install the pip packages using `pip install -r environments/requirements.txt`.
+2. Run the FastAPI server using `python api.py`.
+3. Run the Streamlit server using `streamlit run bin/main.py`.
+
+
 ## Limitations
 
 At the moment, `pybalance` only implements matching routines. Suport for weighting
