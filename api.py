@@ -4,9 +4,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from bin.main import match, generate_data
+from dotenv import load_dotenv
+import os
 import pandas as pd
 import json
 
+load_dotenv()
+
+fastapi_server = os.getenv("FASTAPI_SERVER", "localhost")
+fastapi_port = os.getenv("FASTAPI_PORT", "8000")
 app = FastAPI(
     title="PyBalance API",
 )
@@ -51,4 +57,4 @@ async def match_endpoint(request: MatchRequest):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=fastapi_server, port=fastapi_port)
