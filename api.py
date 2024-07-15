@@ -12,7 +12,8 @@ import json
 load_dotenv()
 
 fastapi_server = os.getenv("FASTAPI_SERVER", "localhost")
-fastapi_port = os.getenv("FASTAPI_PORT", "8000")
+fastapi_port = int(os.getenv("FASTAPI_PORT", "8000"))
+
 app = FastAPI(
     title="PyBalance API",
 )
@@ -48,9 +49,6 @@ async def generate_data_endpoint(request: GenerateDataRequest):
 async def match_endpoint(request: MatchRequest):
     matching_data_dict = request.matching_data
     post_matching_data = match(matching_data_dict, request.objective, request.max_iter)
-    print(
-        f"post_matching_datapost_matching_datapost_matching_datapost_matching_data {post_matching_data}"
-    )
     return {"post_matching_data": post_matching_data}
 
 
