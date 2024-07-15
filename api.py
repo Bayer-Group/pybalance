@@ -42,7 +42,9 @@ async def generate_data_endpoint(request: GenerateDataRequest):
 async def match_endpoint(request: MatchRequest):
     matching_data_dict = request.matching_data
     post_matching_data = match(matching_data_dict, request.objective, request.max_iter)
-    print(f"post_matching_datapost_matching_datapost_matching_datapost_matching_data {post_matching_data}")
+    print(
+        f"post_matching_datapost_matching_datapost_matching_datapost_matching_data {post_matching_data}"
+    )
     return {"post_matching_data": post_matching_data}
 
 

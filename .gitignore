@@ -19,3 +19,4 @@ docs/*
 venv/*
 kubernetes
 kubernetes/*
+kubernetes/deployment.yml

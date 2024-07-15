@@ -1,10 +1,11 @@
-import sys
 import os
+import sys
+from dotenv import load_dotenv
 
 # Assuming 'pybalance' directory is at the same level as 'streamlit_app.py'
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from typing import Any, Dict
+from typing import Dict
 
 import streamlit as st
 import pandas as pd
@@ -19,7 +20,15 @@ from pybalance.visualization import (
 )
 from pybalance.utils import BALANCE_CALCULATORS, split_target_pool, MatchingData
 import requests
-import json
+
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Read server and port from environment variables
+fastapi_server = os.getenv("FASTAPI_SERVER", "localhost")
+fastapi_port = os.getenv("FASTAPI_PORT", "8000")
+FASTAPI_URL = f"http://{fastapi_server}:{fastapi_port}"
 
 OBJECTIVES = list(BALANCE_CALCULATORS.keys())
 OBJECTIVES.remove("base")
@@ -76,12 +85,14 @@ def match(payload: Dict, objective: str, max_iter: int = 100):
     matching_data_recreated = MatchingData.from_dict(payload)
     # Create an instance of PropensityScoreMatcher
     method = "greedy"
-    matcher = PropensityScoreMatcher(matching_data_recreated, objective, None, max_iter, 10, method)
+    matcher = PropensityScoreMatcher(
+        matching_data_recreated, objective, None, max_iter, 10, method
+    )
     print(f"matcher {matcher}")
     # Call the match() method
     post_matching_data = matcher.match()
     post_matching_data.data.loc[:, "population"] = (
-            post_matching_data["population"] + " (postmatch)"
+        post_matching_data["population"] + " (postmatch)"
     )
     st.session_state["post_matching_data"] = post_matching_data
     print(f"post_matching_data {post_matching_data}")
@@ -113,13 +124,10 @@ def load_front_page():
 
     if st.button("Generate"):
         # Prepare the payload
-        payload = {
-            "n_pool": n_pool,
-            "n_target": n_target
-        }
+        payload = {"n_pool": n_pool, "n_target": n_target}
 
         # Call the FastAPI endpoint
-        response = requests.post("http://localhost:8000/generate_data", json=payload)
+        response = requests.post(f"{FASTAPI_URL}/generate_data", json=payload)
 
         if response.status_code == 200:
             matching_data_json = response.json()
@@ -220,15 +228,17 @@ if not st.session_state.get("first_run", True):
                 payload = {
                     "matching_data": matching_data_str,
                     "objective": st.session_state.get("objective"),
-                    "max_iter": st.session_state.get("max_iter")
+                    "max_iter": st.session_state.get("max_iter"),
                 }
 
                 # Call the FastAPI endpoint
-                response = requests.post("http://localhost:8000/match", json=payload)
+                response = requests.post(f"{FASTAPI_URL}/match", json=payload)
 
                 if response.status_code == 200:
                     post_matching_data_json = response.json().get("post_matching_data")
-                    post_matching_instance = MatchingData.from_json(post_matching_data_json)
+                    post_matching_instance = MatchingData.from_json(
+                        post_matching_data_json
+                    )
                     st.session_state["post_matching_instance"] = post_matching_instance
                     st.success("Data matched successfully")
                 else:
@@ -277,7 +287,7 @@ if not st.session_state.get("first_run", True):
         with tab2:
             plot_vars = []
             for i, col in enumerate(
-                    st.columns(len(matching_data.headers["categoric"]))
+                st.columns(len(matching_data.headers["categoric"]))
             ):
                 with col:
                     col_name = matching_data.headers["categoric"][i]

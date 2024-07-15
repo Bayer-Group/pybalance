@@ -34,15 +34,11 @@ class MatchingHeaders(object):
         ]
 
     def to_dict(self):
-        return {
-            "categoric": self.categoric,
-            "numeric": self.numeric
-        }
+        return {"categoric": self.categoric, "numeric": self.numeric}
 
     @classmethod
     def from_dict(cls, data_dict):
         return cls(categoric=data_dict["categoric"], numeric=data_dict["numeric"])
-
 
 
 def infer_matching_headers(
@@ -380,9 +376,9 @@ Populations:
 
     def to_dict(self):
         return {
-            "data": self.data.to_dict(orient='dict'),
+            "data": self.data.to_dict(orient="dict"),
             "headers": self.headers,
-            "population_col": self.population_col
+            "population_col": self.population_col,
         }
 
     @classmethod
@@ -450,4 +446,3 @@ def split_target_pool(
             target = _pool
 
     return target, pool
-
