@@ -3,9 +3,18 @@ from typing import Any, Dict
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from bin.main import match, generate_data
-from dotenv import load_dotenv
 import os
+
+from pybalance.propensity import PropensityScoreMatcher
+from pybalance.sim import generate_toy_dataset
+from pybalance.visualization import (
+    plot_numeric_features,
+    plot_categoric_features,
+    plot_per_feature_loss,
+)
+from pybalance.utils import BALANCE_CALCULATORS, split_target_pool, MatchingData
+
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -23,6 +32,35 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+
+def match(payload: Dict, objective: str, max_iter: int = 100):
+    print("Inside Matching data...")
+    matching_data_recreated = MatchingData.from_dict(payload)
+    # Create an instance of PropensityScoreMatcher
+    method = "greedy"
+    matcher = PropensityScoreMatcher(
+        matching_data_recreated, objective, None, max_iter, 10, method
+    )
+    print(f"matcher {matcher}")
+    # Call the match() method
+    post_matching_data = matcher.match()
+    post_matching_data.data.loc[:, "population"] = (
+        post_matching_data["population"] + " (postmatch)"
+    )
+    print(f"post_matching_data {post_matching_data}")
+    return post_matching_data.to_dict()
+
+
+def generate_data(n_pool: int, n_target: int):
+    print("Inside Generating data...")
+    seed = 45
+    # n_pool, n_target = st.session_state["n_pool"], st.session_state["n_target"]
+    matching_data = generate_toy_dataset(n_pool, n_target, seed)
+
+    # st.session_state["first_run"] = False
+    print(matching_data.head(5))
+    return matching_data.to_dict()
 
 
 class GenerateDataRequest(BaseModel):

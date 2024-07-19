@@ -43,17 +43,6 @@ st.markdown(
 placeholder = st.empty()
 
 
-def generate_data(n_pool: int, n_target: int):
-    print("Inside Generating data...")
-    seed = 45
-    # n_pool, n_target = st.session_state["n_pool"], st.session_state["n_target"]
-    matching_data = generate_toy_dataset(n_pool, n_target, seed)
-
-    # st.session_state["first_run"] = False
-    print(matching_data.head(5))
-    return matching_data.to_dict()
-
-
 def load_data():
     uploaded_file = st.session_state.get("uploaded_file")
     if uploaded_file is None:
@@ -78,25 +67,6 @@ def load_data():
 
     st.session_state["first_run"] = False
     st.session_state["matching_data"] = matching_data
-
-
-def match(payload: Dict, objective: str, max_iter: int = 100):
-    print("Inside Matching data...")
-    matching_data_recreated = MatchingData.from_dict(payload)
-    # Create an instance of PropensityScoreMatcher
-    method = "greedy"
-    matcher = PropensityScoreMatcher(
-        matching_data_recreated, objective, None, max_iter, 10, method
-    )
-    print(f"matcher {matcher}")
-    # Call the match() method
-    post_matching_data = matcher.match()
-    post_matching_data.data.loc[:, "population"] = (
-        post_matching_data["population"] + " (postmatch)"
-    )
-    st.session_state["post_matching_data"] = post_matching_data
-    print(f"post_matching_data {post_matching_data}")
-    return post_matching_data.to_dict()
 
 
 def load_front_page():
