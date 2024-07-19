@@ -17,3 +17,6 @@ docs/*
 .idea
 .idea/*
 venv/*
+kubernetes
+kubernetes/*
+kubernetes/deployment.yml

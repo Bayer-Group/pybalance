@@ -4,6 +4,7 @@ import copy
 from dataclasses import dataclass
 import pandas as pd
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,13 @@ class MatchingHeaders(object):
         return {"numeric": self.numeric, "categoric": self.categoric, "all": self.all}[
             key
         ]
+
+    def to_dict(self):
+        return {"categoric": self.categoric, "numeric": self.numeric}
+
+    @classmethod
+    def from_dict(cls, data_dict):
+        return cls(categoric=data_dict["categoric"], numeric=data_dict["numeric"])
 
 
 def infer_matching_headers(
@@ -366,6 +374,29 @@ Populations:
         n = self.describe_numeric(aggregations, quantiles)
         return pd.concat([c, n])
 
+    def to_dict(self):
+        return {
+            "data": self.data.to_dict(orient="dict"),
+            "headers": self.headers,
+            "population_col": self.population_col,
+        }
+
+    @classmethod
+    def from_dict(cls, data_dict):
+        pd_data = data_dict.get("data")
+        data = pd.DataFrame.from_dict(pd_data)
+        headers_dict = data_dict.get("headers", {})
+        population_col = data_dict["population_col"]
+        return cls(data, headers_dict, population_col)
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
+
+    @classmethod
+    def from_json(cls, json_str):
+        # data_dict = json.loads(json_str)
+        return cls.from_dict(json_str)
+
 
 def split_target_pool(
     matching_data: MatchingData,
@@ -378,7 +409,6 @@ def split_target_pool(
     explicitly provided, the routine will attempt to infer their names,
     assuming that the target population is the smaller population.
     """
-
     if isinstance(target_name, str) and isinstance(pool_name, str):
         target = matching_data.get_population(target_name)
         pool = matching_data.get_population(pool_name)
