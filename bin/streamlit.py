@@ -137,7 +137,7 @@ def load_front_page():
             st.success("Data generated successfully")
             st.rerun()  # Force the script to rerun
         else:
-            st.error("Failed to generate data")
+            st.error(f"Failed to generate data: API response {response.text}")
 
     st.write("---")
     st.markdown("<h5>Upload your own data</h5>", unsafe_allow_html=True)
@@ -236,10 +236,8 @@ if not st.session_state.get("first_run", True):
 
                 if response.status_code == 200:
                     post_matching_data_json = response.json().get("post_matching_data")
-                    post_matching_instance = MatchingData.from_json(
-                        post_matching_data_json
-                    )
-                    st.session_state["post_matching_instance"] = post_matching_instance
+                    post_matching_data = MatchingData.from_json(post_matching_data_json)
+                    st.session_state["post_matching_data"] = post_matching_data
                     st.success("Data matched successfully")
                 else:
                     st.error("Failed to match data")
