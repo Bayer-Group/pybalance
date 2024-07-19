@@ -6,14 +6,11 @@ from pydantic import BaseModel, Field
 from bin.main import match, generate_data
 from dotenv import load_dotenv
 import os
-import pandas as pd
-import json
 
 load_dotenv()
 
 fastapi_server = os.getenv("FASTAPI_SERVER", "localhost")
 fastapi_port = int(os.getenv("FASTAPI_PORT", "8000"))
-
 app = FastAPI(
     title="PyBalance API",
 )
