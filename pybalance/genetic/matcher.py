@@ -187,9 +187,9 @@ class GeneticMatcher:
         candidate_populations = initializer.initialize(
             self.n_candidate_populations, seed=seed
         )
-        self.candidate_populations = torch.from_numpy(np.array(candidate_populations)).to(
-            self.device
-        )
+        self.candidate_populations = torch.from_numpy(
+            np.array(candidate_populations)
+        ).to(self.device)
 
     def _check_stopping_conditions(self):
         best_match = max(self.balance)
