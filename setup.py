@@ -28,6 +28,6 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.12",
+    python_requires=">=3.9",
     package_data={"pybalance": ["sim/data/*parquet", "sim/data/*csv"]},
 )
