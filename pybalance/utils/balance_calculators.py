@@ -185,7 +185,9 @@ class BaseBalanceCalculator:
             [feature_weights[c] for c in self.preprocessor.output_headers["all"]]
         )
         feature_weights = feature_weights / sum(feature_weights)
-        self.feature_weights = torch.tensor(feature_weights).to(self.device)
+        self.feature_weights = torch.tensor(feature_weights, dtype=torch.float32).to(
+            self.device
+        )
 
     def _get_device(self, device):
         if device is None:
@@ -222,7 +224,10 @@ class BaseBalanceCalculator:
         else:
             if not isinstance(subset_populations, torch.Tensor):
                 subset_populations = torch.tensor(
-                    subset_populations, device=self.device, requires_grad=False
+                    subset_populations,
+                    dtype=torch.long,
+                    device=self.device,
+                    requires_grad=False,
                 )
             features = full_population_data[subset_populations]
 
@@ -241,7 +246,9 @@ class BaseBalanceCalculator:
         return torch.hstack(batches)
 
     def _to_array(self, candidate_populations):
-        return torch.tensor(candidate_populations, device=self.device)
+        return torch.tensor(
+            candidate_populations, dtype=torch.float32, device=self.device
+        )
 
     def _to_list(self, candidate_populations):
         return candidate_populations.cpu().detach().numpy().tolist()
@@ -251,7 +258,7 @@ class BaseBalanceCalculator:
         self,
         pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
         target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
-    ) -> torch.Tensor:
+    ) -> torch.tensor:
         """
         Compute overall distance (aka "mismatch", aka "loss") between input
         candidate populations. The per-feature loss is aggregated using a vector
@@ -281,7 +288,7 @@ class BaseBalanceCalculator:
         self,
         pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
         target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
-    ) -> torch.Tensor:
+    ) -> torch.tensor:
         """
         Compute mismatch (aka "distance", aka "loss") on a per-feature basis for
         a set of candidate populations.
@@ -317,9 +324,11 @@ class BaseBalanceCalculator:
 
 class BetaBalance(BaseBalanceCalculator):
     """
-    Convenience interface to BaseBalanceCalculator to computes the distance
-    between populations as the mean standardized mean difference. Uses
-    StandardMatchingPreprocessor as the preprocessor.
+    BetaBalance computes the balance between two populations as the mean
+    absolute standardized mean difference across all features. Uses
+    StandardMatchingPreprocessor as the preprocessor. In this preprocessor,
+    numeric variables are left unchanged, while categorical variables are
+    one-hot encoded. See StandardMatchingPreprocessor for more details.
     """
 
     name = "beta"
@@ -345,8 +354,11 @@ class BetaBalance(BaseBalanceCalculator):
 
 class BetaSquaredBalance(BaseBalanceCalculator):
     """
-    Same as BetaBalance, except that per-feature balances are averaged in a
-    mean square fashion.
+    BetaSquaredBalance computes the balance between two populatiosn as the mean
+    square standardized mean difference across all features. Uses
+    StandardMatchingPreprocessor as the preprocessor. In this preprocessor,
+    numeric variables are left unchanged, while categorical variables are
+    one-hot encoded. See StandardMatchingPreprocessor for more details.
     """
 
     name = "beta_squared"
@@ -468,7 +480,7 @@ class BetaMaxBalance(BaseBalanceCalculator):
         self,
         pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
         target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
-    ) -> torch.Tensor:
+    ) -> torch.tensor:
         per_feature_loss = self.per_feature_loss(pool_subsets, target_subsets)
 
         return torch.max(

@@ -3,7 +3,6 @@ import pandas as pd
 import argparse
 import copy
 import os
-import boto3
 
 import logging
 
@@ -333,27 +332,14 @@ def parse_command_line():
 
 
 def save_match(match, output):
-    if output.startswith("s3://"):
-        local_path = output.split("/")[-1]
-    else:
-        local_path = output
 
+    local_path = output
     logger.info(f"Writing to {output}...")
 
     if output.endswith(".parquet"):
         match.to_parquet(local_path, index=False)
     else:
         match.to_csv(local_path, index=False)
-
-    if output.startswith("s3://"):
-        # parse s3 URI
-        output_path = output[5:].strip("/")
-        bucket = output_path.split("/")[0]
-        path = output_path.split("/")[1:]
-
-        # upload to s3
-        s3 = boto3.client("s3")
-        s3.upload_file(local_path, bucket, "/".join(path))
 
 
 def get_balance_calculator(

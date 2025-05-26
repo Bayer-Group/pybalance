@@ -1,12 +1,15 @@
 import setuptools
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 with open("environments/requirements.txt") as f:
     requirements = f.read().splitlines()
+
+with open("environments/requirements_genetic.txt") as f:
+    requirements_genetic = f.read().splitlines()
 
 setuptools.setup(
     name="pybalance",
@@ -16,6 +19,7 @@ setuptools.setup(
     description="Population Matching",
     long_description=long_description,
     install_requires=requirements,
+    extras_require={"genetic": requirements_genetic},
     long_description_content_type="text/markdown",
     url="",
     packages=setuptools.find_packages(),
@@ -24,6 +28,6 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.12",
     package_data={"pybalance": ["sim/data/*parquet", "sim/data/*csv"]},
 )
