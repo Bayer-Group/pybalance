@@ -1,15 +1,12 @@
 import setuptools
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 with open("environments/requirements.txt") as f:
     requirements = f.read().splitlines()
-
-with open("environments/requirements_genetic.txt") as f:
-    requirements_genetic = f.read().splitlines()
 
 setuptools.setup(
     name="pybalance",
@@ -19,7 +16,6 @@ setuptools.setup(
     description="Population Matching",
     long_description=long_description,
     install_requires=requirements,
-    extras_require={"genetic": requirements_genetic},
     long_description_content_type="text/markdown",
     url="",
     packages=setuptools.find_packages(),

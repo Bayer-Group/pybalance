@@ -11,3 +11,4 @@ seaborn
 
 # the ones below are very particular: keep them set at a fixed version
 ortools==9.9.3963
+torch>=2.0.0
