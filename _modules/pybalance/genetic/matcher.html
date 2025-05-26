@@ -1,0 +1,500 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybalance.genetic.matcher &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=860ec0ee"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybalance.genetic.matcher</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybalance.genetic.matcher</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils.balance_calculators</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BalanceCalculator</span><span class="p">,</span>
+    <span class="n">BatchedBalanceCaclulator</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MatchingData</span><span class="p">,</span>
+    <span class="n">split_target_pool</span><span class="p">,</span>
+    <span class="n">BaseBalanceCalculator</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.genetic.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneticMatcherInitializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.genetic.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasicLogger</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_fitted</span><span class="p">(</span><span class="n">matcher</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">matcher</span><span class="o">.</span><span class="n">best_match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Matcher has not been fitted!&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_global_defaults"><a class="viewcode-back" href="../../../03_api.html#pybalance.genetic.get_global_defaults">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_global_defaults</span><span class="p">(</span><span class="n">n_candidate_populations</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a set of reasonable default values for evolutionary configuration. We</span>
+<span class="sd">    break parameters into two groups: evolutionary, i.e., those that govern how</span>
+<span class="sd">    the candidate populations are mixed, and initialization, i.e., those that</span>
+<span class="sd">    govern the initial set of candidate populations.</span>
+
+<span class="sd">    :param n_candidate_populations: Number of candidate populations to evolve.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1"># Evolutionary params -- how to mix populations</span>
+    <span class="c1">#</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># Size of candidate population to match against reference data. If not</span>
+        <span class="c1"># specified, will use the same size as the reference population.</span>
+        <span class="s2">&quot;candidate_population_size&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># n_candidate_populations = number of candidate populations to simultaneously evolve.</span>
+        <span class="c1"># n_keep_best = keep top N current best scoring candidate populations</span>
+        <span class="c1"># n_voting_populations = form new candidate populations based on frequency of patient occurence</span>
+        <span class="c1"># n_mutation = make individual patient swaps for top candidate populations</span>
+        <span class="s2">&quot;n_candidate_populations&quot;</span><span class="p">:</span> <span class="n">n_candidate_populations</span><span class="p">,</span>
+        <span class="s2">&quot;n_keep_best&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_candidate_populations</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s2">&quot;n_voting_populations&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_candidate_populations</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s2">&quot;n_mutation&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_candidate_populations</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="c1"># n_generations = number of generations to evolve the candidate populations.</span>
+        <span class="c1"># time_limit = time limit (in seconds), checked only at end of every iteration</span>
+        <span class="s2">&quot;n_generations&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="s2">&quot;n_iter_no_change&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="s2">&quot;time_limit&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;max_batch_size_gb&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
+        <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;log_every&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1">#</span>
+    <span class="c1"># Initialization params -- how to initialize the candidate populations</span>
+    <span class="c1">#</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;initialization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;benchmarks&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;propensity&quot;</span><span class="p">:</span> <span class="s2">&quot;include&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;sampling&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;propensity&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="s2">&quot;uniform&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">config</span></div>
+
+
+<div class="viewcode-block" id="GeneticMatcher"><a class="viewcode-back" href="../../../03_api.html#pybalance.genetic.GeneticMatcher">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeneticMatcher</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Match two populations using a genetic algorithm.</span>
+
+<span class="sd">    :param matching_data: MatchingData to be matched. Must contain exactly two</span>
+<span class="sd">        populations. The larger population will be matched to the smaller.</span>
+
+<span class="sd">    :param objective: Matching objective to optimize in hyperparameter search.</span>
+<span class="sd">        Can be a string referring to any balance calculator known to</span>
+<span class="sd">        utils.balance_calculators.BalanceCalculator or an instance of</span>
+<span class="sd">        BaseBalanceCalculator.</span>
+
+<span class="sd">    :param params: Configuration params for the genetic matcher. See</span>
+<span class="sd">        pybalance.genetic.get_global_defaults for a list of options.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+        <span class="n">objective</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseBalanceCalculator</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;beta&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">params</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span> <span class="o">=</span> <span class="n">matching_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="n">matching_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BalanceCalculator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">objective</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">objective</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;objective&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BatchedBalanceCaclulator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size_gb</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">BasicLogger</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;log_every&quot;</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_best_match</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="c1"># set default values for configuration parameters and check sanity</span>
+        <span class="c1"># of resulting parameter set</span>
+
+        <span class="n">n_candidate_populations</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;n_candidate_populations&quot;</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
+        <span class="n">standard_config</span> <span class="o">=</span> <span class="n">get_global_defaults</span><span class="p">(</span><span class="n">n_candidate_populations</span><span class="p">)</span>
+        <span class="n">standard_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">standard_config</span><span class="p">[</span><span class="s2">&quot;candidate_population_size&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">standard_config</span><span class="p">[</span><span class="s2">&quot;candidate_population_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">standard_config</span><span class="p">[</span><span class="s2">&quot;n_keep_best&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">standard_config</span><span class="p">[</span><span class="s2">&quot;n_candidate_populations&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;GeneticMatcher cannot train if it keeps all candidate populations. </span><span class="se">\</span>
+<span class="s2">                Either select more candidate populations or keep fewer from round to round.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">standard_config</span><span class="p">[</span><span class="s2">&quot;n_keep_best&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_keep_best must be &gt; 1&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">standard_config</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">standard_config</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">standard_config</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">kw</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kw</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reset_best_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_match</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_match_idx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_recent_balance</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([],</span> <span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;n_iter_no_change&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="GeneticMatcher.match"><a class="viewcode-back" href="../../../03_api.html#pybalance.genetic.GeneticMatcher.match">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Match populations passed during __init__(). Returns MatchingData</span>
+<span class="sd">        instance containing the matched pool and target populations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_first_generation</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_stopping_conditions</span><span class="p">()</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">stop</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_offspring</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_stopping_conditions</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">finalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_first_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">initializer</span> <span class="o">=</span> <span class="n">GeneticMatcherInitializer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">candidate_populations</span> <span class="o">=</span> <span class="n">initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_candidate_populations</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_stopping_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">best_match</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_recent_balance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_match</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">best_match</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Optimal solution found! Stopping&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_recent_balance</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recent_balance</span><span class="o">.</span><span class="n">maxlen</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">best_match</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recent_balance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No improvement in last </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_recent_balance</span><span class="o">.</span><span class="n">maxlen</span><span class="si">}</span><span class="s2"> iterations. Stopping.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generation</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_generations</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reached maximum number of generations. Stopping.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Time limit exceeded. Stopping.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">finalize</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">on_generation_end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">finalize</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">on_matching_end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_offspring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new set of candidate_populations by preferentially mating</span>
+<span class="sd">        fitter i.e. more similar to target candidate_populations. Higher balance</span>
+<span class="sd">        is more likely to mate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generation</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># keep the best N groups so as to not regress</span>
+        <span class="c1"># Note that higher balance values are better, so we take the candidate</span>
+        <span class="c1"># populations from the end of the list</span>
+        <span class="c1"># FIXME n_keep_best MUST BE AT LEAST ONE OR IT WILL TAKE EVERYTHING!!!</span>
+        <span class="c1"># balance = torch.from_numpy(self.balance).to(self.device)</span>
+        <span class="n">idxs_best_n_matches</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance</span><span class="p">)[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">n_keep_best</span> <span class="p">:]</span>
+        <span class="n">offspring</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="p">[</span><span class="n">idxs_best_n_matches</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># make individual patient swaps</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_mutation</span><span class="p">:</span>
+            <span class="n">offspring</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">offspring</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_mutated_populations</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_mutation</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="c1"># add candidate populations formed from the entire pool of candidate populations</span>
+        <span class="c1"># according to frequency of occurrence</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_voting_populations</span><span class="p">:</span>
+            <span class="n">offspring</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">offspring</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_voting_populations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_voting_populations</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="c1"># perform random mating</span>
+        <span class="n">n_remaining</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_candidate_populations</span> <span class="o">-</span> <span class="n">offspring</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">n_remaining</span><span class="p">:</span>
+            <span class="n">offspring</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">offspring</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_mating_populations</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">n_remaining</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span> <span class="o">=</span> <span class="n">offspring</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_mating_populations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_way_mating</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="c1"># get the mating probabilities for all candidate populations</span>
+        <span class="c1"># basically equivalent to rankdata which the cpu version uses</span>
+        <span class="c1"># note 1.0 is needed to convert to float and avoid dropping the worst candpop.</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance</span><span class="p">)</span>
+
+        <span class="c1"># randomly select groups of candidate populations to mix</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mating_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span>
+            <span class="n">weights</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="n">n_way_mating</span><span class="p">,</span> <span class="n">replacement</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="n">mated_populations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="p">[</span><span class="n">mating_populations</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">N</span><span class="p">,</span> <span class="n">n_way_mating</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_population_size</span>
+        <span class="p">)</span>
+
+        <span class="c1"># shuffle in the last (patient) dimension</span>
+        <span class="c1"># permutes all cols together but that&#39;s ok since the rows are uncorrelated!</span>
+        <span class="n">perm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_population_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">mated_populations</span> <span class="o">=</span> <span class="n">mated_populations</span><span class="p">[:,</span> <span class="n">perm</span><span class="p">]</span>
+        <span class="n">mated_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_population_size</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="n">mated_populations</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mated_populations</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_voting_populations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># count patient frequency within candidate populations. this unique</span>
+        <span class="c1"># function doesn&#39;t seem to scale (in terms of peak memory usage) so well</span>
+        <span class="c1"># when you have a lot of large candidate populations, so here we just</span>
+        <span class="c1"># estimate the counts based on a sample of the candidate populations</span>
+        <span class="n">max_candidate_populations</span> <span class="o">=</span> <span class="mi">1024</span>
+        <span class="n">sample_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="p">))</span>
+        <span class="n">patients</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="p">[</span>
+                <span class="n">sample_populations</span><span class="p">[:</span><span class="n">max_candidate_populations</span><span class="p">],</span> <span class="p">:</span>
+            <span class="p">],</span>
+            <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">voting_probabilities</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">/</span> <span class="n">counts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="n">candidate_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
+            <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_population_size</span><span class="p">),</span>
+            <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">:</span>
+            <span class="c1"># FIXME calculate the max _N based on batch size. I can&#39;t quite</span>
+            <span class="c1"># figure out what the memory requirements of the operation below are</span>
+            <span class="c1"># so I don&#39;t know how to do that. For now, just hard code to a nice</span>
+            <span class="c1"># power of two</span>
+            <span class="n">this_N</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_candidate_populations</span><span class="p">,</span> <span class="n">N</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">))</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">voting_probabilities</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">this_N</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">this_candidate_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span>
+                <span class="n">weights</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">candidate_population_size</span><span class="p">,</span> <span class="n">replacement</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="n">candidate_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">candidate_populations</span><span class="p">,</span> <span class="n">this_candidate_populations</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">candidate_populations</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_mutated_populations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_swap</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">mutaters</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance</span><span class="p">)[</span><span class="o">-</span><span class="n">N</span><span class="p">:]</span>
+        <span class="n">mutated_populations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="p">[</span>
+            <span class="n">mutaters</span>
+        <span class="p">]</span>  <span class="c1"># N x candidate_population_size</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+            <span class="n">n_swap</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">random_pool_patients</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)[</span>
+            <span class="p">:</span><span class="n">N</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mutated_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">random_pool_patients</span><span class="p">,</span> <span class="n">mutated_populations</span><span class="p">])</span>
+
+        <span class="c1"># would love to avoid this for loop but I don&#39;t see how. For some</span>
+        <span class="c1"># reason, the shuffling is absolutely needed. Such is life. It&#39;s still</span>
+        <span class="c1"># faster that numpy, even on a CPU.</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="n">mutated_populations</span><span class="p">):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)][</span>
+                <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_population_size</span>
+            <span class="p">]</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="n">mutated_populations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mutated_populations</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">balance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">candidate_populations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_candidate_populations</span>
+
+    <span class="nd">@candidate_populations</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">candidate_populations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_candidate_populations</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c1"># To avoid having the balance array get out of sync with the candidate</span>
+        <span class="c1"># populations, always recompute balance whenever updating the candidate</span>
+        <span class="c1"># populations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_balance</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_best_match_idxs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">balance_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">balance_calculator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">balance</span> <span class="o">=</span> <span class="n">balance_calculator</span><span class="o">.</span><span class="n">balance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">balance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance</span>
+        <span class="n">idx_best_match</span> <span class="o">=</span> <span class="n">balance</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">candidate_populations</span><span class="p">[</span><span class="n">idx_best_match</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_best_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">balance_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">best_match_patient_idxs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_best_match_idxs</span><span class="p">(</span><span class="n">balance_calculator</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">best_match_patient_idxs</span><span class="p">]</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">target</span><span class="p">,</span> <span class="n">pool</span><span class="p">]),</span>
+            <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">population_col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">match</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

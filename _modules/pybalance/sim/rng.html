@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybalance.sim.rng &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=860ec0ee"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybalance.sim.rng</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybalance.sim.rng</h1><div class="highlight"><pre>
+<span></span><span class="c1"># generate simulated data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">truncnorm</span><span class="p">,</span> <span class="n">uniform</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatchingData</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_truncated_distributions</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">mn</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate multivariate normal variables with truncations.</span>
+<span class="sd">        rng = a function which takes as only parameter size and returns</span>
+<span class="sd">            random variations of shape size x N</span>
+<span class="sd">        cov = covariance matrix, shape N x N</span>
+<span class="sd">        mn = lower limits, shape N x 1</span>
+<span class="sd">        mx = upper limits, shape N x 1</span>
+<span class="sd">        size = number of samples to draw</span>
+<span class="sd">    This is implemented by rejection sampling, so if the code runs</span>
+<span class="sd">    for a really long time, you have probably set parameters for which</span>
+<span class="sd">    most samples get rejected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">mn</span><span class="p">)))</span>
+    <span class="k">while</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+        <span class="n">_out</span> <span class="o">=</span> <span class="n">rng</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">size</span><span class="p">)</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="p">((</span><span class="n">_out</span> <span class="o">&lt;=</span> <span class="n">mx</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">_out</span> <span class="o">&gt;=</span> <span class="n">mn</span><span class="p">))</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">where</span><span class="p">):</span>
+            <span class="n">_out</span> <span class="o">=</span> <span class="n">_out</span><span class="p">[</span><span class="n">where</span><span class="p">]</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">out</span><span class="p">,</span> <span class="n">_out</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">out</span><span class="p">[:</span><span class="n">size</span><span class="p">,</span> <span class="p">:]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">multivariate_truncnorm</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">mn</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate multivariate normal variables with truncations.</span>
+<span class="sd">        mu = means of the covariates, shape N x 1</span>
+<span class="sd">        cov = covariance matrix, shape N x N</span>
+<span class="sd">        mn = lower limits, shape N x 1</span>
+<span class="sd">        mx = upper limits, shape N x 1</span>
+<span class="sd">        size = number of samples to draw</span>
+<span class="sd">    This is implemented by rejection sampling, so if the code runs</span>
+<span class="sd">    for a really long time, you have probably set parameters for which</span>
+<span class="sd">    most samples get rejected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rng</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">generate_truncated_distributions</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">mn</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_truncnorm</span><span class="p">(</span><span class="n">mn</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For reasons I don&#39;t understand, the loc and scale parameters in truncnorm</span>
+<span class="sd">    don&#39;t behave as I expect. Here I reimplment the interface to truncnrom to</span>
+<span class="sd">    make more sense.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">mn</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span><span class="p">,</span> <span class="p">(</span><span class="n">mx</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span>
+    <span class="k">return</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">std</span> <span class="o">*</span> <span class="n">truncnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">correlate_vars</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given two uncorrelated covariates x and y return a new random variable with the same</span>
+<span class="sd">    mean and standard deviation as y but with correlation cor to covariate x.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mu_0</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">sigma_0</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">cor</span> <span class="o">*</span> <span class="n">x</span> <span class="o">/</span> <span class="n">x</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cor</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma_0</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">std</span><span class="p">())</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">+</span> <span class="n">mu_0</span>
+    <span class="k">return</span> <span class="n">y</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_random_feature_data_rct</span><span class="p">(</span>
+    <span class="n">size</span><span class="p">,</span> <span class="n">mu_h</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">std_h</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">cor_hw</span><span class="o">=-</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">cor_ag</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">p_binary</span><span class="o">=</span><span class="p">[],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rng</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">uniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">120</span> <span class="o">-</span> <span class="mi">50</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">mu_h</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">std_h</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">correlate_vars</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">cor_hw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">weight</span><span class="p">,</span> <span class="n">height</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">wh</span> <span class="o">=</span> <span class="n">generate_truncated_distributions</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">mn</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">125</span><span class="p">],</span> <span class="n">mx</span><span class="o">=</span><span class="p">[</span><span class="mi">120</span><span class="p">,</span> <span class="mi">195</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">wh</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">wh</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rng</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">gender</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+        <span class="n">age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">age</span> <span class="o">=</span> <span class="n">correlate_vars</span><span class="p">(</span><span class="n">gender</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">cor_ag</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">gender</span><span class="p">,</span> <span class="n">age</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">ga</span> <span class="o">=</span> <span class="n">generate_truncated_distributions</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">mn</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">18</span><span class="p">],</span> <span class="n">mx</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">gender</span> <span class="o">=</span> <span class="n">ga</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="n">ga</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">haircolor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+    <span class="n">country</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="n">age</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">weight</span><span class="p">,</span>
+            <span class="s2">&quot;gender&quot;</span><span class="p">:</span> <span class="n">gender</span><span class="p">,</span>
+            <span class="s2">&quot;haircolor&quot;</span><span class="p">:</span> <span class="n">haircolor</span><span class="p">,</span>
+            <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="n">country</span><span class="p">,</span>
+            <span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">size</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">p_binary</span><span class="p">):</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="sa">f</span><span class="s2">&quot;binary_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_random_feature_data_rwd</span><span class="p">(</span>
+    <span class="n">size</span><span class="p">,</span> <span class="n">mu_w</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">std_w</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">cor_hw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">cor_ag</span><span class="o">=-</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">p_binary</span><span class="o">=</span><span class="p">[],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">43</span>
+<span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rng</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">mu_w</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">std_w</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">uniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">125</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">195</span> <span class="o">-</span> <span class="mi">125</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">correlate_vars</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">cor_hw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">weight</span><span class="p">,</span> <span class="n">height</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">wh</span> <span class="o">=</span> <span class="n">generate_truncated_distributions</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">mn</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">125</span><span class="p">],</span> <span class="n">mx</span><span class="o">=</span><span class="p">[</span><span class="mi">120</span><span class="p">,</span> <span class="mi">195</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">wh</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">wh</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rng</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">gender</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+        <span class="n">age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">age</span> <span class="o">=</span> <span class="n">correlate_vars</span><span class="p">(</span><span class="n">gender</span><span class="p">,</span> <span class="n">age</span><span class="p">,</span> <span class="n">cor_ag</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">gender</span><span class="p">,</span> <span class="n">age</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">ga</span> <span class="o">=</span> <span class="n">generate_truncated_distributions</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">mn</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">18</span><span class="p">],</span> <span class="n">mx</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">gender</span> <span class="o">=</span> <span class="n">ga</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="n">ga</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">haircolor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>
+    <span class="n">country</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="n">age</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">weight</span><span class="p">,</span>
+            <span class="s2">&quot;gender&quot;</span><span class="p">:</span> <span class="n">gender</span><span class="p">,</span>
+            <span class="s2">&quot;haircolor&quot;</span><span class="p">:</span> <span class="n">haircolor</span><span class="p">,</span>
+            <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="n">country</span><span class="p">,</span>
+            <span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;pool&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">size</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">p_binary</span><span class="p">):</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="sa">f</span><span class="s2">&quot;binary_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<div class="viewcode-block" id="generate_toy_dataset"><a class="viewcode-back" href="../../../03_api.html#pybalance.sim.generate_toy_dataset">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">generate_toy_dataset</span><span class="p">(</span><span class="n">n_pool</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">45</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a toy matching dataset with n_pool patients in the pool and</span>
+<span class="sd">    n_target patients in the target population. For finer control, see</span>
+<span class="sd">    generate_random_feature_data_rwd and generate_random_feature_data_rct.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">generate_random_feature_data_rwd</span><span class="p">(</span>
+        <span class="n">n_pool</span><span class="p">,</span> <span class="n">cor_hw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cor_ag</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">p_binary</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span>
+    <span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">generate_random_feature_data_rct</span><span class="p">(</span>
+        <span class="n">n_target</span><span class="p">,</span> <span class="n">std_h</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">cor_ag</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">p_binary</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="n">feature_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">])</span>
+    <span class="n">feature_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;patient_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_data</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">feature_data</span><span class="p">)</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_paper_dataset_path</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the path to the simulated matching dataset presented in the pybalance paper</span>
+<span class="sd">    (https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="s2">&quot;pool250000-target25000-normal0-lognormal0-binary4.parquet&quot;</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">filepath</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">resource</span>
+
+
+<div class="viewcode-block" id="load_paper_dataset"><a class="viewcode-back" href="../../../03_api.html#pybalance.sim.load_paper_dataset">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">load_paper_dataset</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the simulated matching dataset presented in the pybalance paper</span>
+<span class="sd">    (https://onlinelibrary.wiley.com/doi/10.1002/pst.2352).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">resource</span> <span class="o">=</span> <span class="n">get_paper_dataset_path</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
