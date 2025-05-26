@@ -90,12 +90,19 @@ def plot_categoric_features(
     col_wrap: int = 2,
     height: float = 6,
     include_binary=True,
+    include_only: Optional[List[str]] = None,
     **plot_params,
 ) -> plt.Figure:
     """
     Plot the one-dimensional marginal distributions for all categoric features
     and all treatment groups found in matching_data. Extra keyword arguments are
     passed to seaborn.histplot and override defaults.
+
+    :param matching_data: MatchingData instance containing at least one population.
+    :param include_binary: Whether to include binary features in the plot.
+    :param include_only: List of features to consider for plotting. Otherwise,
+        all categoric features are plotted. If include_binary is False, binary
+        features are excluded, even if present in include_only.
     """
     # Set up default plotting params for categoric varaibles.
     default_params = {
@@ -113,7 +120,11 @@ def plot_categoric_features(
     default_params.update(plot_params)
 
     # Determine which covariates to plot.
-    headers = matching_data.headers["categoric"]
+    if include_only is None:
+        headers = matching_data.headers["categoric"]
+    else:
+        headers = include_only
+
     if not include_binary:
         headers = [c for c in headers if matching_data[c].nunique() > 2]
 
@@ -128,12 +139,20 @@ def plot_categoric_features(
 
 
 def plot_numeric_features(
-    matching_data: MatchingData, col_wrap: int = 2, height: float = 6, **plot_params
+    matching_data: MatchingData,
+    col_wrap: int = 2,
+    height: float = 6,
+    include_only: Optional[List[str]] = None,
+    **plot_params,
 ) -> plt.Figure:
     """
     Plot the one-dimensional marginal distributions for all numerical features
     and all treatment groups found in matching_data. Extra keyword arguments are
     passed to seaborn.histplot and override defaults.
+
+    :param matching_data: MatchingData instance containing at least one population.
+    :param include_only: List of features to consider for plotting. Otherwise,
+        all numeric features are plotted.
     """
     # Set up default plotting params for numeric varaibles.
     default_params = {
@@ -153,7 +172,10 @@ def plot_numeric_features(
     default_params.update(plot_params)
 
     # Determine which covariates to plot.
-    headers = matching_data.headers["numeric"]
+    if include_only is None:
+        headers = matching_data.headers["numeric"]
+    else:
+        headers = include_only
 
     # PLOT!
     fig = _plot_1d_marginals(matching_data, headers, col_wrap, height, **default_params)

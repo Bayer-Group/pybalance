@@ -9,5 +9,5 @@ scikit-learn
 scipy
 seaborn
 
-# the two below are very particular: keep them set at a fixed version
+# the ones below are very particular: keep them set at a fixed version
 ortools==9.9.3963

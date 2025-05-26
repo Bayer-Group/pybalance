@@ -317,9 +317,11 @@ class BaseBalanceCalculator:
 
 class BetaBalance(BaseBalanceCalculator):
     """
-    Convenience interface to BaseBalanceCalculator to computes the distance
-    between populations as the mean standardized mean difference. Uses
-    StandardMatchingPreprocessor as the preprocessor.
+    BetaBalance computes the balance between two populations as the mean
+    absolute standardized mean difference across all features. Uses
+    StandardMatchingPreprocessor as the preprocessor. In this preprocessor,
+    numeric variables are left unchanged, while categorical variables are
+    one-hot encoded. See StandardMatchingPreprocessor for more details.
     """
 
     name = "beta"
@@ -345,8 +347,11 @@ class BetaBalance(BaseBalanceCalculator):
 
 class BetaSquaredBalance(BaseBalanceCalculator):
     """
-    Same as BetaBalance, except that per-feature balances are averaged in a
-    mean square fashion.
+    BetaSquaredBalance computes the balance between two populatiosn as the mean
+    square standardized mean difference across all features. Uses
+    StandardMatchingPreprocessor as the preprocessor. In this preprocessor,
+    numeric variables are left unchanged, while categorical variables are
+    one-hot encoded. See StandardMatchingPreprocessor for more details.
     """
 
     name = "beta_squared"
