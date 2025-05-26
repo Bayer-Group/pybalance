@@ -187,7 +187,7 @@ class GeneticMatcher:
         candidate_populations = initializer.initialize(
             self.n_candidate_populations, seed=seed
         )
-        self.candidate_populations = torch.tensor(np.array(candidate_populations)).to(
+        self.candidate_populations = torch.from_numpy(np.array(candidate_populations)).to(
             self.device
         )
 
@@ -230,7 +230,7 @@ class GeneticMatcher:
         # Note that higher balance values are better, so we take the candidate
         # populations from the end of the list
         # FIXME n_keep_best MUST BE AT LEAST ONE OR IT WILL TAKE EVERYTHING!!!
-        # balance = torch.tensor(self.balance).to(self.device)
+        # balance = torch.from_numpy(self.balance).to(self.device)
         idxs_best_n_matches = torch.argsort(self.balance)[-self.n_keep_best :]
         offspring = self.candidate_populations[idxs_best_n_matches, :]
 

@@ -1,7 +1,7 @@
 setuptools
 PyYAML
 matplotlib
-numpy
+numpy<2
 pandas
 pyarrow
 pytest
