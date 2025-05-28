@@ -222,3 +222,12 @@ def test_specified_headers():
     m = MatchingData(df, headers=headers)
     assert m.headers["categoric"] == []
     assert m.headers["numeric"] == ["cat3"]
+
+
+def test_describe_with_custom_population_col():
+    # Create a dataset with a custom population column "Z"
+    data = generate_toy_dataset().data
+    data.rename(columns={"population": "Z"}, inplace=True)
+    quantiles = [0, 0.25, 0.5, 0.75, 1]
+    m = MatchingData(data, population_col="Z")
+    m.describe(aggregations=[], quantiles=quantiles)
