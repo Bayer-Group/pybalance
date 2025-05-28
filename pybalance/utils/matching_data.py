@@ -330,13 +330,13 @@ Populations:
         for cat in self.headers["categoric"]:
             tmp = (
                 self.data.reset_index()
-                .groupby(["population", cat])
+                .groupby([self.population_col, cat])
                 .count()[["index"]]
                 .reset_index()
             )
             tmp.loc[:, "feature"] = cat
             tmp = tmp.pivot(
-                index=["feature", cat], columns=["population"], values=["index"]
+                index=["feature", cat], columns=[self.population_col], values=["index"]
             )
             tmp.columns = [c[1] for c in tmp.columns]
             tmp.index.names = ["feature", "value"]
@@ -345,8 +345,9 @@ Populations:
         out = pd.concat(out).fillna(0)
 
         if normalize:
+            out = out.astype(float)
             for c in counts.columns:
-                out.loc[:, c] = out[c] / counts.iloc[0][c]
+                out.loc[:, c] = (out[c].values / counts.iloc[0][c]).astype(float)
         else:
             out = out.astype(int)
 
