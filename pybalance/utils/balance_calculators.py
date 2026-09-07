@@ -15,6 +15,7 @@ from pybalance.utils import (
     GammaPreprocessor,
     GammaXPreprocessor,
 )
+from pybalance.utils.aggregate import compute_aggregate_feature_moments
 
 import logging
 
@@ -127,13 +128,26 @@ class BaseBalanceCalculator:
         self.preprocessor = preprocessor
         self.preprocessor.fit(matching_data)
         self.matching_data = matching_data
-        target, pool = split_target_pool(matching_data)
-        self.target = self._preprocess(target)
-        self.pool = self._preprocess(pool)
         self._set_feature_weights(feature_weights)
 
-        self.target_mean = torch.mean(self.target, 0, True).to(self.device)
-        self.target_std = torch.std(self.target, 0, keepdim=True).to(self.device)
+        if matching_data.has_aggregate_target:
+            pool = matching_data.get_population(matching_data.pool_name)
+            self.target = None
+            self.pool = self._preprocess(pool)
+            pool_std = torch.std(self.pool, 0, keepdim=True).to(self.device)
+            self.target_mean, self.target_std = compute_aggregate_feature_moments(
+                matching_data.aggregate_target,
+                self.preprocessor,
+                pool_std=pool_std,
+                device=self.device,
+            )
+        else:
+            target, pool = split_target_pool(matching_data)
+            self.target = self._preprocess(target)
+            self.pool = self._preprocess(pool)
+            self.target_mean = torch.mean(self.target, 0, True).to(self.device)
+            self.target_std = torch.std(self.target, 0, keepdim=True).to(self.device)
+            pool_std = torch.std(self.pool, 0, keepdim=True).to(self.device)
 
         # Zero variances are bad and can lead to infinite loss.
         if any((self.target_std == 0)[0]):
@@ -146,7 +160,6 @@ class BaseBalanceCalculator:
                 f'Detected constant feature(s) in target population: {",".join(bad_columns)}.'
             )
 
-        pool_std = torch.std(self.pool, 0, keepdim=True).to(self.device)
         # Zero variances are bad and can lead to infinite loss.
         if any((pool_std == 0)[0]):
             bad_columns = [

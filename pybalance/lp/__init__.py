@@ -1,1 +1,5 @@
-from .matcher import ConstraintSatisfactionMatcher, SolutionPrinter
+from .matcher import (
+    ConstraintSatisfactionMatcher,
+    AggregateConstraintSatisfactionMatcher,
+    SolutionPrinter,
+)
