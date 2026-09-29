@@ -174,13 +174,18 @@ class FloatEncoder(BaseMatchingPreprocessor):
         # Convert nonfloats to numeric
         input_columns = self.nonfloat_columns
         output_columns = self.get_feature_names_out(input_columns)
-        data.loc[:, output_columns] = self.ordinal_encoder.transform(
-            data[input_columns]
-        )
+        if output_columns:
+            # widen dtype to float first so the assignment below can't be a
+            # lossy in-place cast (e.g. writing floats into an int64 column)
+            data = data.astype({c: float for c in output_columns})
+            data.loc[:, output_columns] = self.ordinal_encoder.transform(
+                data[input_columns]
+            )
 
         # Should be now possible to cast all features to float
         input_columns = self.input_headers["all"]
         output_columns = self.get_feature_names_out(input_columns)
+        data = data.astype({c: float for c in output_columns})
         data.loc[:, output_columns] = data[input_columns].astype(float)
 
         # Transform to MatchingData type

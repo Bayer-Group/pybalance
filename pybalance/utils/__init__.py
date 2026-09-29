@@ -1,7 +1,9 @@
 from .matching_data import (
+    AggregateTarget,
     MatchingData,
     MatchingHeaders,
     infer_matching_headers,
+    load_target_moments,
     split_target_pool,
 )
 from .preprocess import (

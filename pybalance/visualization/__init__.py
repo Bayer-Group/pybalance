@@ -5,4 +5,5 @@ from .distributions import (
     plot_per_feature_loss,
     plot_joint_numeric_distributions,
     plot_joint_numeric_categoric_distributions,
+    plot_fractional_difference,
 )
