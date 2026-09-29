@@ -10,3 +10,4 @@ Demos
    demos/ea_matcher.ipynb
    demos/lp_matcher.ipynb
    demos/card_matcher.ipynb
+   demos/maic_weighting.ipynb

@@ -62,13 +62,19 @@ setting is presented [here](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352
 - Utilizes integer program solvers and evolutionary solvers for optimization.
 - Includes implementation of propensity score matching for comparison.
 - Offers a variety of balance calculators and matchers.
+- Implements weighting methods, including Matching-Adjusted Indirect
+  Comparison (MAIC) and general entropy-balancing weights, for use cases where
+  patients should be reweighted rather than dropped.
 - Provides visualization tools for analysis.
 - Supports simulation of datasets for testing and demonstration purposes.
 
 ## Limitations
 
-At the moment, `pybalance` only implements matching routines. Suport for weighting
-methods is on our roadmap and will appear in a future release.
+`pybalance` implements matching routines as well as weighting methods (see
+`pybalance.weighting`, e.g. `MAICWeighter` for Matching-Adjusted Indirect
+Comparison and the more general `EntropyBalanceWeighter`). Further weighting
+methods (e.g. propensity-score-based inverse probability weighting) may be
+added in future releases.
 
 ## Citation
 

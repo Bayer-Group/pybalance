@@ -1,0 +1,508 @@
+from __future__ import annotations
+
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
+import pandas as pd
+from scipy.optimize import minimize
+
+from pybalance.utils import MatchingData, BalanceCalculator
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _check_fitted(weighter):
+    if weighter.weights is None:
+        raise ValueError("Weighter has not been fitted!")
+
+
+def effective_sample_size(weights: np.ndarray) -> float:
+    """
+    Kish's effective sample size: ``(sum w)**2 / sum(w**2)``. Invariant to the
+    overall scale of the weights. A large drop relative to ``len(weights)``
+    indicates the reweighting is relying heavily on a small number of pool
+    patients to match the target, and results should be interpreted
+    cautiously (e.g. the target may lie outside the range of the pool's
+    covariates).
+    """
+    weights = np.asarray(weights, dtype=float)
+    return float(weights.sum() ** 2 / np.sum(weights**2))
+
+
+def _softmax_weights(Z: np.ndarray, lam: np.ndarray) -> np.ndarray:
+    linpred = Z @ lam
+    linpred = linpred - linpred.max()
+    w = np.exp(linpred)
+    return w / w.sum()
+
+
+def _solve_entropy_weights(
+    Z: np.ndarray,
+    max_iter: int = 200,
+    tol: float = 1e-10,
+    ridge: float = 1e-8,
+) -> Tuple[np.ndarray, Dict]:
+    """
+    Solve for weights ``w_i = softmax(Z @ lambda)_i`` (so ``sum_i w_i == 1`` by
+    construction) by minimizing the (convex, smooth) dual of the
+    maximum-entropy weighting problem, ``log(sum_i exp(Z_i @ lambda))``, via
+    scipy's trust-region-Newton-CG solver using an analytic gradient and
+    Hessian. At the optimum, ``sum_i w_i * Z_i == 0`` for every column of
+    ``Z``, i.e. every (centered) moment constraint is exactly balanced in the
+    weighted pool. This is the method-of-moments weighting scheme underlying
+    MAIC (Signorovitch et al., 2010) and entropy balancing (Hainmueller,
+    2012).
+
+    The softmax parametrization (rather than the more commonly-quoted raw
+    ``w_i = exp(z_i . lambda)``) is important for numerical robustness: the
+    raw form leaves an unconstrained degree of freedom along which ``sum(w)``
+    can be driven towards 0 (or diverge) while the *raw* gradient ``Z.T @ w``
+    shrinks in lockstep, which can fool a naive convergence check into
+    declaring success at a degenerate, non-solution point. Because the
+    softmax always sums to 1, this failure mode is eliminated and the
+    gradient (a genuine weighted mean) is a directly interpretable, scale-free
+    convergence criterion. A trust-region solver (rather than plain damped
+    Newton) is used because the Hessian -- a weighted covariance matrix of
+    ``Z`` -- can be near-singular along directions with little effective
+    curvature (e.g. highly imbalanced categoric rates), which otherwise
+    produces enormous, unstable Newton steps.
+
+    :param Z: (n_pool, n_constraints) matrix of centered, column-scaled moment
+        constraints: ``Z[i, j]`` is patient ``i``'s (scaled) deviation from
+        the target moment for constraint ``j``.
+    :param max_iter: Maximum number of solver iterations.
+    :param tol: Convergence tolerance on the max-norm of the constraint
+        violation (weighted-mean residual).
+    :param ridge: Ridge term added to the Hessian for numerical stability;
+        important when constraints are collinear or near-collinear.
+    :return: Tuple ``(weights, diagnostics)`` where diagnostics has keys
+        'converged', 'n_iter', 'max_constraint_violation'.
+    """
+    n, k = Z.shape
+    if k == 0:
+        return np.ones(n) / n, {
+            "converged": True,
+            "n_iter": 0,
+            "max_constraint_violation": 0.0,
+        }
+
+    def _objective(lam):
+        linpred = Z @ lam
+        m = linpred.max()
+        return m + np.log(np.exp(linpred - m).sum())
+
+    def _grad(lam):
+        return Z.T @ _softmax_weights(Z, lam)
+
+    def _hess(lam):
+        w = _softmax_weights(Z, lam)
+        zc = Z - (Z.T @ w)
+        return (zc * w[:, None]).T @ zc + ridge * np.eye(k)
+
+    res = minimize(
+        _objective,
+        x0=np.zeros(k),
+        jac=_grad,
+        hess=_hess,
+        method="trust-ncg",
+        options={"maxiter": max_iter, "gtol": tol},
+    )
+
+    w_final = _softmax_weights(Z, res.x)
+    max_violation = float(np.max(np.abs(Z.T @ w_final)))
+    converged = bool(res.success) or max_violation < tol * 100
+
+    diagnostics = {
+        "converged": converged,
+        "n_iter": int(res.nit),
+        "max_constraint_violation": max_violation,
+    }
+    return w_final, diagnostics
+
+
+class BaseWeighter:
+    """
+    Common interface for weighting methods. Unlike the Matcher classes
+    (genetic/lp/propensity), a Weighter never drops pool patients; instead it
+    assigns every pool patient a non-negative weight so that the *weighted*
+    pool resembles the target on the moments of interest. This is the
+    standard approach for indirect/external comparisons when excluding
+    patients is undesirable or infeasible -- e.g. small pools, or a target
+    known only through published aggregate statistics.
+
+    :param matching_data: MatchingData whose pool is to be weighted. The
+        target can be either patient-level or an ``AggregateTarget`` (e.g. a
+        published Table 1).
+    :param weight_col: Name of the column used to store weights on the
+        MatchingData returned by match(). Must not collide with an existing
+        matching feature.
+    :param verbose: Whether to log fitting diagnostics.
+    """
+
+    def __init__(
+        self,
+        matching_data: MatchingData,
+        weight_col: str = "sample_weight",
+        verbose: bool = True,
+    ):
+        if weight_col in matching_data.headers.all:
+            raise ValueError(
+                f"weight_col={weight_col!r} collides with an existing matching "
+                "feature. Pass a different weight_col."
+            )
+
+        self.matching_data = matching_data.copy()
+        self.weight_col = weight_col
+        self.verbose = verbose
+        self.weights: Optional[np.ndarray] = None
+        self.diagnostics: Dict = {}
+
+    def get_params(self) -> Dict:
+        raise NotImplementedError
+
+    def _fit(self) -> "BaseWeighter":
+        """
+        Compute self.weights/self.diagnostics. Subclasses implement this;
+        end users should call match() instead (see below), which calls this
+        internally and wraps the result in a MatchingData, matching the
+        public interface of the other matchers in pybalance.
+        """
+        raise NotImplementedError
+
+    def get_weights(self) -> np.ndarray:
+        """
+        Return the fitted per-patient pool weights (in pool row order).
+        """
+        _check_fitted(self)
+        return self.weights
+
+    def effective_sample_size(self) -> float:
+        """
+        Kish's effective sample size of the fitted weights. See
+        ``effective_sample_size()``.
+        """
+        _check_fitted(self)
+        return effective_sample_size(self.weights)
+
+    def match(self) -> MatchingData:
+        """
+        Fit (if not already fit) and return a MatchingData instance in which
+        every pool patient is retained and carries a new column (see
+        weight_col) holding their fitted weight. The target population
+        (patient-level or aggregate) is passed through unchanged, with weight
+        1.0 assigned to any patient-level target rows.
+        """
+        if self.weights is None:
+            self._fit()
+
+        md = self.matching_data
+        pool = md.get_population(md.pool_name).copy()
+        pool[self.weight_col] = self.weights
+
+        if md.has_aggregate_target:
+            return MatchingData(
+                pool=pool,
+                target=md.aggregate_target,
+                headers=md.headers,
+                population_col=md.population_col,
+                pool_name=md.pool_name,
+                target_name=md.target_name,
+            )
+
+        target = md.get_population(md.target_name).copy()
+        target[self.weight_col] = 1.0
+        return MatchingData(
+            pool=pool,
+            target=target,
+            headers=md.headers,
+            population_col=md.population_col,
+            pool_name=md.pool_name,
+            target_name=md.target_name,
+        )
+
+
+class EntropyBalanceWeighter(BaseWeighter):
+    """
+    General maximum-entropy ("method of moments") weighting: solves for
+    pool weights of the form ``w_i = exp(z_i . alpha)`` such that the weighted
+    pool mean equals the target mean for every matching feature (categoric
+    features are one-hot encoded, so matching their mean matches their rate).
+    Optionally also balances variance for numeric features whose target
+    discloses (or, for a patient-level target, has) a standard deviation.
+
+    This is the general form of Matching-Adjusted Indirect Comparison (MAIC;
+    Signorovitch et al., 2010); see ``MAICWeighter`` for the classic
+    mean-only formulation.
+
+    :param matching_data: MatchingData whose pool is to be weighted.
+    :param match_variance: If True, additionally constrain the weighted
+        variance of numeric features. For an ``AggregateTarget``, only
+        features that actually disclose a "std" are constrained (mirroring
+        ``AggregateConstraintSatisfactionMatcher``); for a patient-level
+        target, every numeric feature's variance is constrained. Categoric
+        features are never variance-constrained: their variance is already
+        determined by their (matched) rate.
+    :param normalize: How to rescale the fitted weights for reporting: "target"
+        (default) rescales so weights sum to the target population size,
+        "pool" rescales so weights sum to the pool size, "none" leaves the raw
+        dual-optimizer weights unscaled. This choice has no effect on balance
+        (the moment constraints are scale-invariant) or on
+        effective_sample_size(); it only affects the units the weights are
+        reported in.
+    :param max_iter: Maximum number of Newton iterations.
+    :param tol: Convergence tolerance on the (max-norm) constraint violation.
+    :param ridge: Ridge regularization added to the Newton step for numerical
+        stability; increase this if fitting fails to converge due to
+        collinear/near-collinear features.
+    :param weight_col: Name of the column used to store weights on the
+        MatchingData returned by match().
+    :param verbose: Whether to log fitting diagnostics.
+    """
+
+    def __init__(
+        self,
+        matching_data: MatchingData,
+        match_variance: bool = False,
+        normalize: str = "target",
+        max_iter: int = 200,
+        tol: float = 1e-8,
+        ridge: float = 1e-8,
+        weight_col: str = "sample_weight",
+        verbose: bool = True,
+    ):
+        super().__init__(matching_data, weight_col=weight_col, verbose=verbose)
+
+        if normalize not in ("target", "pool", "none"):
+            raise ValueError(
+                f"normalize must be one of 'target', 'pool', 'none'; got {normalize!r}."
+            )
+
+        self.match_variance = match_variance
+        self.normalize = normalize
+        self.max_iter = max_iter
+        self.tol = tol
+        self.ridge = ridge
+
+        # Reuse BetaBalance to get a fitted preprocessor plus pool features and
+        # target mean/std in a single consistent output feature space (one-hot
+        # categoric rates + numeric passthrough) -- including its existing,
+        # tested handling of AggregateTarget mapping.
+        self.balance_calculator = BalanceCalculator(self.matching_data, "beta")
+        self.preprocessor = self.balance_calculator.preprocessor
+
+    def get_params(self) -> Dict:
+        return {
+            "match_variance": self.match_variance,
+            "normalize": self.normalize,
+            "max_iter": self.max_iter,
+            "tol": self.tol,
+            "ridge": self.ridge,
+        }
+
+    def _numeric_features_with_disclosed_std(self) -> List[str]:
+        md = self.matching_data
+        if md.has_aggregate_target:
+            return [
+                f
+                for f in md.aggregate_target.headers.numeric
+                if "std" in md.aggregate_target.numeric[f]
+            ]
+        return list(md.headers.numeric)
+
+    def _build_constraints(self) -> Tuple[np.ndarray, List[str]]:
+        """
+        Build the (n_pool, n_constraints) centered-and-scaled constraint
+        matrix used to solve for weights, plus a human-readable label per
+        constraint column (for diagnostics/reporting).
+        """
+        pool = self.balance_calculator.pool.cpu().numpy()
+        target_mean = self.balance_calculator.target_mean.cpu().numpy().reshape(-1)
+        target_std = self.balance_calculator.target_std.cpu().numpy().reshape(-1)
+        pool_std = pool.std(axis=0)
+
+        out_features = self.preprocessor.output_headers["all"]
+        n_pool, n_features = pool.shape
+
+        columns = []
+        labels = []
+        for j in range(n_features):
+            scale = (
+                target_std[j]
+                if target_std[j] > 0
+                else (pool_std[j] if pool_std[j] > 0 else 1.0)
+            )
+            columns.append((pool[:, j] - target_mean[j]) / scale)
+            labels.append(f"{out_features[j]} (mean)")
+
+        if self.match_variance:
+            variance_features = set(self._numeric_features_with_disclosed_std())
+            for j, feature in enumerate(out_features):
+                if feature not in variance_features:
+                    continue
+                dev = (pool[:, j] - target_mean[j]) ** 2
+                target_var = target_std[j] ** 2
+                # Give the variance term its own scale so it neither dominates
+                # nor is swamped by the mean terms purely due to units (same
+                # concern handled in
+                # AggregateConstraintSatisfactionMatcher._get_target_variance_targets).
+                scale2 = target_var if target_var > 0 else max(dev.std(), 1.0)
+                columns.append((dev - target_var) / scale2)
+                labels.append(f"{feature} (variance)")
+
+        Z = np.column_stack(columns) if columns else np.zeros((n_pool, 0))
+        return Z, labels
+
+    def _fit(self) -> "EntropyBalanceWeighter":
+        md = self.matching_data
+        n_pool = len(md.get_population(md.pool_name))
+        n_target = (
+            md.aggregate_target.n
+            if md.has_aggregate_target
+            else len(md.get_population(md.target_name))
+        )
+
+        Z, labels = self._build_constraints()
+        self.constraint_labels = labels
+
+        weights, diagnostics = _solve_entropy_weights(
+            Z, max_iter=self.max_iter, tol=self.tol, ridge=self.ridge
+        )
+
+        if self.normalize == "target":
+            weights = weights * (n_target / weights.sum())
+        elif self.normalize == "pool":
+            weights = weights * (n_pool / weights.sum())
+
+        self.weights = weights
+        self.diagnostics = diagnostics
+        self.diagnostics["effective_sample_size"] = effective_sample_size(weights)
+
+        if not diagnostics["converged"]:
+            logger.warning(
+                f"{self.__class__.__name__} did not converge within "
+                f"{self.max_iter} iterations (max constraint violation = "
+                f"{diagnostics['max_constraint_violation']:.4g}). Weights may "
+                "not exactly balance the requested moments; consider "
+                "increasing max_iter/ridge, or check for unmatchable (e.g. "
+                "near-extreme or non-overlapping) covariates."
+            )
+        elif self.verbose:
+            logger.info(
+                f"{self.__class__.__name__} converged in {diagnostics['n_iter']} "
+                "iterations. Effective sample size: "
+                f"{self.diagnostics['effective_sample_size']:.1f} / {n_pool} pool patients."
+            )
+
+        return self
+
+
+class MAICWeighter(EntropyBalanceWeighter):
+    """
+    Matching-Adjusted Indirect Comparison (MAIC; Signorovitch et al., 2010,
+    "Comparative effectiveness without head-to-head trials: a method for
+    matching-adjusted indirect comparisons applied to psoriasis clinical
+    trials"). Reweights patient-level ("IPD") pool data so that its weighted
+    means match a target's aggregate statistics -- typically a comparator
+    trial's published Table 1 -- using the method-of-moments / maximum-entropy
+    weighting scheme of ``EntropyBalanceWeighter``, restricted to first
+    moments only. This is the standard MAIC formulation and is appropriate
+    whenever the comparator discloses only means (and category rates), not
+    variances.
+
+    Use ``EntropyBalanceWeighter(matching_data, match_variance=True)`` directly
+    if the comparator additionally discloses standard deviations you also want
+    to match.
+
+    :param matching_data: MatchingData whose pool (IPD) is to be weighted to
+        match the target's (typically aggregate, e.g. ``AggregateTarget``)
+        moments.
+    :param normalize: See ``EntropyBalanceWeighter``. Defaults to "target",
+        i.e. weights sum to the target's sample size, matching common MAIC
+        reporting conventions.
+    :param max_iter: Maximum number of Newton iterations.
+    :param tol: Convergence tolerance on the (max-norm) constraint violation.
+    :param ridge: Ridge regularization added to the Newton step for numerical
+        stability.
+    :param weight_col: Name of the column used to store weights on the
+        MatchingData returned by match().
+    :param verbose: Whether to log fitting diagnostics.
+    """
+
+    def __init__(
+        self,
+        matching_data: MatchingData,
+        normalize: str = "target",
+        max_iter: int = 200,
+        tol: float = 1e-8,
+        ridge: float = 1e-8,
+        weight_col: str = "sample_weight",
+        verbose: bool = True,
+    ):
+        super().__init__(
+            matching_data,
+            match_variance=False,
+            normalize=normalize,
+            max_iter=max_iter,
+            tol=tol,
+            ridge=ridge,
+            weight_col=weight_col,
+            verbose=verbose,
+        )
+
+    def get_params(self) -> Dict:
+        params = super().get_params()
+        del params["match_variance"]
+        return params
+
+
+def weighted_balance_table(weighter: EntropyBalanceWeighter) -> pd.DataFrame:
+    """
+    Return a table comparing each balanced feature's weighted (and, for
+    reference, unweighted) pool moment to the target moment -- a quick
+    post-hoc check that match() achieved balance (residuals should be ~0 for
+    every constrained row).
+
+    :param weighter: A fitted EntropyBalanceWeighter (or subclass, e.g.
+        MAICWeighter), i.e. one on which match() has already been called.
+    """
+    _check_fitted(weighter)
+    pool = weighter.balance_calculator.pool.cpu().numpy()
+    target_mean = weighter.balance_calculator.target_mean.cpu().numpy().reshape(-1)
+    target_std = weighter.balance_calculator.target_std.cpu().numpy().reshape(-1)
+    out_features = weighter.preprocessor.output_headers["all"]
+    w = weighter.weights
+
+    variance_features = (
+        set(weighter._numeric_features_with_disclosed_std())
+        if weighter.match_variance
+        else set()
+    )
+
+    rows = []
+    for j, feature in enumerate(out_features):
+        rows.append(
+            {
+                "feature": feature,
+                "moment": "mean",
+                "target": target_mean[j],
+                "unweighted_pool": pool[:, j].mean(),
+                "weighted_pool": np.average(pool[:, j], weights=w),
+            }
+        )
+        if feature in variance_features:
+            rows.append(
+                {
+                    "feature": feature,
+                    "moment": "variance",
+                    "target": target_std[j] ** 2,
+                    "unweighted_pool": pool[:, j].var(),
+                    "weighted_pool": np.average(
+                        (pool[:, j] - np.average(pool[:, j], weights=w)) ** 2,
+                        weights=w,
+                    ),
+                }
+            )
+
+    return pd.DataFrame(rows)
