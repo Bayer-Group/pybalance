@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pybalance.utils.preprocess &mdash; PyBalance</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
@@ -257,13 +257,18 @@
         <span class="c1"># Convert nonfloats to numeric</span>
         <span class="n">input_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonfloat_columns</span>
         <span class="n">output_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">(</span><span class="n">input_columns</span><span class="p">)</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">output_columns</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordinal_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">input_columns</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">output_columns</span><span class="p">:</span>
+            <span class="c1"># widen dtype to float first so the assignment below can&#39;t be a</span>
+            <span class="c1"># lossy in-place cast (e.g. writing floats into an int64 column)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">output_columns</span><span class="p">})</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">output_columns</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordinal_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">input_columns</span><span class="p">]</span>
+            <span class="p">)</span>
 
         <span class="c1"># Should be now possible to cast all features to float</span>
         <span class="n">input_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>
         <span class="n">output_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">(</span><span class="n">input_columns</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">output_columns</span><span class="p">})</span>
         <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">output_columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">input_columns</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="c1"># Transform to MatchingData type</span>

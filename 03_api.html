@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>API documentation &mdash; PyBalance</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -96,6 +96,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#constraint-satisfaction-matcher">Constraint Satisfaction Matcher</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.lp.ConstraintSatisfactionMatcher"><code class="docutils literal notranslate"><span class="pre">ConstraintSatisfactionMatcher</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher"><code class="docutils literal notranslate"><span class="pre">AggregateConstraintSatisfactionMatcher</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -196,7 +197,7 @@ categoric (e.g. country, gender) and numeric (e.g. age, weight) types.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pybalance.utils.MatchingData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">MatchingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'population'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybalance/utils/matching_data.html#MatchingData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">MatchingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'population'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pool'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'target'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybalance/utils/matching_data.html#MatchingData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData" title="Permalink to this definition"></a></dt>
 <dd><p>It is common in matching problems to require basic metadata about the data
 in order to perform matching. For instance, the data may contain columns
 such as “patient_id”, “population” and “index_date”, which are not intended
@@ -205,20 +206,41 @@ the main data everywhere. MatchingData is a wrapper around pandas.DataFrame
 that includes this additional required logic about the columns. Features
 required for matching are described by a “headers” field, while other
 columns exist alongside. See MatchingHeaders.</p>
+<p>Construction patterns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Combined patient-level table with a population column</span>
+<span class="n">MatchingData</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="n">MatchingData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">population_col</span><span class="o">=</span><span class="s2">&quot;population&quot;</span><span class="p">)</span>
+
+<span class="c1"># Explicit patient-level pool and target</span>
+<span class="n">MatchingData</span><span class="p">(</span><span class="n">pool</span><span class="o">=</span><span class="n">pool_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target_df</span><span class="p">)</span>
+
+<span class="c1"># Patient-level pool and aggregate-only target</span>
+<span class="n">MatchingData</span><span class="p">(</span><span class="n">pool</span><span class="o">=</span><span class="n">pool_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">AggregateTarget</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data frame containing both matching feature data for all
+<li><p><strong>data</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>str</em><em>]</em><em>]</em>) – Data frame containing both matching feature data for all
 populations as well as at least one additional column specifying to
 which population each row belongs. If a string is passed, it is assumed
-to be a path to the data frame.</p></li>
+to be a path to the data frame. Mutually exclusive with <code class="docutils literal notranslate"><span class="pre">pool</span></code> /
+<code class="docutils literal notranslate"><span class="pre">target</span></code>.</p></li>
 <li><p><strong>headers</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#pybalance.utils.MatchingHeaders" title="pybalance.utils.MatchingHeaders"><em>MatchingHeaders</em></a><em>]</em>) – A MatchingHeaders object with keys “numeric” and “categoric”
 and whoses values are names of columns to be used for matching. If None
 is passed, headers will be inferred based on how many unique values each
-column has. As guessing the headers can lead to errors, it is
-recommended to supply them explicitly.</p></li>
+column has (or from <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> when the target is aggregate).
+As guessing the headers can lead to errors, it is recommended to supply
+them explicitly.</p></li>
 <li><p><strong>population_col</strong> (<em>str</em>) – Name of the column used to split data into
 subpopulations.</p></li>
+<li><p><strong>pool</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>str</em><em>]</em><em>]</em>) – Patient-level pool population. Used with <code class="docutils literal notranslate"><span class="pre">target</span></code>.</p></li>
+<li><p><strong>target</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>str</em><em>, </em><em>AggregateTarget</em><em>]</em><em>]</em>) – Either a patient-level target DataFrame or an
+<code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> summary. Used with <code class="docutils literal notranslate"><span class="pre">pool</span></code>.</p></li>
+<li><p><strong>pool_name</strong> (<em>str</em>) – Population label for <code class="docutils literal notranslate"><span class="pre">pool</span></code> when using the explicit
+split constructor.</p></li>
+<li><p><strong>target_name</strong> (<em>str</em>) – Population label for <code class="docutils literal notranslate"><span class="pre">target</span></code> when using the explicit
+split constructor.</p></li>
 </ul>
 </dd>
 </dl>
@@ -879,6 +901,67 @@ up in a later release.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.lp.AggregateConstraintSatisfactionMatcher">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.lp.</span></span><span class="sig-name descname"><span class="pre">AggregateConstraintSatisfactionMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybalance/lp/matcher.html#AggregateConstraintSatisfactionMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher" title="Permalink to this definition"></a></dt>
+<dd><p>Constraint-satisfaction matcher for an <em>aggregate</em> target: the pool is
+patient-level, but the reference population is known only through summary
+statistics (an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>, e.g. a published Table 1). A subset of
+the pool is selected so that its moments match the target’s.</p>
+<p>Only the moments actually disclosed on <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> are matched: a
+numeric feature’s mean is always matched (mean is required), and its
+variance is <em>additionally</em> constrained if – and only if – the target
+discloses a “std” for that feature. This makes matching moment-aware: pass
+a target std to control it, or omit it to leave a feature’s spread
+unconstrained. One consequence: setting a target std of 0 asks the solver
+for the minimal-variance subset achievable for that feature, subject to
+everything else.</p>
+<p>The target is a fixed constraint vector and is never subsetted, so several
+<code class="docutils literal notranslate"><span class="pre">ConstraintSatisfactionMatcher</span></code> options do not apply here and are
+intentionally absent:</p>
+<ul class="simple">
+<li><p>no <code class="docutils literal notranslate"><span class="pre">objective</span></code>: only the beta / mean-matching formulation is defined
+against aggregate moments, so it is used unconditionally;</p></li>
+<li><p>no <code class="docutils literal notranslate"><span class="pre">target_size</span></code> / <code class="docutils literal notranslate"><span class="pre">match_size</span></code>: the target cannot be subsetted, so
+the effective target size is always <code class="docutils literal notranslate"><span class="pre">AggregateTarget.n</span></code>;</p></li>
+<li><p>no <code class="docutils literal notranslate"><span class="pre">ps_hinting</span></code> / solver hints: there is no patient-level target to
+build a hint from.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matching_data</strong> (<a class="reference internal" href="#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a>) – A MatchingData object whose target is an
+<code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>. See utils.matching_data.</p></li>
+<li><p><strong>pool_size</strong> (<em>int</em><em> | </em><em>None</em>) – Number of samples to include from the pool in the matched
+population. Must be less than the size of the pool. If neither pool_size
+nor max_mismatch is set, pool_size defaults to <code class="docutils literal notranslate"><span class="pre">AggregateTarget.n</span></code>. If
+max_mismatch is set and pool_size is not, then pool_size is optimized
+subject to the balance constraint (cardinality matching).</p></li>
+<li><p><strong>max_mismatch</strong> (<em>float</em><em> | </em><em>None</em>) – Maximum allowable absolute mean difference for any
+feature. Only applies to mean matching; variance matching (for
+features with a disclosed target std) is always a soft, minimized
+objective term and is not capped by max_mismatch.</p></li>
+<li><p><strong>time_limit</strong> (<em>float</em>) – Time limit to stop solving in seconds (def: 180 sec).</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers to use to optimize objective.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Verbose solving.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.lp.AggregateConstraintSatisfactionMatcher.match">
+<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybalance/lp/matcher.html#AggregateConstraintSatisfactionMatcher.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher.match" title="Permalink to this definition"></a></dt>
+<dd><p>Match the pool to the aggregate target passed during __init__().
+Returns a MatchingData instance containing the matched pool and the
+(unchanged) aggregate target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 <section id="visualization">
@@ -889,6 +972,10 @@ up in a later release.</p>
 <dd><p>Plot the one-dimensional marginal distributions for all numerical features
 and all treatment groups found in matching_data. Extra keyword arguments are
 passed to seaborn.histplot and override defaults.</p>
+<p>If matching_data has an AggregateTarget, it has no patient-level rows to
+plot a distribution for; instead, each feature’s disclosed mean is
+overlaid as a dashed vertical line, and its mean +/- std (when disclosed)
+as a shaded band.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -909,6 +996,9 @@ all numeric features are plotted.</p></li>
 <dd><p>Plot the one-dimensional marginal distributions for all categoric features
 and all treatment groups found in matching_data. Extra keyword arguments are
 passed to seaborn.histplot and override defaults.</p>
+<p>If matching_data has an AggregateTarget, it has no patient-level rows to
+plot a distribution for; instead, each feature’s disclosed rate(s) are
+overlaid as diamond markers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

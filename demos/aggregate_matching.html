@@ -1,0 +1,1216 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo: Matching a pool to an aggregate target &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=860ec0ee"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Demo: Matching a pool to an <em>aggregate</em> target</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/demos/aggregate_matching.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Demo:-Matching-a-pool-to-an-aggregate-target">
+<h1>Demo: Matching a pool to an <em>aggregate</em> target<a class="headerlink" href="#Demo:-Matching-a-pool-to-an-aggregate-target" title="Permalink to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">AggregateConstraintSatisfactionMatcher</span></code> selects a subset of a patient-level pool so that its moments match a target known only through <strong>summary statistics</strong> – e.g. a published trial’s Table 1 (means, proportions, sometimes standard deviations) – rather than patient-level rows.</p>
+<p>This notebook uses <code class="docutils literal notranslate"><span class="pre">pybalance.sim.generate_toy_dataset</span></code> and deliberately throws away the patient-level target rows, keeping only a few summary numbers computed from them. That’s the only place target information comes from below.</p>
+<p>The notebook walks through the moment-aware behavior of the matcher:</p>
+<ul class="simple">
+<li><p>a numeric feature’s <strong>mean</strong> is always matched (it’s required on <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>);</p></li>
+<li><p>its <strong>variance</strong> is <em>additionally</em> constrained only if you disclose a target <code class="docutils literal notranslate"><span class="pre">std</span></code> for it;</p></li>
+<li><p>disclosing a target <code class="docutils literal notranslate"><span class="pre">std</span></code> of <code class="docutils literal notranslate"><span class="pre">0</span></code> asks the solver for the <strong>minimal-variance</strong> subset for that feature – a neat trick for finding the most homogeneous matching subgroup.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.lp</span><span class="w"> </span><span class="kn">import</span> <span class="n">AggregateConstraintSatisfactionMatcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_toy_dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">AggregateTarget</span><span class="p">,</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">MatchingHeaders</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">plot_categoric_features</span><span class="p">,</span>
+    <span class="n">plot_fractional_difference</span><span class="p">,</span>
+    <span class="n">plot_numeric_features</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="c1"># show the matcher&#39;s CP-SAT solver output</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="1.-Synthetic-data,-and-%22disclosing%22-only-a-few-numbers">
+<h2>1. Synthetic data, and “disclosing” only a few numbers<a class="headerlink" href="#1.-Synthetic-data,-and-%22disclosing%22-only-a-few-numbers" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">generate_toy_dataset</span></code> returns patient-level <code class="docutils literal notranslate"><span class="pre">pool</span></code> and <code class="docutils literal notranslate"><span class="pre">target</span></code> populations – entirely simulated, no real patients. We keep the pool, but for the target we compute a handful of summary statistics (as if reading them off a published Table 1) and then delete the patient-level target rows, so nothing below this cell can accidentally use them.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">generate_toy_dataset</span><span class="p">(</span><span class="n">n_pool</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">pool</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s2">&quot;pool&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">population_col</span><span class="p">])</span>
+<span class="n">target_patient_level</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">population_col</span><span class="p">])</span>
+
+<span class="c1"># Keep the feature set small so the solver stays quick for a demo.</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="n">MatchingHeaders</span><span class="p">(</span><span class="n">numeric</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="n">categoric</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">,</span> <span class="s2">&quot;country&quot;</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pool:   </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span><span class="si">}</span><span class="s2"> (synthetic) patients&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;target: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">target_patient_level</span><span class="p">)</span><span class="si">}</span><span class="s2"> (synthetic) patients -- patient-level rows discarded below&quot;</span><span class="p">)</span>
+<span class="n">pool</span><span class="p">[</span><span class="n">headers</span><span class="o">.</span><span class="n">all</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+pool:   1000 (synthetic) patients
+target: 100 (synthetic) patients -- patient-level rows discarded below
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>gender</th>
+      <th>country</th>
+      <th>age</th>
+      <th>weight</th>
+      <th>height</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.0</td>
+      <td>4</td>
+      <td>69.436489</td>
+      <td>79.144533</td>
+      <td>155.189260</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.0</td>
+      <td>5</td>
+      <td>28.771438</td>
+      <td>97.734561</td>
+      <td>175.270602</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.0</td>
+      <td>2</td>
+      <td>62.640154</td>
+      <td>85.170055</td>
+      <td>136.648640</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.0</td>
+      <td>3</td>
+      <td>68.907932</td>
+      <td>90.705549</td>
+      <td>189.959952</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.0</td>
+      <td>3</td>
+      <td>49.571169</td>
+      <td>76.708193</td>
+      <td>133.787109</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># &quot;Disclosed&quot; summary statistics -- pretend these are the only numbers a</span>
+<span class="c1"># published Table 1 gives us about the target.</span>
+<span class="n">age_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">target_patient_level</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="n">age_std</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">target_patient_level</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="n">height_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">target_patient_level</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="n">height_std</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">target_patient_level</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="n">weight_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">target_patient_level</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="n">weight_std</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">target_patient_level</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="n">gender_rates</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">target_patient_level</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="p">}</span>
+<span class="n">country_rates</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">target_patient_level</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="p">}</span>
+<span class="n">n_target</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_patient_level</span><span class="p">)</span>
+
+<span class="c1"># From here on, only the disclosed numbers above exist -- no patient-level target data.</span>
+<span class="k">del</span> <span class="n">target_patient_level</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;age:    mean=</span><span class="si">{</span><span class="n">age_mean</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, std=</span><span class="si">{</span><span class="n">age_std</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;weight: mean=</span><span class="si">{</span><span class="n">weight_mean</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, std=</span><span class="si">{</span><span class="n">weight_std</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;height: mean=</span><span class="si">{</span><span class="n">height_mean</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, std=</span><span class="si">{</span><span class="n">height_std</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gender: </span><span class="si">{</span><span class="n">gender_rates</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;country: </span><span class="si">{</span><span class="n">country_rates</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+age:    mean=50.8, std=15.0
+weight: mean=82.1, std=18.7
+height: mean=153.8, std=15.7
+gender: {0.0: 0.55, 1.0: 0.45}
+country: {1: 0.25, 2: 0.2, 4: 0.2, 5: 0.15, 3: 0.11, 0: 0.09}
+</pre></div></div>
+</div>
+</section>
+<section id="2.-A-small-helper">
+<h2>2. A small helper<a class="headerlink" href="#2.-A-small-helper" title="Permalink to this heading"></a></h2>
+<p>We’ll build several <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>s below with different <code class="docutils literal notranslate"><span class="pre">std_mode</span></code>s, controlling whether/how the numeric features’ (<code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">weight</span></code>, <code class="docutils literal notranslate"><span class="pre">height</span></code>) variances are constrained, and compare the resulting matches. This helper builds the target, wraps it with the pool in a <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code>, and runs <code class="docutils literal notranslate"><span class="pre">AggregateConstraintSatisfactionMatcher</span></code>. <code class="docutils literal notranslate"><span class="pre">gender</span></code>’s and <code class="docutils literal notranslate"><span class="pre">country</span></code>’s rates are always disclosed, as categoric baselines.</p>
+<p>To inspect the results, use the library’s own <code class="docutils literal notranslate"><span class="pre">MatchingData.describe()</span></code> – it reports pool vs. target side by side (N, categoric rates, numeric mean/std/quantiles) for both patient-level and aggregate targets alike, so there’s no need to write a custom summary printer.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">match_with_std_mode</span><span class="p">(</span><span class="n">std_mode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Match `pool` to the disclosed target. std_mode controls whether/how the</span>
+<span class="sd">    numeric features&#39; (age, weight, height) variances are constrained:</span>
+<span class="sd">      - &quot;none&quot;      -&gt; no std disclosed for any numeric feature; only their</span>
+<span class="sd">                        means are matched, so their spreads are unconstrained.</span>
+<span class="sd">      - &quot;disclosed&quot; -&gt; each numeric feature&#39;s actual std is disclosed too, so</span>
+<span class="sd">                        the matcher additionally constrains its variance.</span>
+<span class="sd">      - &quot;zero&quot;      -&gt; every numeric feature&#39;s std is forced to 0, asking the</span>
+<span class="sd">                        solver for the minimal-variance subset simultaneously</span>
+<span class="sd">                        for all three.</span>
+<span class="sd">    gender&#39;s and country&#39;s rates are always disclosed, as categoric baselines.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">numeric</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="n">age_mean</span><span class="p">},</span>
+        <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="n">weight_mean</span><span class="p">},</span>
+        <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="n">height_mean</span><span class="p">},</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">std_mode</span> <span class="o">==</span> <span class="s2">&quot;disclosed&quot;</span><span class="p">:</span>
+        <span class="n">numeric</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">][</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">age_std</span>
+        <span class="n">numeric</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight_std</span>
+        <span class="n">numeric</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">][</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">height_std</span>
+    <span class="k">elif</span> <span class="n">std_mode</span> <span class="o">==</span> <span class="s2">&quot;zero&quot;</span><span class="p">:</span>
+        <span class="n">numeric</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">][</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">numeric</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">numeric</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">][</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">elif</span> <span class="n">std_mode</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown std_mode: </span><span class="si">{</span><span class="n">std_mode</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">target</span> <span class="o">=</span> <span class="n">AggregateTarget</span><span class="p">(</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">n_target</span><span class="p">,</span>
+        <span class="n">numeric</span><span class="o">=</span><span class="n">numeric</span><span class="p">,</span>
+        <span class="n">categoric</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;gender&quot;</span><span class="p">:</span> <span class="n">gender_rates</span><span class="p">,</span> <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="n">country_rates</span><span class="p">},</span>
+        <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">matching_data</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">matcher</span> <span class="o">=</span> <span class="n">AggregateConstraintSatisfactionMatcher</span><span class="p">(</span>
+        <span class="n">matching_data</span><span class="p">,</span> <span class="n">time_limit</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">matching_data</span><span class="p">,</span> <span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="3.-Use-case-1----solve-just-for-means">
+<h2>3. Use case 1 – solve just for means<a class="headerlink" href="#3.-Use-case-1----solve-just-for-means" title="Permalink to this heading"></a></h2>
+<p>No numeric feature’s std is passed to <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>, so the matcher is under no obligation to control any of their spreads – only <code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">weight</span></code> and <code class="docutils literal notranslate"><span class="pre">height</span></code>’s means (and <code class="docutils literal notranslate"><span class="pre">gender</span></code>/<code class="docutils literal notranslate"><span class="pre">country</span></code>’s rates) are constrained. Expect all three numeric features’ matched stds to land wherever an unconstrained mean-match happens to leave them.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">before_a</span><span class="p">,</span> <span class="n">after_a</span> <span class="o">=</span> <span class="n">match_with_std_mode</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Scaling features by factor 240.00 in order to use integer solver with &lt;= 0.4801% loss.
+Solving for match population with pool size = 100 and target size = 100 (aggregate), optimizing balance (no max_mismatch cap).
+Matching on 8 dimensions ...
+Building model variables and constraints ...
+Calculating bounds on feature variables ...
+Applying size constraints on pool ...
+Solving with 1 workers ...
+Initial balance score: 0.1757
+=========================================
+Solution 1, time = 0.00 m
+Objective:      40000.0
+Balance (beta): 0.0068
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 2, time = 0.00 m
+Objective:      4700.0
+Balance (beta): 0.0018
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 3, time = 0.01 m
+Objective:      2700.0
+Balance (beta): 0.0026
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 4, time = 0.01 m
+Objective:      1200.0
+Balance (beta): 0.0022
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 5, time = 0.01 m
+Objective:      1100.0
+Balance (beta): 0.0024
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 6, time = 0.01 m
+Objective:      800.0
+Balance (beta): 0.0024
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 7, time = 0.04 m
+Objective:      600.0
+Balance (beta): 0.0021
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 8, time = 0.05 m
+Objective:      400.0
+Balance (beta): 0.0021
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 9, time = 0.11 m
+Objective:      300.0
+Balance (beta): 0.0022
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+Status = FEASIBLE
+Number of solutions found: 9
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <span class="n">before_a</span>
+        <span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">quantiles</span><span class="o">=</span><span class="p">[])</span>
+        <span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">after_a</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">quantiles</span><span class="o">=</span><span class="p">[]),</span>
+            <span class="n">rsuffix</span><span class="o">=</span><span class="s1">&#39;_matched&#39;</span>
+        <span class="p">)[[</span><span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;pool_matched&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">]]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>pool</th>
+      <th>pool_matched</th>
+      <th>target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>population size</th>
+      <th>N</th>
+      <td>1.000</td>
+      <td>1.00</td>
+      <td>100.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">gender</th>
+      <th>0.0</th>
+      <td>0.483</td>
+      <td>0.55</td>
+      <td>0.55</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>0.517</td>
+      <td>0.45</td>
+      <td>0.45</td>
+    </tr>
+    <tr>
+      <th rowspan="6" valign="top">country</th>
+      <th>1.0</th>
+      <td>0.108</td>
+      <td>0.34</td>
+      <td>0.25</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.224</td>
+      <td>0.20</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.274</td>
+      <td>0.11</td>
+      <td>0.11</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.284</td>
+      <td>0.20</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.110</td>
+      <td>0.15</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>0.0</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.09</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">age</th>
+      <th>mean</th>
+      <td>55.520</td>
+      <td>50.91</td>
+      <td>50.80</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>13.110</td>
+      <td>15.78</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">weight</th>
+      <th>mean</th>
+      <td>88.020</td>
+      <td>82.23</td>
+      <td>82.08</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>16.550</td>
+      <td>13.73</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">height</th>
+      <th>mean</th>
+      <td>160.310</td>
+      <td>153.94</td>
+      <td>153.80</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>19.500</td>
+      <td>20.84</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_fractional_difference</span><span class="p">(</span><span class="n">before_a</span><span class="p">,</span> <span class="n">after_a</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Use case 1: means only&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_aggregate_matching_10_0.png" src="../_images/demos_aggregate_matching_10_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="s1">&#39;pool (matched)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">after_a</span><span class="o">.</span><span class="n">populations</span><span class="p">:</span>
+    <span class="n">before_a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">after_a</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;pool (matched)&#39;</span><span class="p">)</span>
+<span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">before_a</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">col_wrap</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;After matching (all numeric stds forced to 0)&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.08</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_aggregate_matching_11_0.png" src="../_images/demos_aggregate_matching_11_0.png" />
+</div>
+</div>
+</section>
+<section id="4.-Use-case-2----add-std-constraints-for-numeric-variables">
+<h2>4. Use case 2 – add std constraints for numeric variables<a class="headerlink" href="#4.-Use-case-2----add-std-constraints-for-numeric-variables" title="Permalink to this heading"></a></h2>
+<p>Now <code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">weight</span></code> and <code class="docutils literal notranslate"><span class="pre">height</span></code> each disclose their actual std too, so the matcher additionally constrains all three variances toward their disclosed values. Every numeric feature’s mean and std should land close to its disclosed target.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">before_b</span><span class="p">,</span> <span class="n">after_b</span> <span class="o">=</span> <span class="n">match_with_std_mode</span><span class="p">(</span><span class="s2">&quot;disclosed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Scaling features by factor 240.00 in order to use integer solver with &lt;= 0.4801% loss.
+Scaling variance terms by factor 2 (vs. mean-term factor 240.0) so neither dominates the objective purely due to units.
+Solving for match population with pool size = 100 and target size = 100 (aggregate), optimizing balance (no max_mismatch cap).
+Matching on 8 dimensions ...
+Building model variables and constraints ...
+Calculating bounds on feature variables ...
+Applying size constraints on pool ...
+Applying variance constraints on 3 feature(s) with disclosed std ...
+Solving with 1 workers ...
+Initial balance score: 0.1745
+=========================================
+Solution 1, time = 0.01 m
+Objective:      15416.0
+Balance (beta): 0.0027
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 2, time = 0.01 m
+Objective:      7789.0
+Balance (beta): 0.0018
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 3, time = 0.01 m
+Objective:      5801.0
+Balance (beta): 0.0023
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 4, time = 0.01 m
+Objective:      5405.0
+Balance (beta): 0.0023
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 5, time = 0.01 m
+Objective:      4467.0
+Balance (beta): 0.0021
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 6, time = 0.02 m
+Objective:      3192.0
+Balance (beta): 0.0022
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 7, time = 0.02 m
+Objective:      3133.0
+Balance (beta): 0.0023
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 8, time = 0.03 m
+Objective:      2842.0
+Balance (beta): 0.0020
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 9, time = 0.04 m
+Objective:      2817.0
+Balance (beta): 0.0021
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 10, time = 0.05 m
+Objective:      2554.0
+Balance (beta): 0.0020
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 11, time = 0.06 m
+Objective:      2180.0
+Balance (beta): 0.0022
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 12, time = 0.08 m
+Objective:      1847.0
+Balance (beta): 0.0020
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 13, time = 0.18 m
+Objective:      1831.0
+Balance (beta): 0.0020
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 14, time = 0.18 m
+Objective:      1574.0
+Balance (beta): 0.0020
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 15, time = 0.21 m
+Objective:      1453.0
+Balance (beta): 0.0020
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 16, time = 0.25 m
+Objective:      1254.0
+Balance (beta): 0.0020
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 17, time = 0.45 m
+Objective:      1234.0
+Balance (beta): 0.0021
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 18, time = 0.52 m
+Objective:      782.0
+Balance (beta): 0.0023
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+Status = FEASIBLE
+Number of solutions found: 18
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <span class="n">before_b</span>
+        <span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">quantiles</span><span class="o">=</span><span class="p">[])</span>
+        <span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">after_b</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">quantiles</span><span class="o">=</span><span class="p">[]),</span>
+            <span class="n">rsuffix</span><span class="o">=</span><span class="s1">&#39;_matched&#39;</span>
+        <span class="p">)[[</span><span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;pool_matched&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">]]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>pool</th>
+      <th>pool_matched</th>
+      <th>target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>population size</th>
+      <th>N</th>
+      <td>1.000</td>
+      <td>1.00</td>
+      <td>100.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">gender</th>
+      <th>0.0</th>
+      <td>0.483</td>
+      <td>0.55</td>
+      <td>0.55</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>0.517</td>
+      <td>0.45</td>
+      <td>0.45</td>
+    </tr>
+    <tr>
+      <th rowspan="6" valign="top">country</th>
+      <th>1.0</th>
+      <td>0.108</td>
+      <td>0.34</td>
+      <td>0.25</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.224</td>
+      <td>0.20</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.274</td>
+      <td>0.11</td>
+      <td>0.11</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.284</td>
+      <td>0.20</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.110</td>
+      <td>0.15</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>0.0</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.09</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">age</th>
+      <th>mean</th>
+      <td>55.520</td>
+      <td>50.91</td>
+      <td>50.80</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>13.110</td>
+      <td>15.08</td>
+      <td>15.02</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">weight</th>
+      <th>mean</th>
+      <td>88.020</td>
+      <td>82.24</td>
+      <td>82.08</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>16.550</td>
+      <td>18.84</td>
+      <td>18.72</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">height</th>
+      <th>mean</th>
+      <td>160.310</td>
+      <td>153.95</td>
+      <td>153.80</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>19.500</td>
+      <td>15.80</td>
+      <td>15.72</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_fractional_difference</span><span class="p">(</span><span class="n">before_b</span><span class="p">,</span> <span class="n">after_b</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Use case 2: means + disclosed std&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_aggregate_matching_15_0.png" src="../_images/demos_aggregate_matching_15_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="s1">&#39;pool (matched)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">after_b</span><span class="o">.</span><span class="n">populations</span><span class="p">:</span>
+    <span class="n">before_b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">after_b</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;pool (matched)&#39;</span><span class="p">)</span>
+<span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">before_b</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">col_wrap</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;After matching (all numeric stds forced to 0)&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.08</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_aggregate_matching_16_0.png" src="../_images/demos_aggregate_matching_16_0.png" />
+</div>
+</div>
+</section>
+<section id="5.-Use-case-3----add-std=0-constraints-for-numeric-variables">
+<h2>5. Use case 3 – add std=0 constraints for numeric variables<a class="headerlink" href="#5.-Use-case-3----add-std=0-constraints-for-numeric-variables" title="Permalink to this heading"></a></h2>
+<p>Setting every numeric feature’s target std to <code class="docutils literal notranslate"><span class="pre">0</span></code> asks the solver for the <strong>minimal-variance</strong> subset of the pool <em>simultaneously</em> for <code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">weight</span></code> and <code class="docutils literal notranslate"><span class="pre">height</span></code>. All three matched stds should collapse well below both use cases above – while their means (and gender/country’s rates) stay just as well matched as before.</p>
+<p>(You may see a <code class="docutils literal notranslate"><span class="pre">Detected</span> <span class="pre">constant</span> <span class="pre">feature(s)</span> <span class="pre">in</span> <span class="pre">target</span> <span class="pre">population:</span> <span class="pre">age,weight,height</span></code> warning – that’s the balance calculator flagging the zero-variance targets for its own diagnostics; it’s expected and harmless here.)</p>
+<p>You may also notice <code class="docutils literal notranslate"><span class="pre">country</span></code>’s fractional difference (and its bar chart further down) can’t be driven to zero for every level: this toy pool structurally contains <strong>no</strong> <code class="docutils literal notranslate"><span class="pre">country=0</span></code> patients at all (its generator never produces one), while the target discloses a small <code class="docutils literal notranslate"><span class="pre">country=0</span></code> rate. No subset of the pool can conjure up a category the pool doesn’t contain – a good reminder that subset-matching can only re-weight/re-select what’s already present.</p>
+<p>We also show the <code class="docutils literal notranslate"><span class="pre">clip</span></code> keyword on <code class="docutils literal notranslate"><span class="pre">plot_fractional_difference</span></code> here: it clips fractional differences to <code class="docutils literal notranslate"><span class="pre">[-clip,</span> <span class="pre">clip]</span></code> before plotting, which is useful when a feature’s target value is close to zero (a tiny target can otherwise produce a huge fractional difference that squashes every other feature’s bar in comparison).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">before_c</span><span class="p">,</span> <span class="n">after_c</span> <span class="o">=</span> <span class="n">match_with_std_mode</span><span class="p">(</span><span class="s2">&quot;zero&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Detected constant feature(s) in target population: age,weight,height.
+Scaling features by factor 240.00 in order to use integer solver with &lt;= 0.4801% loss.
+Scaling variance terms by factor 2 (vs. mean-term factor 240.0) so neither dominates the objective purely due to units.
+Solving for match population with pool size = 100 and target size = 100 (aggregate), optimizing balance (no max_mismatch cap).
+Matching on 8 dimensions ...
+Building model variables and constraints ...
+Calculating bounds on feature variables ...
+Applying size constraints on pool ...
+Applying variance constraints on 3 feature(s) with disclosed std ...
+Solving with 1 workers ...
+Initial balance score: 0.2143
+=========================================
+Solution 1, time = 0.01 m
+Objective:      199450.0
+Balance (beta): 0.0069
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 2, time = 0.01 m
+Objective:      197682.0
+Balance (beta): 0.0056
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 3, time = 0.01 m
+Objective:      196910.0
+Balance (beta): 0.0055
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 4, time = 0.01 m
+Objective:      196601.0
+Balance (beta): 0.0059
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+=========================================
+Solution 5, time = 0.02 m
+Objective:      195586.0
+Balance (beta): 0.0062
+Patients (pool):        100
+Patients (target):      100 (aggregate)
+
+Status = OPTIMAL
+Number of solutions found: 5
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <span class="n">before_c</span>
+        <span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">quantiles</span><span class="o">=</span><span class="p">[])</span>
+        <span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">after_c</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">quantiles</span><span class="o">=</span><span class="p">[]),</span>
+            <span class="n">rsuffix</span><span class="o">=</span><span class="s1">&#39;_matched&#39;</span>
+        <span class="p">)[[</span><span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;pool_matched&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">]]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>pool</th>
+      <th>pool_matched</th>
+      <th>target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>population size</th>
+      <th>N</th>
+      <td>1.000</td>
+      <td>1.00</td>
+      <td>100.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">gender</th>
+      <th>0.0</th>
+      <td>0.483</td>
+      <td>0.55</td>
+      <td>0.55</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>0.517</td>
+      <td>0.45</td>
+      <td>0.45</td>
+    </tr>
+    <tr>
+      <th rowspan="6" valign="top">country</th>
+      <th>1.0</th>
+      <td>0.108</td>
+      <td>0.34</td>
+      <td>0.25</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.224</td>
+      <td>0.20</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.274</td>
+      <td>0.11</td>
+      <td>0.11</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.284</td>
+      <td>0.20</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.110</td>
+      <td>0.15</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>0.0</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.09</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">age</th>
+      <th>mean</th>
+      <td>55.520</td>
+      <td>50.92</td>
+      <td>50.80</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>13.110</td>
+      <td>7.63</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">weight</th>
+      <th>mean</th>
+      <td>88.020</td>
+      <td>82.22</td>
+      <td>82.08</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>16.550</td>
+      <td>7.77</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">height</th>
+      <th>mean</th>
+      <td>160.310</td>
+      <td>153.94</td>
+      <td>153.80</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>19.500</td>
+      <td>9.55</td>
+      <td>0.00</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_fractional_difference</span><span class="p">(</span><span class="n">before_c</span><span class="p">,</span> <span class="n">after_c</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Use case 3: all numeric stds forced to 0 (minimal variance)&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_aggregate_matching_20_0.png" src="../_images/demos_aggregate_matching_20_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="s1">&#39;pool (matched)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">after_c</span><span class="o">.</span><span class="n">populations</span><span class="p">:</span>
+    <span class="n">before_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">after_c</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;pool (matched)&#39;</span><span class="p">)</span>
+<span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">before_c</span><span class="p">,</span> <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">col_wrap</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;After matching (all numeric stds forced to 0)&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.08</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_aggregate_matching_21_0.png" src="../_images/demos_aggregate_matching_21_0.png" />
+</div>
+</div>
+</section>
+<section id="Takeaways">
+<h2>Takeaways<a class="headerlink" href="#Takeaways" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> only needs a <strong>mean</strong> per numeric feature; a <strong>std</strong> is optional and, when given, adds a variance constraint the solver actually enforces (it’s linear in the decision variables, so this is cheap for the CP-SAT solver).</p></li>
+<li><p>Across use cases 1-3, every feature’s <strong>mean</strong> stays well matched throughout – disclosing/ constraining variance doesn’t come at the expense of mean-matching elsewhere. That’s a consequence of how the two objective terms are scaled to be commensurate internally.</p></li>
+<li><p>A disclosed std of <code class="docutils literal notranslate"><span class="pre">0</span></code> is a simple way to ask “give me the most homogeneous subset of the pool (for these features) that still matches everything else” – useful for sensitivity analyses or finding a low-variance subgroup, and it composes across multiple features at once.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

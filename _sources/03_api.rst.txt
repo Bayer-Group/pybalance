@@ -92,6 +92,9 @@ Constraint Satisfaction Matcher
 .. autoclass:: pybalance.lp.ConstraintSatisfactionMatcher
     :members:
 
+.. autoclass:: pybalance.lp.AggregateConstraintSatisfactionMatcher
+    :members:
+
 
 Visualization
 ================

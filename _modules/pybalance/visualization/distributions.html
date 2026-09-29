@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pybalance.visualization.distributions &mdash; PyBalance</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
@@ -105,7 +105,10 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_default_hue_order</span><span class="p">(</span><span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span>
+    <span class="c1"># matching_data.populations includes the target name even for an</span>
+    <span class="c1"># AggregateTarget (which has no rows); using it as a hue_order would give</span>
+    <span class="c1"># seaborn a category with no data, i.e. a phantom, empty legend entry.</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_reference_population</span><span class="p">(</span><span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -168,6 +171,84 @@
     <span class="k">return</span> <span class="n">fig</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_merge_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">new_handles</span><span class="p">,</span> <span class="n">new_labels</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add new_handles/new_labels to whatever legend is already on ax (e.g. the</span>
+<span class="sd">    one seaborn&#39;s histplot creates for hue). Seaborn builds its legend from</span>
+<span class="sd">    proxy handles passed directly to ax.legend(handles=..., labels=...)</span>
+<span class="sd">    rather than from labeled artists, so a plain ax.legend() call here would</span>
+<span class="sd">    not pick them up -- it would silently replace them with only new_handles.</span>
+<span class="sd">    Placed above the axes (rather than seaborn&#39;s default &quot;best&quot; location)</span>
+<span class="sd">    since a categoric probability plot often has bars filling the full</span>
+<span class="sd">    y-range, leaving no in-axes corner free of data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">existing</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># matplotlib &gt;=3.7 renamed Legend.legendHandles to legend_handles.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">existing</span><span class="p">,</span> <span class="s2">&quot;legend_handles&quot;</span><span class="p">):</span>
+            <span class="n">handles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">existing</span><span class="o">.</span><span class="n">legend_handles</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">handles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">existing</span><span class="o">.</span><span class="n">legendHandles</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">existing</span><span class="o">.</span><span class="n">get_texts</span><span class="p">()]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+        <span class="n">handles</span><span class="o">=</span><span class="n">handles</span> <span class="o">+</span> <span class="n">new_handles</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">labels</span> <span class="o">+</span> <span class="n">new_labels</span><span class="p">,</span>
+        <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower center&quot;</span><span class="p">,</span>
+        <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.02</span><span class="p">),</span>
+        <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_overlay_aggregate_target_numeric</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">,</span> <span class="n">headers</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Draw the AggregateTarget&#39;s mean (and std, if disclosed) on each numeric</span>
+<span class="sd">    subplot, since an aggregate target has no patient-level rows for</span>
+<span class="sd">    histplot to draw in the first place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target_name</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">headers</span><span class="p">):</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">numeric</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stats</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target_name</span><span class="si">}</span><span class="s2"> mean&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;std&quot;</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+            <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span>
+                    <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">],</span>
+                    <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">],</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target_name</span><span class="si">}</span><span class="s2"> mean </span><span class="se">\u00b1</span><span class="s2"> std&quot;</span><span class="p">)</span>
+        <span class="n">_merge_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_overlay_aggregate_target_categoric</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">,</span> <span class="n">headers</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Draw the AggregateTarget&#39;s rate per level on each categoric subplot,</span>
+<span class="sd">    since an aggregate target has no patient-level rows for histplot to draw</span>
+<span class="sd">    in the first place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target_name</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">headers</span><span class="p">):</span>
+        <span class="n">rates</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">categoric</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rates</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">rates</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">]</span>
+        <span class="n">scatter</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">_merge_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="p">[</span><span class="n">scatter</span><span class="p">],</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target_name</span><span class="si">}</span><span class="s2"> rate&quot;</span><span class="p">])</span>
+
+
 <div class="viewcode-block" id="plot_categoric_features"><a class="viewcode-back" href="../../../03_api.html#pybalance.visualization.plot_categoric_features">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">plot_categoric_features</span><span class="p">(</span>
     <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
     <span class="n">col_wrap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
@@ -180,6 +261,10 @@
 <span class="sd">    Plot the one-dimensional marginal distributions for all categoric features</span>
 <span class="sd">    and all treatment groups found in matching_data. Extra keyword arguments are</span>
 <span class="sd">    passed to seaborn.histplot and override defaults.</span>
+
+<span class="sd">    If matching_data has an AggregateTarget, it has no patient-level rows to</span>
+<span class="sd">    plot a distribution for; instead, each feature&#39;s disclosed rate(s) are</span>
+<span class="sd">    overlaid as diamond markers.</span>
 
 <span class="sd">    :param matching_data: MatchingData instance containing at least one population.</span>
 <span class="sd">    :param include_binary: Whether to include binary features in the plot.</span>
@@ -217,6 +302,8 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">matching_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
         <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
     <span class="p">]</span>
+    <span class="k">if</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">has_aggregate_target</span><span class="p">:</span>
+        <span class="n">_overlay_aggregate_target_categoric</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span></div>
 
@@ -232,6 +319,11 @@
 <span class="sd">    Plot the one-dimensional marginal distributions for all numerical features</span>
 <span class="sd">    and all treatment groups found in matching_data. Extra keyword arguments are</span>
 <span class="sd">    passed to seaborn.histplot and override defaults.</span>
+
+<span class="sd">    If matching_data has an AggregateTarget, it has no patient-level rows to</span>
+<span class="sd">    plot a distribution for; instead, each feature&#39;s disclosed mean is</span>
+<span class="sd">    overlaid as a dashed vertical line, and its mean +/- std (when disclosed)</span>
+<span class="sd">    as a shaded band.</span>
 
 <span class="sd">    :param matching_data: MatchingData instance containing at least one population.</span>
 <span class="sd">    :param include_only: List of features to consider for plotting. Otherwise,</span>
@@ -262,6 +354,8 @@
 
     <span class="c1"># PLOT!</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">_plot_1d_marginals</span><span class="p">(</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">col_wrap</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="o">**</span><span class="n">default_params</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">has_aggregate_target</span><span class="p">:</span>
+        <span class="n">_overlay_aggregate_target_numeric</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span></div>
 
@@ -678,6 +772,176 @@
         <span class="n">g</span><span class="o">.</span><span class="n">plot_marginals</span><span class="p">(</span><span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">common_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stat</span><span class="o">=</span><span class="s2">&quot;probability&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">grids</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fractional_differences</span><span class="p">(</span>
+    <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">include_only</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fractional difference between pool and target for each *matched moment*:</span>
+<span class="sd">    (pool - target) / target. Indexed by a (feature, moment) MultiIndex so</span>
+<span class="sd">    that a feature&#39;s related rows (e.g. its mean and std) can be grouped</span>
+<span class="sd">    together by the caller rather than scattered based on magnitude alone.</span>
+
+<span class="sd">    A numeric feature contributes a &quot;mean&quot; row, plus a separate &quot;std&quot; row --</span>
+<span class="sd">    but only when the target actually has/discloses one (an AggregateTarget</span>
+<span class="sd">    may only disclose a mean; a patient-level target always has both). A</span>
+<span class="sd">    binary categoric feature contributes one &quot;rate&quot; row, for its &quot;1&quot; level</span>
+<span class="sd">    (the complementary rate is implied). A categoric feature with more than</span>
+<span class="sd">    two levels contributes one row per level (moment = the level), since no</span>
+<span class="sd">    single number can summarize a multi-category mismatch. Built entirely on</span>
+<span class="sd">    top of MatchingData.describe(), so this shows a row for every moment that</span>
+<span class="sd">    was actually available to constrain against, and works identically</span>
+<span class="sd">    whether the target is patient-level or an AggregateTarget.</span>
+
+<span class="sd">    Unlike a standardized mean difference, this makes no assumption about --</span>
+<span class="sd">    and needs no knowledge of -- the target&#39;s variance, which an</span>
+<span class="sd">    AggregateTarget frequently does not disclose.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">described</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">include_only</span> <span class="ow">or</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">all</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fractional_diff</span><span class="p">(</span><span class="n">pool_value</span><span class="p">,</span> <span class="n">target_value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">pool_value</span> <span class="o">-</span> <span class="n">target_value</span><span class="p">)</span> <span class="o">/</span> <span class="n">target_value</span> <span class="k">if</span> <span class="n">target_value</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_level</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
+        <span class="c1"># A level disclosed on an AggregateTarget but absent from the pool</span>
+        <span class="c1"># (e.g. a category the pool structurally never contains) can come</span>
+        <span class="c1"># back from describe() as a float (e.g. 0.0) even when sibling levels</span>
+        <span class="c1"># are ints, due to how pandas enlarges a MultiIndex row-by-row; strip</span>
+        <span class="c1"># the &quot;.0&quot; so labels stay consistent.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">level</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">level</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+    <span class="n">diffs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">described</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">numeric</span><span class="p">:</span>
+            <span class="n">diffs</span><span class="p">[(</span><span class="n">feature</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">fractional_diff</span><span class="p">(</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">pool_name</span><span class="p">],</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">target_std</span> <span class="o">=</span> <span class="n">rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">target_std</span><span class="p">):</span>
+                <span class="n">diffs</span><span class="p">[(</span><span class="n">feature</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">fractional_diff</span><span class="p">(</span>
+                    <span class="n">rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">pool_name</span><span class="p">],</span> <span class="n">target_std</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">rows</span><span class="o">.</span><span class="n">index</span> <span class="k">else</span> <span class="n">rows</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">diffs</span><span class="p">[(</span><span class="n">feature</span><span class="p">,</span> <span class="s2">&quot;rate&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">fractional_diff</span><span class="p">(</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">level</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">pool_name</span><span class="p">],</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">level</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">rows</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                <span class="n">diffs</span><span class="p">[(</span><span class="n">feature</span><span class="p">,</span> <span class="n">format_level</span><span class="p">(</span><span class="n">level</span><span class="p">))]</span> <span class="o">=</span> <span class="n">fractional_diff</span><span class="p">(</span>
+                    <span class="n">rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">level</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">pool_name</span><span class="p">],</span>
+                    <span class="n">rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">level</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span><span class="p">],</span>
+                <span class="p">)</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">diffs</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;feature&quot;</span><span class="p">,</span> <span class="s2">&quot;moment&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">diffs</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fractional_difference&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_fractional_difference_label</span><span class="p">(</span><span class="n">feature</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">moment</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">moment</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;rate&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">feature</span>
+    <span class="k">if</span> <span class="n">moment</span> <span class="o">==</span> <span class="s2">&quot;std&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2"> (std)&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">moment</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_fractional_difference</span><span class="p">(</span>
+    <span class="n">before</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+    <span class="n">after</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+    <span class="n">include_only</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot the fractional difference between pool and target -- (pool - target)</span>
+<span class="sd">    / target -- for each *matched moment*, before vs. after matching: one dot</span>
+<span class="sd">    per numeric feature&#39;s mean, plus a separate &quot;&lt;feature&gt; (std)&quot; dot for its</span>
+<span class="sd">    standard deviation whenever the target has/discloses one; a binary</span>
+<span class="sd">    categoric feature gets one dot (its rate), while a categoric feature with</span>
+<span class="sd">    more than two levels gets one &quot;&lt;feature&gt;=&lt;level&gt;&quot; dot per level. A</span>
+<span class="sd">    feature&#39;s rows are always kept adjacent (e.g. mean directly next to std),</span>
+<span class="sd">    with feature groups ordered by their worst mismatch so poorly-balanced</span>
+<span class="sd">    features are still easy to spot. Dashed reference lines at +/-10% mark</span>
+<span class="sd">    the usual &quot;good balance&quot; threshold.</span>
+
+<span class="sd">    Unlike a standardized mean difference, this requires no knowledge of the</span>
+<span class="sd">    target&#39;s variance, so it is well defined even when the target only</span>
+<span class="sd">    discloses a mean/proportion (the common case for a published Table 1).</span>
+
+<span class="sd">    Works identically for a patient-level or aggregate target, since it is</span>
+<span class="sd">    built entirely on top of MatchingData.describe().</span>
+
+<span class="sd">    :param before: MatchingData with the (unmatched) pool and target, e.g. what</span>
+<span class="sd">        was passed into ConstraintSatisfactionMatcher.</span>
+<span class="sd">    :param after: MatchingData with the matched pool and target, e.g. the</span>
+<span class="sd">        return value of ConstraintSatisfactionMatcher.match().</span>
+<span class="sd">    :param include_only: Restrict to these features; otherwise uses all of</span>
+<span class="sd">        before.headers.</span>
+<span class="sd">    :param clip: If supplied, clip fractional differences to [-clip, clip]</span>
+<span class="sd">        before plotting (e.g. clip=1 caps at +/-100%). A feature whose target</span>
+<span class="sd">        value is close to zero can otherwise blow up the x-axis and squash</span>
+<span class="sd">        every other feature&#39;s bar to look &quot;balanced&quot; by comparison. Off by</span>
+<span class="sd">        default so the raw values are shown.</span>
+<span class="sd">    :param ax: Existing axes to draw on. If not supplied, a new figure/axes is</span>
+<span class="sd">        created, sized to fit the number of features.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">diffs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;before&quot;</span><span class="p">:</span> <span class="n">_fractional_differences</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">include_only</span><span class="p">),</span>
+            <span class="s2">&quot;after&quot;</span><span class="p">:</span> <span class="n">_fractional_differences</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">include_only</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Group each feature&#39;s rows together (e.g. mean next to std, or a</span>
+    <span class="c1"># multi-level categoric feature&#39;s levels next to each other) rather than</span>
+    <span class="c1"># interleaving them; order the groups by their worst (largest-magnitude)</span>
+    <span class="c1"># &quot;before&quot; mismatch so the least-balanced features are still easy to spot.</span>
+    <span class="n">group_order</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">diffs</span><span class="p">[</span><span class="s2">&quot;before&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;feature&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+    <span class="p">)</span>
+    <span class="n">diffs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">diffs</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;feature&quot;</span><span class="p">,</span> <span class="n">drop_level</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">group_order</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">clip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">diffs</span> <span class="o">=</span> <span class="n">diffs</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=-</span><span class="n">clip</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">clip</span><span class="p">)</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_format_fractional_difference_label</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">moment</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">moment</span> <span class="ow">in</span> <span class="n">diffs</span><span class="o">.</span><span class="n">index</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">diffs</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">figure</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">diffs</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">diffs</span><span class="p">[</span><span class="s2">&quot;after&quot;</span><span class="p">],</span> <span class="n">diffs</span><span class="p">[</span><span class="s2">&quot;before&quot;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">diffs</span><span class="p">[</span><span class="s2">&quot;before&quot;</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;before matching&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">diffs</span><span class="p">[</span><span class="s2">&quot;after&quot;</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;after matching&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Fractional Difference, (pool - target) / target&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Covariate Balance&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
 </pre></div>
 
            </div>
