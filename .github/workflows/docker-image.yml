@@ -23,6 +23,6 @@ jobs:
       - name: "Black: Code Formatting 👮🏽‍♀️"
         run: black --diff . && black -v --check .
       - name: install requirements
-        run: pip install -r environments/requirements.txt && pip install -r environments/requirements_genetic.txt
+        run: pip install -r environments/requirements.txt
       - name: run tests
         run: PYTHONPATH=. pytest
