@@ -4,3 +4,4 @@ import pybalance.propensity
 import pybalance.sim
 import pybalance.visualization
 import pybalance.lp
+import pybalance.weighting
