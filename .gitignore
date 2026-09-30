@@ -17,3 +17,4 @@ docs/*
 .idea
 .idea/*
 venv/*
+.venv/

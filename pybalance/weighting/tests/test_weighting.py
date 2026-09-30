@@ -7,6 +7,7 @@ from pybalance.utils import AggregateTarget, MatchingData, MatchingHeaders, spli
 from pybalance.weighting import (
     EntropyBalanceWeighter,
     MAICWeighter,
+    IPTWWeighter,
     effective_sample_size,
     weighted_balance_table,
 )
@@ -156,4 +157,53 @@ def test_hard_covariate_shift_reports_diagnostics_without_crashing():
     assert np.all(np.isfinite(w))
     assert np.all(w >= 0)
     assert weighter.effective_sample_size() <= len(pool)
+
+
+def test_iptw_improves_balance_over_unweighted_pool():
+    matching_data = generate_toy_dataset(n_pool=3000, n_target=300, seed=7)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    target_df = _biased_pool_subsample(pool_df, n=300, seed=7)
+
+    md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
+    weighter = IPTWWeighter(md, verbose=False)
+    weighter.match()
+
+    table = weighted_balance_table(weighter)
+    unweighted_residual = (table["unweighted_pool"] - table["target"]).abs()
+    weighted_residual = (table["weighted_pool"] - table["target"]).abs()
+
+    # IPTW doesn't solve for exact balance (unlike entropy balancing), but a
+    # correctly-fit propensity model should substantially reduce imbalance.
+    assert weighted_residual.sum() < unweighted_residual.sum()
+    assert weighter.effective_sample_size() <= len(pool_df)
+
+
+def test_iptw_rejects_aggregate_target():
+    matching_data = generate_toy_dataset(n_pool=500, n_target=100, seed=8)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    target_df = matching_data.get_population(matching_data.target_name).reset_index(drop=True)
+    aggregate_target = _aggregate_target_from_frame(target_df, matching_data.headers)
+    md = MatchingData(pool=pool_df, target=aggregate_target, headers=matching_data.headers)
+
+    with pytest.raises(ValueError):
+        IPTWWeighter(md, verbose=False)
+
+
+def test_iptw_trim_quantiles_caps_extreme_weights():
+    matching_data = generate_toy_dataset(n_pool=2000, n_target=200, seed=9)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    target_df = _biased_pool_subsample(pool_df, n=200, seed=9)
+    md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
+
+    untrimmed = IPTWWeighter(md, verbose=False)
+    untrimmed.match()
+
+    trimmed = IPTWWeighter(md, trim_quantiles=(0.05, 0.95), verbose=False)
+    trimmed.match()
+
+    assert trimmed.weights.max() <= untrimmed.weights.max()
+    assert trimmed.diagnostics["n_trimmed"] > 0
+
+    with pytest.raises(ValueError):
+        IPTWWeighter(md, trim_quantiles=(0.9, 0.1), verbose=False)
 

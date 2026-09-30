@@ -5,6 +5,9 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
+from sklearn.base import BaseEstimator, clone
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
 
 from pybalance.utils import MatchingData, BalanceCalculator
 
@@ -457,15 +460,149 @@ class MAICWeighter(EntropyBalanceWeighter):
         return params
 
 
-def weighted_balance_table(weighter: EntropyBalanceWeighter) -> pd.DataFrame:
+class IPTWWeighter(BaseWeighter):
+    """
+    Inverse Probability of Treatment Weighting (IPTW; Rosenbaum & Rubin,
+    1983; see Austin, 2011, "An Introduction to Propensity Score Methods for
+    Reducing the Effects of Confounding in Observational Studies", for the
+    ATT construction used here). Fits a propensity model ``p(X) = P(target |
+    X)`` that classifies pool vs. target patients on their covariates, then
+    reweights each pool patient by the odds ``p / (1 - p)``. The target
+    population keeps weight 1, so the weighted pool is reweighted onto the
+    target's covariate distribution -- i.e. this is the ATT estimand with the
+    target playing the role of the fixed/reference ("treated") group, which
+    matches the convention used by ``MAICWeighter``/``EntropyBalanceWeighter``
+    and the package's typical use case of building an external comparator
+    arm that represents a trial population.
+
+    Unlike ``EntropyBalanceWeighter``, IPTW does not guarantee exact balance
+    on any particular moment: it only guarantees balance asymptotically, and
+    only if the propensity model is correctly specified. It also requires a
+    patient-level target (there is no pool-vs-target classification problem
+    to fit against a published aggregate Table 1). Its main practical
+    advantages over entropy balancing are that it scales to many covariates
+    without requiring the target's moments to be inside the pool's convex
+    hull, and that it is the most widely recognized/reported method in the
+    observational literature.
+
+    :param matching_data: MatchingData whose pool is to be weighted. The
+        target must be patient-level (not an ``AggregateTarget``).
+    :param classifier: A fitted-or-unfitted sklearn-compatible classifier
+        exposing ``predict_proba``, used to estimate ``P(target | X)``. It is
+        cloned before fitting, so passing a pre-fitted instance does not
+        reuse its fit. Defaults to ``LogisticRegression(max_iter=1000)``, the
+        standard choice for propensity score estimation.
+    :param trim_quantiles: Optional ``(low, high)`` quantiles (e.g. ``(0.01,
+        0.99)``) at which to clip the fitted weights. Extreme weights (driven
+        by pool patients whose covariates make them look almost certainly
+        pool or almost certainly target) are the main practical failure mode
+        of IPTW; trimming trades a little bias for a large reduction in
+        variance. Left unset (``None``) by default so the raw weights are
+        returned untouched.
+    :param weight_col: Name of the column used to store weights on the
+        MatchingData returned by match().
+    :param verbose: Whether to log fitting diagnostics.
+    """
+
+    def __init__(
+        self,
+        matching_data: MatchingData,
+        classifier: Optional[BaseEstimator] = None,
+        trim_quantiles: Optional[Tuple[float, float]] = None,
+        weight_col: str = "sample_weight",
+        verbose: bool = True,
+    ):
+        super().__init__(matching_data, weight_col=weight_col, verbose=verbose)
+
+        if self.matching_data.has_aggregate_target:
+            raise ValueError(
+                "IPTWWeighter requires a patient-level target (it fits a "
+                "pool-vs-target propensity model), so it cannot be used with "
+                "an AggregateTarget. Use EntropyBalanceWeighter/MAICWeighter "
+                "for aggregate (e.g. published Table 1) targets."
+            )
+
+        if trim_quantiles is not None:
+            lo, hi = trim_quantiles
+            if not (0 <= lo < hi <= 1):
+                raise ValueError(
+                    f"trim_quantiles must satisfy 0 <= low < high <= 1; got {trim_quantiles!r}."
+                )
+
+        self.classifier = classifier
+        self.trim_quantiles = trim_quantiles
+
+        # Reuse BetaBalance purely to get a fitted preprocessor plus pool and
+        # target feature tensors in a single consistent (one-hot categoric +
+        # numeric passthrough) output space, as EntropyBalanceWeighter does.
+        self.balance_calculator = BalanceCalculator(self.matching_data, "beta")
+        self.preprocessor = self.balance_calculator.preprocessor
+
+    def get_params(self) -> Dict:
+        return {
+            "classifier": self.classifier,
+            "trim_quantiles": self.trim_quantiles,
+        }
+
+    def _fit(self) -> "IPTWWeighter":
+        pool = self.balance_calculator.pool.cpu().numpy()
+        target = self.balance_calculator.target.cpu().numpy()
+        n_pool = len(pool)
+
+        X = np.vstack([pool, target])
+        y = np.concatenate([np.zeros(n_pool), np.ones(len(target))])
+
+        scaler = StandardScaler()
+        X = scaler.fit_transform(X)
+
+        clf = clone(self.classifier) if self.classifier is not None else LogisticRegression(
+            max_iter=1000
+        )
+        clf.fit(X, y)
+
+        propensity_score = clf.predict_proba(X[:n_pool])[:, 1]
+        # Clip away from 0/1 to avoid infinite weights from a
+        # (near-)perfectly separable model.
+        propensity_score = np.clip(propensity_score, 1e-4, 1 - 1e-4)
+        weights = propensity_score / (1 - propensity_score)
+
+        n_trimmed = 0
+        if self.trim_quantiles is not None:
+            lo, hi = np.quantile(weights, self.trim_quantiles)
+            n_trimmed = int(np.sum((weights < lo) | (weights > hi)))
+            weights = np.clip(weights, lo, hi)
+
+        self.propensity_model = clf
+        self.propensity_score = propensity_score
+        self.weights = weights
+        self.diagnostics = {
+            "effective_sample_size": effective_sample_size(weights),
+            "n_trimmed": n_trimmed,
+        }
+
+        if self.verbose:
+            logger.info(
+                f"{self.__class__.__name__} fit {str(clf).split('(')[0]}. "
+                f"Effective sample size: {self.diagnostics['effective_sample_size']:.1f} "
+                f"/ {n_pool} pool patients."
+                + (f" Trimmed {n_trimmed} extreme weights." if n_trimmed else "")
+            )
+
+        return self
+
+
+def weighted_balance_table(weighter: BaseWeighter) -> pd.DataFrame:
     """
     Return a table comparing each balanced feature's weighted (and, for
     reference, unweighted) pool moment to the target moment -- a quick
-    post-hoc check that match() achieved balance (residuals should be ~0 for
-    every constrained row).
+    post-hoc check of how well match() balanced the pool. For
+    EntropyBalanceWeighter/MAICWeighter, residuals should be ~0 for every
+    constrained row; for IPTWWeighter, which does not solve for exact
+    balance, this is instead a diagnostic of how much balance improved
+    relative to the unweighted pool.
 
-    :param weighter: A fitted EntropyBalanceWeighter (or subclass, e.g.
-        MAICWeighter), i.e. one on which match() has already been called.
+    :param weighter: A fitted EntropyBalanceWeighter/MAICWeighter/IPTWWeighter,
+        i.e. one on which match() has already been called.
     """
     _check_fitted(weighter)
     pool = weighter.balance_calculator.pool.cpu().numpy()
@@ -476,7 +613,7 @@ def weighted_balance_table(weighter: EntropyBalanceWeighter) -> pd.DataFrame:
 
     variance_features = (
         set(weighter._numeric_features_with_disclosed_std())
-        if weighter.match_variance
+        if getattr(weighter, "match_variance", False)
         else set()
     )
 

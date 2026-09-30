@@ -11,3 +11,4 @@ Demos
    demos/lp_matcher.ipynb
    demos/card_matcher.ipynb
    demos/maic_weighting.ipynb
+   demos/iptw_weighting.ipynb
