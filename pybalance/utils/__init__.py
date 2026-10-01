@@ -9,6 +9,7 @@ from .matching_data import (
 from .preprocess import (
     BaseMatchingPreprocessor,
     ChainPreprocessor,
+    DerivedFeatureEncoder,
     FloatEncoder,
     NumericBinsEncoder,
     CategoricOneHotEncoder,

@@ -141,6 +141,90 @@ class BaseMatchingPreprocessor(ABC):
         raise NotImplementedError
 
 
+class DerivedFeatureEncoder(BaseMatchingPreprocessor):
+    """
+    Transform raw IPD columns into 0/1 columns according to an
+    AggregateTarget's ``derived`` specs. Runs before FloatEncoder and
+    CategoricOneHotEncoder in the preprocessor chain.
+
+    Three modes are supported:
+
+    - **median**: ``output[i] = float(raw[i] > disclosed_median)``.
+      Target rate is 0.5. For a discrete column with many values equal to
+      the median, the true rate above the median is less than 0.5, so the
+      target is approximate.
+    - **indicator**: ``output[i] = float(op(raw[i], threshold))``.
+      Target rate is the disclosed proportion.
+    - **presence**: ``output[i] = float(raw[i])``. The column is already
+      binary in the IPD. Target rate is the disclosed prevalence.
+
+    Missing values in a source column raise ValueError. The column is
+    replaced in place by its 0/1 encoding.
+
+    :param derived_specs: The ``derived`` dict from an AggregateTarget.
+    """
+
+    _OPS = {
+        "eq": lambda a, b: a == b,
+        "ge": lambda a, b: a >= b,
+        "gt": lambda a, b: a > b,
+        "le": lambda a, b: a <= b,
+        "lt": lambda a, b: a < b,
+    }
+
+    def __init__(self, derived_specs: dict):
+        super().__init__()
+        self.derived_specs = derived_specs
+
+    def _fit(self, matching_data: MatchingData) -> None:
+        pass
+
+    def _get_output_headers(self):
+        added = [f for f in self.derived_specs if f not in self.input_headers.numeric]
+        return MatchingHeaders(
+            numeric=self.input_headers.numeric + added,
+            categoric=self.input_headers.categoric,
+        )
+
+    def _transform(self, matching_data: MatchingData) -> MatchingData:
+        data = matching_data.copy().data
+        for col, spec in self.derived_specs.items():
+            raw = data[col]
+            # A comparison with NaN gives False, so a missing value would
+            # silently count as "below the median" or "not the category".
+            # Make the caller decide how to handle missing data.
+            n_missing = int(raw.isna().sum())
+            if n_missing:
+                raise ValueError(
+                    f"Derived feature '{col}' has {n_missing} missing value(s) "
+                    "in the pool. Remove incomplete rows or drop the feature "
+                    "from the target before matching."
+                )
+            mode = spec["mode"]
+            if mode == "median":
+                data[col] = (raw > spec["value"]).astype(float)
+            elif mode == "indicator":
+                op_fn = self._OPS[spec["op"]]
+                data[col] = op_fn(raw, spec["threshold"]).astype(float)
+            elif mode == "presence":
+                values = raw.astype(float)
+                if not values.isin([0.0, 1.0]).all():
+                    bad = sorted(set(values.unique()) - {0.0, 1.0})[:5]
+                    raise ValueError(
+                        f"Derived feature '{col}' with mode 'presence' must be "
+                        f"binary (0/1); found values {bad}."
+                    )
+                data[col] = values
+        return MatchingData(
+            data=data,
+            headers=self.output_headers,
+            population_col=matching_data.population_col,
+        )
+
+    def _get_feature_names_out(self, feature_name_in: str) -> List[str]:
+        return [feature_name_in]
+
+
 class FloatEncoder(BaseMatchingPreprocessor):
     """
     FloatEncoder converts all variables to float. In particular, if a certain
