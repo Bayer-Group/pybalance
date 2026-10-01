@@ -113,14 +113,39 @@ class AggregateTarget:
     :param n: Sample size of the target population.
     :param numeric: Mapping feature -> {"mean": ..., "std": optional}.
     :param categoric: Mapping feature -> {category: rate}, rates summing to ~1.
+    :param derived: Mapping feature -> transform spec for covariates that need
+        dichotomization before matching. Three modes are supported:
+
+        - ``{"mode": "median", "value": 71}`` — dichotomize the raw IPD column
+          at the disclosed median; target rate is 0.5.
+        - ``{"mode": "indicator", "op": "eq", "threshold": 0, "rate": 0.37}``
+          — dichotomize by a comparison operator; target rate is the disclosed
+          proportion. Supported ops: eq, ge, gt, le, lt.
+        - ``{"mode": "presence", "rate": 0.80}`` — the IPD column is already
+          binary (0/1); target rate is the disclosed prevalence.
+
+        The feature name must be the IPD column name. A feature cannot be both
+        derived and numeric/categoric. Rates must be strictly between 0 and 1.
+        Derived features are transformed into 0/1 columns by
+        ``DerivedFeatureEncoder`` and enter the constraint matrix as numeric
+        features with target mean equal to the disclosed rate.
     :param headers: Optional explicit MatchingHeaders. If omitted, inferred from
-        the keys of ``numeric`` and ``categoric``.
+        the keys of ``numeric``, ``categoric``, and ``derived``.
     """
 
     n: int
     numeric: Dict[str, Dict[str, float]] = field(default_factory=dict)
     categoric: Dict[str, Dict[Any, float]] = field(default_factory=dict)
+    derived: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     headers: Optional[MatchingHeaders] = None
+
+    _DERIVED_MODES = ("median", "indicator", "presence")
+    _DERIVED_OPS = ("eq", "ge", "gt", "le", "lt")
+    _DERIVED_KEYS = {
+        "median": ("value",),
+        "indicator": ("op", "threshold", "rate"),
+        "presence": ("rate",),
+    }
 
     def __post_init__(self) -> None:
         if self.n is None or int(self.n) <= 0:
@@ -135,16 +160,17 @@ class AggregateTarget:
             feature: _normalize_categoric_rates(rates, feature)
             for feature, rates in self.categoric.items()
         }
+        self._validate_derived()
 
         if self.headers is None:
             self.headers = MatchingHeaders(
-                numeric=list(self.numeric.keys()),
+                numeric=list(self.numeric.keys()) + list(self.derived.keys()),
                 categoric=list(self.categoric.keys()),
             )
         elif not isinstance(self.headers, MatchingHeaders):
             self.headers = MatchingHeaders(**self.headers)
 
-        numeric_keys = set(self.numeric)
+        numeric_keys = set(self.numeric) | set(self.derived)
         categoric_keys = set(self.categoric)
         if numeric_keys & categoric_keys:
             raise ValueError(
@@ -153,14 +179,59 @@ class AggregateTarget:
             )
         if set(self.headers.numeric) != numeric_keys:
             raise ValueError(
-                "headers.numeric must match numeric feature keys. "
-                f"headers={self.headers.numeric}, numeric={sorted(numeric_keys)}"
+                "headers.numeric must match numeric + derived feature keys. "
+                f"headers={self.headers.numeric}, expected={sorted(numeric_keys)}"
             )
         if set(self.headers.categoric) != categoric_keys:
             raise ValueError(
                 "headers.categoric must match categoric feature keys. "
                 f"headers={self.headers.categoric}, categoric={sorted(categoric_keys)}"
             )
+
+    def _validate_derived(self) -> None:
+        overlap = set(self.derived) & (set(self.numeric) | set(self.categoric))
+        if overlap:
+            raise ValueError(
+                "Features cannot be both derived and numeric/categoric in "
+                f"AggregateTarget: {sorted(overlap)}. The derived encoding "
+                "replaces the raw column, so copy the column under a new name "
+                "to match it both ways."
+            )
+        for feature, spec in self.derived.items():
+            mode = spec.get("mode")
+            if mode not in self._DERIVED_MODES:
+                raise ValueError(
+                    f"Derived feature '{feature}' has unknown mode '{mode}'. "
+                    f"Supported: {self._DERIVED_MODES}"
+                )
+            required = self._DERIVED_KEYS[mode]
+            missing = [k for k in required if k not in spec]
+            if missing:
+                raise ValueError(
+                    f"Derived feature '{feature}' with mode '{mode}' requires "
+                    + ", ".join(f"'{k}'" for k in missing)
+                    + "."
+                )
+            unknown = set(spec) - set(required) - {"mode"}
+            if unknown:
+                raise ValueError(
+                    f"Derived feature '{feature}' with mode '{mode}' has unknown "
+                    f"key(s) {sorted(unknown)}. Allowed: {list(required)}."
+                )
+            if mode == "indicator" and spec["op"] not in self._DERIVED_OPS:
+                raise ValueError(
+                    f"Derived feature '{feature}' has unknown op '{spec['op']}'. "
+                    f"Supported: {self._DERIVED_OPS}"
+                )
+            if "rate" in spec:
+                rate = float(spec["rate"])
+                # A rate of exactly 0 or 1 cannot be reached with positive
+                # weights unless the pool is already constant.
+                if not 0.0 < rate < 1.0:
+                    raise ValueError(
+                        f"Derived feature '{feature}' rate must be strictly "
+                        f"between 0 and 1; got {spec['rate']}."
+                    )
 
     @classmethod
     def from_dict(cls, payload: Dict[str, Any]) -> "AggregateTarget":
@@ -173,6 +244,7 @@ class AggregateTarget:
                 "n": 200,
                 "numeric": {"age": {"mean": 65.2, "std": 10.1}, ...},
                 "categoric": {"sex": {"F": 0.45, "M": 0.55}, ...},
+                "derived": {"psa": {"mode": "median", "value": 65}, ...},
                 # optional:
                 "headers": {"numeric": [...], "categoric": [...]},
             }
@@ -186,6 +258,7 @@ class AggregateTarget:
             n=payload["n"],
             numeric=dict(payload.get("numeric", {})),
             categoric=dict(payload.get("categoric", {})),
+            derived=dict(payload.get("derived", {})),
             headers=headers,
         )
 
@@ -305,18 +378,29 @@ class AggregateTarget:
                         "value": value,
                     }
                 )
+        for feature, spec in self.derived.items():
+            mode = spec["mode"]
+            rate = 0.5 if mode == "median" else spec["rate"]
+            rows.append(
+                {
+                    "feature": feature,
+                    "type": f"derived ({mode})",
+                    "stat": "target_rate",
+                    "value": rate,
+                }
+            )
         return pd.DataFrame(rows, columns=["feature", "type", "stat", "value"])
 
     def __repr__(self) -> str:
         header = f"AggregateTarget(n={self.n})"
-        if self.numeric or self.categoric:
+        if self.numeric or self.categoric or self.derived:
             body = self.to_frame().to_string(index=False)
             return f"{header}\n{body}"
         return header
 
     def _repr_html_(self) -> str:
         header = f"<b>AggregateTarget</b> (n={self.n})<br>"
-        if self.numeric or self.categoric:
+        if self.numeric or self.categoric or self.derived:
             return header + self.to_frame().to_html(index=False)
         return header
 

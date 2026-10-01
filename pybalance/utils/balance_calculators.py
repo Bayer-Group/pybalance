@@ -9,7 +9,9 @@ from pybalance.utils import (
     MatchingData,
     split_target_pool,
     BaseMatchingPreprocessor,
+    ChainPreprocessor,
     DecisionTreeEncoder,
+    DerivedFeatureEncoder,
     StandardMatchingPreprocessor,
     BetaXPreprocessor,
     GammaPreprocessor,
@@ -125,6 +127,20 @@ class BaseBalanceCalculator:
         self.order = order
         self.standardize_difference = standardize_difference
         self.device = self._get_device(device)
+        # Derived features (median/indicator/presence) are 0/1 encodings of raw
+        # pool columns. Encode them first so that every pool passed through this
+        # calculator, including later calls to distance(), is compared with the
+        # disclosed rates and not with the raw values.
+        if (
+            matching_data.has_aggregate_target
+            and matching_data.aggregate_target.derived
+        ):
+            preprocessor = ChainPreprocessor(
+                [
+                    DerivedFeatureEncoder(matching_data.aggregate_target.derived),
+                    preprocessor,
+                ]
+            )
         self.preprocessor = preprocessor
         self.preprocessor.fit(matching_data)
         self.matching_data = matching_data

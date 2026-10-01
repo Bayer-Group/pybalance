@@ -13,6 +13,7 @@ from pybalance.utils.preprocess import (
     ChainPreprocessor,
     CrossTermsPreprocessor,
     DecisionTreeEncoder,
+    DerivedFeatureEncoder,
     FloatEncoder,
     NumericBinsEncoder,
     StandardMatchingPreprocessor,
@@ -47,23 +48,27 @@ def _rate_lookup(rates: Dict[Any, float], category: Any) -> float:
 def _find_onehot_encoder(
     preprocessor: BaseMatchingPreprocessor,
 ) -> Optional[CategoricOneHotEncoder]:
-    if isinstance(preprocessor, CategoricOneHotEncoder):
-        return preprocessor
-    if isinstance(preprocessor, ChainPreprocessor):
-        for step in preprocessor.preprocessors:
-            if isinstance(step, CategoricOneHotEncoder):
-                return step
+    for step in _flatten_steps(preprocessor):
+        if isinstance(step, CategoricOneHotEncoder):
+            return step
     return None
+
+
+def _flatten_steps(
+    preprocessor: BaseMatchingPreprocessor,
+) -> List[BaseMatchingPreprocessor]:
+    # BalanceCalculator wraps its preprocessor in a chain with a leading
+    # DerivedFeatureEncoder, so chains can be nested.
+    if isinstance(preprocessor, ChainPreprocessor):
+        return sum([_flatten_steps(p) for p in preprocessor.preprocessors], [])
+    return [preprocessor]
 
 
 def _assert_preprocessor_supports_aggregates(
     preprocessor: BaseMatchingPreprocessor,
 ) -> None:
     unsupported = (NumericBinsEncoder, CrossTermsPreprocessor, DecisionTreeEncoder)
-    if isinstance(preprocessor, ChainPreprocessor):
-        steps = list(preprocessor.preprocessors)
-    else:
-        steps = [preprocessor]
+    steps = _flatten_steps(preprocessor)
 
     bad = [step.__class__.__name__ for step in steps if isinstance(step, unsupported)]
     if bad:
@@ -76,7 +81,10 @@ def _assert_preprocessor_supports_aggregates(
     if isinstance(preprocessor, StandardMatchingPreprocessor):
         return
 
-    if all(isinstance(step, (CategoricOneHotEncoder, FloatEncoder)) for step in steps):
+    if all(
+        isinstance(step, (CategoricOneHotEncoder, FloatEncoder, DerivedFeatureEncoder))
+        for step in steps
+    ):
         return
 
     raise ValueError(
@@ -115,7 +123,10 @@ def compute_aggregate_feature_moments(
         if len(pool_std_vec) != len(output_features):
             raise ValueError("pool_std length does not match preprocessor outputs.")
 
+    derived_keys = set(aggregate_target.derived) if aggregate_target.derived else set()
     for feature in aggregate_target.headers.numeric:
+        if feature in derived_keys:
+            continue
         out_cols = preprocessor.get_feature_names_out(feature)
         if len(out_cols) != 1:
             raise ValueError(
@@ -161,6 +172,19 @@ def compute_aggregate_feature_moments(
             p = _rate_lookup(rates, category)
             means[idx] = p
             stds[idx] = math.sqrt(max(p * (1.0 - p), 0.0))
+
+    for feature, spec in aggregate_target.derived.items():
+        out_cols = preprocessor.get_feature_names_out(feature)
+        if len(out_cols) != 1:
+            raise ValueError(
+                f"Expected derived feature '{feature}' to map to one output column, "
+                f"got {out_cols}."
+            )
+        out_col = out_cols[0]
+        idx = feature_index[out_col]
+        p = 0.5 if spec["mode"] == "median" else spec["rate"]
+        means[idx] = p
+        stds[idx] = math.sqrt(max(p * (1.0 - p), 0.0))
 
     mean_t = torch.tensor(means, dtype=torch.float32, device=device).reshape(1, -1)
     std_t = torch.tensor(stds, dtype=torch.float32, device=device).reshape(1, -1)

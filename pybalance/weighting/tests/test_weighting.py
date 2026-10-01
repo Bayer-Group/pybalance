@@ -1,9 +1,16 @@
 import numpy as np
 import pandas as pd
 import pytest
+import torch
 
 from pybalance.sim import generate_toy_dataset
-from pybalance.utils import AggregateTarget, MatchingData, MatchingHeaders, split_target_pool
+from pybalance.utils import (
+    AggregateTarget,
+    BalanceCalculator,
+    MatchingData,
+    MatchingHeaders,
+    split_target_pool,
+)
 from pybalance.weighting import (
     EntropyBalanceWeighter,
     MAICWeighter,
@@ -206,4 +213,228 @@ def test_iptw_trim_quantiles_caps_extreme_weights():
 
     with pytest.raises(ValueError):
         IPTWWeighter(md, trim_quantiles=(0.9, 0.1), verbose=False)
+
+
+def _make_derived_pool(n=2000, seed=42):
+    """Synthetic pool with continuous and binary columns for derived-feature tests."""
+    rng = np.random.default_rng(seed)
+    return pd.DataFrame({
+        "age": rng.normal(65, 10, n),
+        "psa": rng.lognormal(4, 1, n),
+        "ecog": rng.choice([0, 1, 2], n, p=[0.4, 0.4, 0.2]),
+        "prior_chemo": rng.binomial(1, 0.6, n).astype(float),
+    })
+
+
+def test_maic_derived_median_balances_to_half():
+    pool = _make_derived_pool()
+    target = AggregateTarget(
+        n=100,
+        derived={
+            "age": {"mode": "median", "value": 68},
+            "psa": {"mode": "median", "value": 80},
+        },
+    )
+    md = MatchingData(pool=pool, target=target)
+    weighter = MAICWeighter(md, verbose=False)
+    weighter.match()
+    assert weighter.diagnostics["converged"]
+
+    w = weighter.get_weights()
+    age_binary = (pool["age"] > 68).astype(float).values
+    psa_binary = (pool["psa"] > 80).astype(float).values
+    assert np.average(age_binary, weights=w) == pytest.approx(0.5, abs=1e-3)
+    assert np.average(psa_binary, weights=w) == pytest.approx(0.5, abs=1e-3)
+
+
+def test_maic_derived_indicator_balances_to_rate():
+    pool = _make_derived_pool()
+    target = AggregateTarget(
+        n=100,
+        derived={
+            "ecog": {"mode": "indicator", "op": "eq", "threshold": 0, "rate": 0.55},
+        },
+    )
+    md = MatchingData(pool=pool, target=target)
+    weighter = MAICWeighter(md, verbose=False)
+    weighter.match()
+    assert weighter.diagnostics["converged"]
+
+    w = weighter.get_weights()
+    ecog0 = (pool["ecog"] == 0).astype(float).values
+    assert np.average(ecog0, weights=w) == pytest.approx(0.55, abs=1e-3)
+
+
+def test_maic_derived_presence_balances_to_rate():
+    pool = _make_derived_pool()
+    target = AggregateTarget(
+        n=100,
+        derived={
+            "prior_chemo": {"mode": "presence", "rate": 0.75},
+        },
+    )
+    md = MatchingData(pool=pool, target=target)
+    weighter = MAICWeighter(md, verbose=False)
+    weighter.match()
+    assert weighter.diagnostics["converged"]
+
+    w = weighter.get_weights()
+    assert np.average(pool["prior_chemo"].values, weights=w) == pytest.approx(0.75, abs=1e-3)
+
+
+def test_maic_mixed_numeric_and_derived():
+    pool = _make_derived_pool()
+    target = AggregateTarget(
+        n=100,
+        numeric={"age": {"mean": 70.0}},
+        derived={
+            "ecog": {"mode": "indicator", "op": "eq", "threshold": 0, "rate": 0.50},
+            "prior_chemo": {"mode": "presence", "rate": 0.70},
+        },
+    )
+    md = MatchingData(pool=pool, target=target)
+    weighter = MAICWeighter(md, verbose=False)
+    weighter.match()
+    assert weighter.diagnostics["converged"]
+
+    w = weighter.get_weights()
+    assert np.average(pool["age"].values, weights=w) == pytest.approx(70.0, abs=0.1)
+    ecog0 = (pool["ecog"] == 0).astype(float).values
+    assert np.average(ecog0, weights=w) == pytest.approx(0.50, abs=1e-3)
+    assert np.average(pool["prior_chemo"].values, weights=w) == pytest.approx(0.70, abs=1e-3)
+
+
+def test_derived_feature_validation():
+    with pytest.raises(ValueError, match="unknown mode"):
+        AggregateTarget(n=50, derived={"x": {"mode": "bogus"}})
+    with pytest.raises(ValueError, match="requires 'value'"):
+        AggregateTarget(n=50, derived={"x": {"mode": "median"}})
+    with pytest.raises(ValueError, match="requires 'op'"):
+        AggregateTarget(n=50, derived={"x": {"mode": "indicator", "threshold": 0, "rate": 0.5}})
+    with pytest.raises(ValueError, match="unknown op"):
+        AggregateTarget(
+            n=50, derived={"x": {"mode": "indicator", "op": "ne", "threshold": 0, "rate": 0.5}}
+        )
+    with pytest.raises(ValueError, match="requires 'rate'"):
+        AggregateTarget(n=50, derived={"x": {"mode": "presence"}})
+    with pytest.raises(ValueError, match="unknown key"):
+        AggregateTarget(n=50, derived={"x": {"mode": "median", "value": 1, "column": "y"}})
+    for bad_rate in (0.0, 1.0, 1.5, -0.1):
+        with pytest.raises(ValueError, match="strictly between 0 and 1"):
+            AggregateTarget(n=50, derived={"x": {"mode": "presence", "rate": bad_rate}})
+
+
+def test_derived_feature_overlap_with_numeric_rejected():
+    with pytest.raises(ValueError, match="both derived and numeric"):
+        AggregateTarget(
+            n=50,
+            numeric={"age": {"mean": 70.0}},
+            derived={"age": {"mode": "median", "value": 68}},
+        )
+    with pytest.raises(ValueError, match="both derived and numeric"):
+        AggregateTarget(
+            n=50,
+            categoric={"ecog": {0: 0.5, 1: 0.5}},
+            derived={"ecog": {"mode": "indicator", "op": "eq", "threshold": 0, "rate": 0.5}},
+        )
+
+
+@pytest.mark.parametrize(
+    "spec",
+    [
+        {"mode": "median", "value": 1},
+        {"mode": "indicator", "op": "eq", "threshold": 0, "rate": 0.5},
+        {"mode": "presence", "rate": 0.5},
+    ],
+)
+def test_derived_missing_values_raise(spec):
+    pool = _make_derived_pool()
+    col = "prior_chemo" if spec["mode"] == "presence" else "ecog"
+    pool[col] = pool[col].astype(float)
+    pool.loc[:9, col] = np.nan
+    target = AggregateTarget(n=100, derived={col: spec})
+    md = MatchingData(pool=pool, target=target)
+    with pytest.raises(ValueError, match="10 missing value"):
+        MAICWeighter(md, verbose=False)
+
+
+def test_derived_presence_requires_binary_column():
+    pool = _make_derived_pool()
+    target = AggregateTarget(n=100, derived={"ecog": {"mode": "presence", "rate": 0.5}})
+    md = MatchingData(pool=pool, target=target)
+    with pytest.raises(ValueError, match="must be binary"):
+        MAICWeighter(md, verbose=False)
+
+
+def test_derived_match_variance_with_numeric_std():
+    pool = _make_derived_pool()
+    target = AggregateTarget(
+        n=100,
+        numeric={"age": {"mean": 66.0, "std": 9.0}},
+        derived={"ecog": {"mode": "indicator", "op": "eq", "threshold": 0, "rate": 0.5}},
+    )
+    md = MatchingData(pool=pool, target=target)
+    weighter = EntropyBalanceWeighter(md, match_variance=True, verbose=False)
+    weighter.match()
+    assert weighter.diagnostics["converged"]
+    assert "age (variance)" in weighter.constraint_labels
+    assert "ecog (variance)" not in weighter.constraint_labels
+
+    w = weighter.get_weights()
+    age = pool["age"].values
+    mean = np.average(age, weights=w)
+    assert mean == pytest.approx(66.0, abs=0.1)
+    assert np.sqrt(np.average((age - mean) ** 2, weights=w)) == pytest.approx(9.0, abs=0.1)
+    ecog0 = (pool["ecog"] == 0).astype(float).values
+    assert np.average(ecog0, weights=w) == pytest.approx(0.5, abs=1e-3)
+
+
+def test_balance_calculator_encodes_derived_features():
+    """A BalanceCalculator built directly on derived-target data must compare the
+    0/1 encoding with the disclosed rate, the same as a pre-encoded presence target."""
+    pool = _make_derived_pool()
+    derived_md = MatchingData(
+        pool=pool,
+        target=AggregateTarget(n=100, derived={"age": {"mode": "median", "value": 68}}),
+    )
+    encoded = pool.copy()
+    encoded["age"] = (pool["age"] > 68).astype(float)
+    presence_md = MatchingData(
+        pool=encoded,
+        target=AggregateTarget(n=100, derived={"age": {"mode": "presence", "rate": 0.5}}),
+    )
+
+    bc_derived = BalanceCalculator(derived_md, "beta")
+    bc_presence = BalanceCalculator(presence_md, "beta")
+    assert torch.allclose(bc_derived.pool, bc_presence.pool)
+    raw_pool = derived_md.get_population(derived_md.pool_name)
+    encoded_pool = presence_md.get_population(presence_md.pool_name)
+    assert bc_derived.distance(raw_pool).item() == pytest.approx(
+        bc_presence.distance(encoded_pool).item(), rel=1e-6
+    )
+
+    # The same holds for the MatchingData returned by match(), which keeps the
+    # raw columns.
+    matched = MAICWeighter(derived_md, verbose=False).match()
+    bc_matched = BalanceCalculator(matched, "beta")
+    assert torch.allclose(bc_matched.pool, bc_presence.pool)
+
+
+def test_weighted_balance_table_reports_derived_rates():
+    pool = _make_derived_pool()
+    target = AggregateTarget(
+        n=100,
+        derived={
+            "age": {"mode": "median", "value": 68},
+            "ecog": {"mode": "indicator", "op": "eq", "threshold": 0, "rate": 0.55},
+        },
+    )
+    weighter = MAICWeighter(MatchingData(pool=pool, target=target), verbose=False)
+    weighter.match()
+    table = weighted_balance_table(weighter).set_index("feature")
+    assert table.loc["age", "target"] == pytest.approx(0.5)
+    assert table.loc["ecog", "target"] == pytest.approx(0.55)
+    assert table.loc["age", "unweighted_pool"] == pytest.approx((pool["age"] > 68).mean(), abs=1e-6)
+    assert table.loc["age", "weighted_pool"] == pytest.approx(0.5, abs=1e-3)
+    assert table.loc["ecog", "weighted_pool"] == pytest.approx(0.55, abs=1e-3)
 
