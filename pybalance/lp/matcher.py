@@ -706,20 +706,24 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
     the pool is selected so that its moments match the target's.
 
     Only the moments actually disclosed on ``AggregateTarget`` are matched: a
-    numeric feature's mean is always matched (mean is required), and its
-    variance is *additionally* constrained if -- and only if -- the target
-    discloses a "std" for that feature. This makes matching moment-aware: pass
-    a target std to control it, or omit it to leave a feature's spread
-    unconstrained. One consequence: setting a target std of 0 asks the solver
-    for the minimal-variance subset achievable for that feature, subject to
-    everything else.
+    numeric feature's mean is always matched (mean is required unless a
+    median/quantile is disclosed instead), and its variance is *additionally*
+    constrained if -- and only if -- the target discloses a "std" for that
+    feature. This makes matching moment-aware: pass a target std to control
+    it, or omit it to leave a feature's spread unconstrained. One
+    consequence: setting a target std of 0 asks the solver for the
+    minimal-variance subset achievable for that feature, subject to
+    everything else. A feature whose target discloses a median/quantile
+    instead of (or alongside) a mean is dichotomized automatically -- see
+    AggregateTargetBalanceCalculator.
 
     The target is a fixed constraint vector and is never subsetted, so several
     ``ConstraintSatisfactionMatcher`` options do not apply here and are
     intentionally absent:
 
-    - no ``objective``: only the beta / mean-matching formulation is defined
-      against aggregate moments, so it is used unconditionally;
+    - no ``objective``: only the beta / mean-matching formulation (via
+      AggregateTargetBalanceCalculator) is defined against aggregate moments,
+      so it is used unconditionally;
     - no ``target_size`` / ``match_size``: the target cannot be subsetted, so
       the effective target size is always ``AggregateTarget.n``;
     - no ``ps_hinting`` / solver hints: there is no patient-level target to
@@ -746,8 +750,10 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
     :param verbose: Verbose solving.
     """
 
-    # Only the beta / mean-matching formulation is defined against aggregate moments.
-    _OBJECTIVE = "beta"
+    # Only the beta / mean-matching formulation (AggregateTargetBalanceCalculator)
+    # is defined against aggregate moments; it also dichotomizes any
+    # median/quantile-disclosed features automatically.
+    _OBJECTIVE = "aggregate_beta"
 
     def __init__(
         self,

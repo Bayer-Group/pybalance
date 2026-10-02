@@ -35,12 +35,43 @@ class MatchingHeaders(object):
         ]
 
 
-def _normalize_numeric_stats(stats: Dict[str, Any]) -> Dict[str, float]:
-    if "mean" not in stats:
-        raise ValueError(f"Numeric aggregate stats must include 'mean'. Got: {stats}")
-    out = {"mean": float(stats["mean"])}
+def _normalize_numeric_stats(stats: Dict[str, Any]) -> Dict[str, Any]:
+    extra = set(stats) - {"mean", "std", "median", "quantile"}
+    if extra:
+        raise ValueError(
+            f"Unknown numeric aggregate stat key(s) {sorted(extra)}. Got: {stats}"
+        )
+    out: Dict[str, Any] = {}
+    if "mean" in stats:
+        out["mean"] = float(stats["mean"])
     if "std" in stats and stats["std"] is not None:
         out["std"] = float(stats["std"])
+
+    # A disclosed quantile (q, value) means P(raw <= value) = q for the raw
+    # column; it is matched by dichotomizing the raw column at `value` and
+    # constraining the resulting indicator's rate to 1 - q. 'median' is just
+    # sugar for the single quantile (0.5, value). Quantile constraints are
+    # independent of, and may be disclosed alongside, 'mean'/'std' on the same
+    # raw column. See AggregateTargetBalanceCalculator / FixedNumericBinsEncoder.
+    quantiles = []
+    if "median" in stats:
+        quantiles.append((0.5, float(stats["median"])))
+    if "quantile" in stats:
+        for q, value in stats["quantile"]:
+            q = float(q)
+            if not 0.0 < q < 1.0:
+                raise ValueError(
+                    f"Quantile proportion must be strictly between 0 and 1; got {q}."
+                )
+            quantiles.append((q, float(value)))
+    if quantiles:
+        out["quantile"] = quantiles
+
+    if "mean" not in out and "quantile" not in out:
+        raise ValueError(
+            "Numeric aggregate stats must include 'mean' and/or "
+            f"'median'/'quantile'. Got: {stats}"
+        )
     return out
 
 
@@ -48,10 +79,21 @@ def _normalize_categoric_rates(rates: Dict[Any, Any], feature: str) -> Dict[Any,
     if not rates:
         raise ValueError(f"Categoric feature '{feature}' has empty rate dictionary.")
     out = {k: float(v) for k, v in rates.items()}
+    for category, rate in out.items():
+        if not 0.0 < rate < 1.0:
+            raise ValueError(
+                f"Categoric rate for '{feature}'='{category}' must be strictly "
+                f"between 0 and 1; got {rate}."
+            )
+    # Categories are allowed to be partially disclosed -- e.g. a published
+    # Table 1 may give "country: US 60%" without breaking out every other
+    # country -- in which case the rest are left unconstrained. Only the
+    # impossible case (rates summing to more than 1) is rejected.
     total = sum(out.values())
-    if not math.isclose(total, 1.0, rel_tol=1e-3, abs_tol=1e-3):
+    if total > 1.0 + 1e-3:
         raise ValueError(
-            f"Categoric rates for '{feature}' must sum to 1.0 (got {total})."
+            f"Categoric rates for '{feature}' must not sum to more than 1.0 "
+            f"(got {total})."
         )
     return out
 
@@ -111,41 +153,24 @@ class AggregateTarget:
     and category prevalences).
 
     :param n: Sample size of the target population.
-    :param numeric: Mapping feature -> {"mean": ..., "std": optional}.
-    :param categoric: Mapping feature -> {category: rate}, rates summing to ~1.
-    :param derived: Mapping feature -> transform spec for covariates that need
-        dichotomization before matching. Three modes are supported:
-
-        - ``{"mode": "median", "value": 71}`` — dichotomize the raw IPD column
-          at the disclosed median; target rate is 0.5.
-        - ``{"mode": "indicator", "op": "eq", "threshold": 0, "rate": 0.37}``
-          — dichotomize by a comparison operator; target rate is the disclosed
-          proportion. Supported ops: eq, ge, gt, le, lt.
-        - ``{"mode": "presence", "rate": 0.80}`` — the IPD column is already
-          binary (0/1); target rate is the disclosed prevalence.
-
-        The feature name must be the IPD column name. A feature cannot be both
-        derived and numeric/categoric. Rates must be strictly between 0 and 1.
-        Derived features are transformed into 0/1 columns by
-        ``DerivedFeatureEncoder`` and enter the constraint matrix as numeric
-        features with target mean equal to the disclosed rate.
+    :param numeric: Mapping feature -> {"mean": ..., "std": optional,
+        "median": optional, "quantile": optional}. ``median`` and
+        ``quantile`` describe disclosed quantiles of the raw column (e.g. a
+        published median, or "80% of patients weigh more than 70kg" as
+        ``{"quantile": [(0.2, 70)]}``) and may be given alongside, or instead
+        of, ``mean``/``std``.
+    :param categoric: Mapping feature -> {category: rate}. Categories may be
+        partially disclosed -- e.g. a published Table 1 may give only
+        "country: US 60%" -- in which case rates need not sum to 1 and
+        unlisted categories are left unconstrained.
     :param headers: Optional explicit MatchingHeaders. If omitted, inferred from
-        the keys of ``numeric``, ``categoric``, and ``derived``.
+        the keys of ``numeric`` and ``categoric``.
     """
 
     n: int
     numeric: Dict[str, Dict[str, float]] = field(default_factory=dict)
     categoric: Dict[str, Dict[Any, float]] = field(default_factory=dict)
-    derived: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     headers: Optional[MatchingHeaders] = None
-
-    _DERIVED_MODES = ("median", "indicator", "presence")
-    _DERIVED_OPS = ("eq", "ge", "gt", "le", "lt")
-    _DERIVED_KEYS = {
-        "median": ("value",),
-        "indicator": ("op", "threshold", "rate"),
-        "presence": ("rate",),
-    }
 
     def __post_init__(self) -> None:
         if self.n is None or int(self.n) <= 0:
@@ -160,17 +185,16 @@ class AggregateTarget:
             feature: _normalize_categoric_rates(rates, feature)
             for feature, rates in self.categoric.items()
         }
-        self._validate_derived()
 
         if self.headers is None:
             self.headers = MatchingHeaders(
-                numeric=list(self.numeric.keys()) + list(self.derived.keys()),
+                numeric=list(self.numeric.keys()),
                 categoric=list(self.categoric.keys()),
             )
         elif not isinstance(self.headers, MatchingHeaders):
             self.headers = MatchingHeaders(**self.headers)
 
-        numeric_keys = set(self.numeric) | set(self.derived)
+        numeric_keys = set(self.numeric)
         categoric_keys = set(self.categoric)
         if numeric_keys & categoric_keys:
             raise ValueError(
@@ -179,59 +203,14 @@ class AggregateTarget:
             )
         if set(self.headers.numeric) != numeric_keys:
             raise ValueError(
-                "headers.numeric must match numeric + derived feature keys. "
-                f"headers={self.headers.numeric}, expected={sorted(numeric_keys)}"
+                "headers.numeric must match numeric feature keys. "
+                f"headers={self.headers.numeric}, numeric={sorted(numeric_keys)}"
             )
         if set(self.headers.categoric) != categoric_keys:
             raise ValueError(
                 "headers.categoric must match categoric feature keys. "
                 f"headers={self.headers.categoric}, categoric={sorted(categoric_keys)}"
             )
-
-    def _validate_derived(self) -> None:
-        overlap = set(self.derived) & (set(self.numeric) | set(self.categoric))
-        if overlap:
-            raise ValueError(
-                "Features cannot be both derived and numeric/categoric in "
-                f"AggregateTarget: {sorted(overlap)}. The derived encoding "
-                "replaces the raw column, so copy the column under a new name "
-                "to match it both ways."
-            )
-        for feature, spec in self.derived.items():
-            mode = spec.get("mode")
-            if mode not in self._DERIVED_MODES:
-                raise ValueError(
-                    f"Derived feature '{feature}' has unknown mode '{mode}'. "
-                    f"Supported: {self._DERIVED_MODES}"
-                )
-            required = self._DERIVED_KEYS[mode]
-            missing = [k for k in required if k not in spec]
-            if missing:
-                raise ValueError(
-                    f"Derived feature '{feature}' with mode '{mode}' requires "
-                    + ", ".join(f"'{k}'" for k in missing)
-                    + "."
-                )
-            unknown = set(spec) - set(required) - {"mode"}
-            if unknown:
-                raise ValueError(
-                    f"Derived feature '{feature}' with mode '{mode}' has unknown "
-                    f"key(s) {sorted(unknown)}. Allowed: {list(required)}."
-                )
-            if mode == "indicator" and spec["op"] not in self._DERIVED_OPS:
-                raise ValueError(
-                    f"Derived feature '{feature}' has unknown op '{spec['op']}'. "
-                    f"Supported: {self._DERIVED_OPS}"
-                )
-            if "rate" in spec:
-                rate = float(spec["rate"])
-                # A rate of exactly 0 or 1 cannot be reached with positive
-                # weights unless the pool is already constant.
-                if not 0.0 < rate < 1.0:
-                    raise ValueError(
-                        f"Derived feature '{feature}' rate must be strictly "
-                        f"between 0 and 1; got {spec['rate']}."
-                    )
 
     @classmethod
     def from_dict(cls, payload: Dict[str, Any]) -> "AggregateTarget":
@@ -244,7 +223,6 @@ class AggregateTarget:
                 "n": 200,
                 "numeric": {"age": {"mean": 65.2, "std": 10.1}, ...},
                 "categoric": {"sex": {"F": 0.45, "M": 0.55}, ...},
-                "derived": {"psa": {"mode": "median", "value": 65}, ...},
                 # optional:
                 "headers": {"numeric": [...], "categoric": [...]},
             }
@@ -258,7 +236,6 @@ class AggregateTarget:
             n=payload["n"],
             numeric=dict(payload.get("numeric", {})),
             categoric=dict(payload.get("categoric", {})),
-            derived=dict(payload.get("derived", {})),
             headers=headers,
         )
 
@@ -360,6 +337,17 @@ class AggregateTarget:
         rows = []
         for feature, stats in self.numeric.items():
             for stat, value in stats.items():
+                if stat == "quantile":
+                    for q, cutpoint in value:
+                        rows.append(
+                            {
+                                "feature": feature,
+                                "type": "numeric",
+                                "stat": f"quantile_{q}",
+                                "value": cutpoint,
+                            }
+                        )
+                    continue
                 rows.append(
                     {
                         "feature": feature,
@@ -378,29 +366,18 @@ class AggregateTarget:
                         "value": value,
                     }
                 )
-        for feature, spec in self.derived.items():
-            mode = spec["mode"]
-            rate = 0.5 if mode == "median" else spec["rate"]
-            rows.append(
-                {
-                    "feature": feature,
-                    "type": f"derived ({mode})",
-                    "stat": "target_rate",
-                    "value": rate,
-                }
-            )
         return pd.DataFrame(rows, columns=["feature", "type", "stat", "value"])
 
     def __repr__(self) -> str:
         header = f"AggregateTarget(n={self.n})"
-        if self.numeric or self.categoric or self.derived:
+        if self.numeric or self.categoric:
             body = self.to_frame().to_string(index=False)
             return f"{header}\n{body}"
         return header
 
     def _repr_html_(self) -> str:
         header = f"<b>AggregateTarget</b> (n={self.n})<br>"
-        if self.numeric or self.categoric or self.derived:
+        if self.numeric or self.categoric:
             return header + self.to_frame().to_html(index=False)
         return header
 

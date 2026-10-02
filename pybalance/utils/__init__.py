@@ -9,7 +9,7 @@ from .matching_data import (
 from .preprocess import (
     BaseMatchingPreprocessor,
     ChainPreprocessor,
-    DerivedFeatureEncoder,
+    FixedNumericBinsEncoder,
     FloatEncoder,
     NumericBinsEncoder,
     CategoricOneHotEncoder,
@@ -23,6 +23,7 @@ from .preprocess import (
 from .balance_calculators import (
     BalanceCalculator,
     BaseBalanceCalculator,
+    AggregateTargetBalanceCalculator,
     BatchedBalanceCaclulator,
     BetaBalance,
     BetaSquaredBalance,
@@ -36,3 +37,4 @@ from .balance_calculators import (
     BALANCE_CALCULATORS,
 )
 from .misc import require_fitted
+from .aggregate import aggregate_target_constraints

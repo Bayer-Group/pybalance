@@ -54,8 +54,16 @@ def test_aggregate_target_from_dict_validation():
     assert target.numeric["age"]["mean"] == 65.0
     assert set(target.categoric["sex"]) == {"F", "M"}
 
+    # Partial disclosure is fine (rates need not sum to 1; unlisted categories
+    # are left unconstrained) ...
+    partial = AggregateTarget.from_dict(
+        {"n": 10, "categoric": {"country": {"US": 0.6}}}
+    )
+    assert partial.categoric["country"] == {"US": 0.6}
+
+    # ... but summing to more than 1 is impossible and still rejected.
     with pytest.raises(ValueError):
-        AggregateTarget.from_dict({"n": 10, "categoric": {"sex": {"F": 0.2, "M": 0.2}}})
+        AggregateTarget.from_dict({"n": 10, "categoric": {"sex": {"F": 0.7, "M": 0.6}}})
 
 
 def test_matching_data_pool_and_target_frames():

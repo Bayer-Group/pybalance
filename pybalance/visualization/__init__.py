@@ -6,4 +6,5 @@ from .distributions import (
     plot_joint_numeric_distributions,
     plot_joint_numeric_categoric_distributions,
     plot_fractional_difference,
+    plot_aggregate_target_match,
 )

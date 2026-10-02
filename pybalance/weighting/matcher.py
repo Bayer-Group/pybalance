@@ -307,12 +307,10 @@ class EntropyBalanceWeighter(BaseWeighter):
     def _numeric_features_with_disclosed_std(self) -> List[str]:
         md = self.matching_data
         if md.has_aggregate_target:
-            # Iterate over numeric stats only: derived features share
-            # headers.numeric but have no disclosed std.
             return [
                 f
-                for f, stats in md.aggregate_target.numeric.items()
-                if "std" in stats
+                for f in md.aggregate_target.headers.numeric
+                if "std" in md.aggregate_target.numeric[f]
             ]
         return list(md.headers.numeric)
 

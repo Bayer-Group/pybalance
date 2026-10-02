@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Union, Optional, Tuple
+from typing import Dict, List, Union, Optional, Tuple
 
 import pandas as pd
 import numpy as np
@@ -139,90 +139,6 @@ class BaseMatchingPreprocessor(ABC):
         should be overridden by the subclass.
         """
         raise NotImplementedError
-
-
-class DerivedFeatureEncoder(BaseMatchingPreprocessor):
-    """
-    Transform raw IPD columns into 0/1 columns according to an
-    AggregateTarget's ``derived`` specs. Runs before FloatEncoder and
-    CategoricOneHotEncoder in the preprocessor chain.
-
-    Three modes are supported:
-
-    - **median**: ``output[i] = float(raw[i] > disclosed_median)``.
-      Target rate is 0.5. For a discrete column with many values equal to
-      the median, the true rate above the median is less than 0.5, so the
-      target is approximate.
-    - **indicator**: ``output[i] = float(op(raw[i], threshold))``.
-      Target rate is the disclosed proportion.
-    - **presence**: ``output[i] = float(raw[i])``. The column is already
-      binary in the IPD. Target rate is the disclosed prevalence.
-
-    Missing values in a source column raise ValueError. The column is
-    replaced in place by its 0/1 encoding.
-
-    :param derived_specs: The ``derived`` dict from an AggregateTarget.
-    """
-
-    _OPS = {
-        "eq": lambda a, b: a == b,
-        "ge": lambda a, b: a >= b,
-        "gt": lambda a, b: a > b,
-        "le": lambda a, b: a <= b,
-        "lt": lambda a, b: a < b,
-    }
-
-    def __init__(self, derived_specs: dict):
-        super().__init__()
-        self.derived_specs = derived_specs
-
-    def _fit(self, matching_data: MatchingData) -> None:
-        pass
-
-    def _get_output_headers(self):
-        added = [f for f in self.derived_specs if f not in self.input_headers.numeric]
-        return MatchingHeaders(
-            numeric=self.input_headers.numeric + added,
-            categoric=self.input_headers.categoric,
-        )
-
-    def _transform(self, matching_data: MatchingData) -> MatchingData:
-        data = matching_data.copy().data
-        for col, spec in self.derived_specs.items():
-            raw = data[col]
-            # A comparison with NaN gives False, so a missing value would
-            # silently count as "below the median" or "not the category".
-            # Make the caller decide how to handle missing data.
-            n_missing = int(raw.isna().sum())
-            if n_missing:
-                raise ValueError(
-                    f"Derived feature '{col}' has {n_missing} missing value(s) "
-                    "in the pool. Remove incomplete rows or drop the feature "
-                    "from the target before matching."
-                )
-            mode = spec["mode"]
-            if mode == "median":
-                data[col] = (raw > spec["value"]).astype(float)
-            elif mode == "indicator":
-                op_fn = self._OPS[spec["op"]]
-                data[col] = op_fn(raw, spec["threshold"]).astype(float)
-            elif mode == "presence":
-                values = raw.astype(float)
-                if not values.isin([0.0, 1.0]).all():
-                    bad = sorted(set(values.unique()) - {0.0, 1.0})[:5]
-                    raise ValueError(
-                        f"Derived feature '{col}' with mode 'presence' must be "
-                        f"binary (0/1); found values {bad}."
-                    )
-                data[col] = values
-        return MatchingData(
-            data=data,
-            headers=self.output_headers,
-            population_col=matching_data.population_col,
-        )
-
-    def _get_feature_names_out(self, feature_name_in: str) -> List[str]:
-        return [feature_name_in]
 
 
 class FloatEncoder(BaseMatchingPreprocessor):
@@ -492,6 +408,107 @@ class NumericBinsEncoder(BaseMatchingPreprocessor):
         assert all(feature_name_in in f for f in feature_names_out)
 
         return feature_names_out
+
+
+class FixedNumericBinsEncoder(BaseMatchingPreprocessor):
+    """
+    Dichotomize numeric covariates at caller-supplied quantile cutpoints,
+    producing one 0/1 output column per quantile -- anchored at externally
+    disclosed values (e.g. a published median or threshold) instead of bins
+    fit from pool quantiles.
+
+    Useful for matching an AggregateTarget to disclosed statistics that
+    describe a threshold on a raw covariate rather than its mean, e.g. a
+    published median ("PSA, median: 65") or a threshold prevalence
+    ("ECOG 0: 37%", i.e. ecog > 0.5 is false for 37% of patients).
+
+    Every other column (numeric or categoric, including numeric columns not
+    named in `thresholds`) passes through unchanged.
+
+    :param thresholds: Mapping feature -> list of (q, cutpoint) pairs, where
+        q is the disclosed quantile proportion (P(raw <= cutpoint) = q). Each
+        pair produces an output column named "{feature}_q{q}" equal to
+        float(raw > cutpoint) -- named after the quantile rather than the
+        cutpoint so it reads back as "the indicator for the published q=0.2
+        statistic" rather than an arbitrary float. By default the raw input
+        column is dropped from the output in favor of its quantile column(s);
+        pass the feature in `keep_raw` to match both (e.g. a disclosed mean
+        *and* a disclosed median for the same covariate).
+
+    :param keep_raw: Features (a subset of `thresholds`' keys) whose raw
+        column should be kept alongside its quantile column(s), instead of
+        being dropped.
+    """
+
+    def __init__(
+        self,
+        thresholds: Dict[str, List[Tuple[float, float]]],
+        keep_raw: Optional[List[str]] = None,
+    ):
+        self.thresholds = {
+            feature: sorted(qvs) for feature, qvs in thresholds.items()
+        }
+        self.keep_raw = set(keep_raw or [])
+        super(FixedNumericBinsEncoder, self).__init__()
+
+    def _fit(self, matching_data: MatchingData) -> None:
+        missing = set(self.thresholds) - set(matching_data.headers.numeric)
+        if missing:
+            raise ValueError(
+                "FixedNumericBinsEncoder thresholds reference unknown or "
+                f"non-numeric feature(s): {sorted(missing)}."
+            )
+
+    def _get_output_headers(self):
+        kept_numeric = [
+            f
+            for f in self.input_headers.numeric
+            if f not in self.thresholds or f in self.keep_raw
+        ]
+        added_categoric = [
+            f"{feature}_q{q}"
+            for feature, qvs in self.thresholds.items()
+            for q, _ in qvs
+        ]
+        return MatchingHeaders(
+            numeric=kept_numeric,
+            categoric=self.input_headers.categoric + added_categoric,
+        )
+
+    def _transform(self, matching_data: MatchingData) -> MatchingData:
+        data = matching_data.copy().data
+        for feature, qvs in self.thresholds.items():
+            raw = data[feature]
+            # A comparison with NaN gives False, so a missing value would
+            # silently count as "at or below the cutpoint". Make the caller
+            # decide how to handle missing data instead.
+            n_missing = int(raw.isna().sum())
+            if n_missing:
+                raise ValueError(
+                    f"Feature '{feature}' has {n_missing} missing value(s). "
+                    "FixedNumericBinsEncoder cannot dichotomize a column with "
+                    "missing values; remove incomplete rows or drop the "
+                    "feature first."
+                )
+            for q, cut in qvs:
+                data[f"{feature}_q{q}"] = (raw > cut).astype(float)
+            if feature not in self.keep_raw:
+                del data[feature]
+        return MatchingData(
+            data=data,
+            headers=self.output_headers,
+            population_col=matching_data.population_col,
+        )
+
+    def _get_feature_names_out(self, feature_name_in: str) -> List[str]:
+        if feature_name_in in self.thresholds:
+            quantile_cols = [
+                f"{feature_name_in}_q{q}" for q, _ in self.thresholds[feature_name_in]
+            ]
+            if feature_name_in in self.keep_raw:
+                return [feature_name_in] + quantile_cols
+            return quantile_cols
+        return [feature_name_in]
 
 
 class CrossTermsPreprocessor(BaseMatchingPreprocessor):

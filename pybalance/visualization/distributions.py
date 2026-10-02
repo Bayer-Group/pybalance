@@ -131,20 +131,25 @@ def _overlay_aggregate_target_numeric(fig, matching_data, headers):
             continue
         ax = fig.axes[j]
         handles, labels = [], []
-        handles.append(
-            ax.axvline(stats["mean"], color="k", linestyle="--", linewidth=2)
-        )
-        labels.append(f"{target_name} mean")
-        if "std" in stats:
+        if "mean" in stats:
             handles.append(
-                ax.axvspan(
-                    stats["mean"] - stats["std"],
-                    stats["mean"] + stats["std"],
-                    color="k",
-                    alpha=0.12,
-                )
+                ax.axvline(stats["mean"], color="k", linestyle="--", linewidth=2)
             )
-            labels.append(f"{target_name} mean \u00b1 std")
+            labels.append(f"{target_name} mean")
+            if "std" in stats:
+                handles.append(
+                    ax.axvspan(
+                        stats["mean"] - stats["std"],
+                        stats["mean"] + stats["std"],
+                        color="k",
+                        alpha=0.12,
+                    )
+                )
+                labels.append(f"{target_name} mean \u00b1 std")
+        # A disclosed quantile (q, value) says P(raw <= value) = q: mark the cutpoint.
+        for q, value in stats.get("quantile", []):
+            handles.append(ax.axvline(value, color="k", linestyle=":", linewidth=2))
+            labels.append(f"{target_name} q={q:g} ({value:g})")
         _merge_legend(ax, handles, labels)
 
 
@@ -858,4 +863,81 @@ def plot_fractional_difference(
     ax.legend()
     fig.tight_layout()
 
+    return fig
+
+
+def plot_aggregate_target_match(
+    before: MatchingData,
+    after: MatchingData,
+    include_only: Optional[List[str]] = None,
+    col_wrap: int = 4,
+    tolerance: float = 0.1,
+) -> plt.Figure:
+    """
+    Show, for every constraint an AggregateTarget discloses, where the pool
+    lands before vs. after matching relative to the disclosed target value.
+
+    One small panel per constraint (a numeric feature's mean / std, a
+    disclosed quantile as ``P(x <= value)``, a disclosed categoric level's
+    rate). Each panel has its own y-axis in the constraint's natural units:
+    the dashed line is the disclosed target value, the shaded band is
+    +/- ``tolerance`` around it, and the two dots are the pool before and after
+    matching. A successful match moves the "after" dot onto the dashed line.
+    Categoric levels the target does not disclose are unconstrained and not
+    shown. See ``pybalance.utils.aggregate_target_constraints`` for the
+    underlying table.
+
+    :param before: MatchingData with the unmatched pool and the AggregateTarget.
+    :param after: MatchingData returned by the matcher (same AggregateTarget).
+    :param include_only: Restrict to these features.
+    :param col_wrap: Number of panels per row.
+    :param tolerance: Half-width of the shaded band, as a fraction of the target value.
+    """
+    from pybalance.utils.aggregate import aggregate_target_constraints
+
+    merged = aggregate_target_constraints(before).merge(
+        aggregate_target_constraints(after),
+        on=["feature", "constraint", "target"],
+        suffixes=("_before", "_after"),
+    )
+    if include_only is not None:
+        merged = merged[merged["feature"].isin(include_only)]
+    if merged.empty:
+        raise ValueError("No constraints to plot.")
+
+    ncols = min(col_wrap, len(merged))
+    nrows = 1 + (len(merged) - 1) // ncols
+    fig, axes = plt.subplots(
+        nrows, ncols, figsize=(2.6 * ncols, 2.8 * nrows), squeeze=False
+    )
+
+    for ax, (_, row) in zip(axes.flat, merged.iterrows()):
+        target, b, a = row["target"], row["pool_before"], row["pool_after"]
+        # Keep the band and both dots in view with a margin, instead of
+        # starting at zero, so small residual errors are visible.
+        half = max(1.25 * max(abs(b - target), abs(a - target)), tolerance * abs(target) * 1.5, 1e-9)
+        ax.axhspan(
+            target - tolerance * abs(target),
+            target + tolerance * abs(target),
+            color="k",
+            alpha=0.1,
+        )
+        ax.axhline(target, color="k", linestyle="--", linewidth=1.5)
+        ax.scatter([0], [b], s=70, color="tab:orange", zorder=3)
+        ax.scatter([1], [a], s=70, color="tab:green", zorder=3)
+        for x, v in ((0, b), (1, a)):
+            ax.annotate(
+                f"{v:.3g}", (x, v), textcoords="offset points", xytext=(0, 8), ha="center", fontsize=8
+            )
+        ax.set_xlim(-0.6, 1.6)
+        ax.set_ylim(target - half, target + half)
+        ax.set_xticks([0, 1])
+        ax.set_xticklabels(["before", "after"])
+        ax.set_title(f"{row['feature']}\n{row['constraint']}  (target {target:.3g})", fontsize=9)
+        ax.grid(True, axis="y", alpha=0.3)
+    for ax in list(axes.flat)[len(merged) :]:
+        ax.set_visible(False)
+
+    fig.suptitle("Aggregate target constraints: pool vs. disclosed target")
+    fig.tight_layout()
     return fig
