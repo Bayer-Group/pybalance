@@ -102,12 +102,20 @@ def compute_aggregate_feature_moments(
     """
     Map an AggregateTarget into the fitted preprocessor's output feature space.
 
-    Returns ``(target_mean, target_std)`` with shape ``(1, n_features)``.
-    Missing numeric stds fall back to the corresponding pool std when provided;
-    otherwise 0. A categoric level not present in a feature's disclosed rates
-    is left unconstrained, falling back to the pool's own mean/std for that
-    one-hot column when provided (otherwise 0); it is *not* assumed to be 0%.
-    Disclosed categoric rates use ``sqrt(p * (1 - p))`` for std.
+    Returns ``(target_mean, target_std, constrained)``. The first two have
+    shape ``(1, n_features)``; ``constrained`` is a boolean vector marking the
+    output columns for which the target actually discloses a mean (a numeric
+    mean, the rate of a quantile indicator, or the rate of a categoric level).
+    Every other column is *not* constrained: its entries in ``target_mean`` /
+    ``target_std`` are only placeholders (the pool's own values when
+    provided, otherwise 0) and callers must give it no weight.
+
+    Disclosed categoric rates use ``sqrt(p * (1 - p))`` for std; a numeric
+    feature without a disclosed std falls back to the pool std when provided.
+    Quantile indicators are expected one-hot encoded without dropping a level;
+    only the "1" level carries the constraint, since the "0" level is implied.
+    If every level of a categoric feature is disclosed and no level is
+    dropped, the first level is likewise implied and not constrained.
     """
     if not preprocessor.is_fitted:
         raise RuntimeError("Preprocessor must be fitted before mapping aggregates.")
@@ -116,8 +124,6 @@ def compute_aggregate_feature_moments(
     onehot = _find_onehot_encoder(preprocessor)
 
     output_features = preprocessor.output_headers["all"]
-    means = np.zeros(len(output_features), dtype=np.float32)
-    stds = np.zeros(len(output_features), dtype=np.float32)
     feature_index = {name: i for i, name in enumerate(output_features)}
 
     pool_std_vec = None
@@ -132,51 +138,62 @@ def compute_aggregate_feature_moments(
         if len(pool_mean_vec) != len(output_features):
             raise ValueError("pool_mean length does not match preprocessor outputs.")
 
+    means = (
+        pool_mean_vec.astype(np.float32)
+        if pool_mean_vec is not None
+        else np.zeros(len(output_features), dtype=np.float32)
+    )
+    stds = (
+        pool_std_vec.astype(np.float32)
+        if pool_std_vec is not None
+        else np.zeros(len(output_features), dtype=np.float32)
+    )
+    constrained = np.zeros(len(output_features), dtype=bool)
+
     for feature in aggregate_target.headers.numeric:
         stats = aggregate_target.numeric[feature]
-        has_mean = "mean" in stats
-        quantiles = stats.get("quantile", [])
         out_cols = preprocessor.get_feature_names_out(feature)
-        expected_n = int(has_mean) + len(quantiles)
-        if len(out_cols) != expected_n:
-            raise ValueError(
-                f"Expected numeric feature '{feature}' to map to {expected_n} "
-                f"output column(s) (one per disclosed 'mean' and one per "
-                f"disclosed quantile/median), got {out_cols}."
-            )
-        if has_mean:
+        if "mean" in stats or "std" in stats:
+            # The raw column is needed for the mean and/or the variance.
+            if feature not in out_cols:
+                raise ValueError(
+                    f"Numeric feature '{feature}' discloses a mean/std but the "
+                    f"preprocessor dropped its raw column (got {out_cols}). Use "
+                    "AggregateTargetBalanceCalculator."
+                )
             idx = feature_index[feature]
-            means[idx] = stats["mean"]
+            if "mean" in stats:
+                means[idx] = stats["mean"]
+                constrained[idx] = True
             if "std" in stats:
                 stds[idx] = stats["std"]
-            elif pool_std_vec is not None:
-                stds[idx] = pool_std_vec[idx]
-            else:
-                stds[idx] = 0.0
-        for q, value in quantiles:
+        for q, value in stats.get("quantile", []):
             # FixedNumericBinsEncoder names its output "{feature}_q{q}", which
-            # CategoricOneHotEncoder then suffixes further (e.g. "..._1.0"), so
-            # match by prefix rather than relying on get_feature_names_out()'s
-            # column order or an exact name.
+            # CategoricOneHotEncoder then suffixes with the level (e.g.
+            # "..._1.0"), so match by prefix rather than an exact name.
             prefix = f"{feature}_q{q}"
             matches = [
                 c for c in out_cols if c == prefix or c.startswith(prefix + "_")
             ]
-            if len(matches) != 1:
+            if not matches:
                 raise ValueError(
                     f"Numeric feature '{feature}' discloses a quantile (q={q}) "
-                    f"but the preprocessor did not produce exactly one output "
-                    f"column prefixed '{prefix}' (got {out_cols}). Use "
+                    f"but the preprocessor produced no output column prefixed "
+                    f"'{prefix}' (got {out_cols}). Use "
                     "AggregateTargetBalanceCalculator, which dichotomizes "
                     "quantile-disclosed features automatically."
                 )
-            idx = feature_index[matches[0]]
-            # A disclosed quantile (q, value) means P(raw <= value) = q, so by
-            # definition (approximately, for discrete columns with ties at
-            # `value`) a (1 - q) fraction of the population falls above it.
-            rate = 1.0 - q
-            means[idx] = rate
-            stds[idx] = math.sqrt(max(rate * (1.0 - rate), 0.0))
+            for col in matches:
+                # A disclosed quantile (q, value) means P(raw <= value) = q, so
+                # by definition (approximately, for discrete columns with ties
+                # at `value`) a (1 - q) fraction of the population falls above
+                # it, i.e. is "1" in the indicator.
+                is_above = col.rsplit("_", 1)[-1] == "1.0"
+                rate = 1.0 - q if is_above else q
+                idx = feature_index[col]
+                means[idx] = rate
+                stds[idx] = math.sqrt(max(rate * (1.0 - rate), 0.0))
+                constrained[idx] = is_above
 
     for feature in aggregate_target.headers.categoric:
         if onehot is None:
@@ -201,37 +218,65 @@ def compute_aggregate_feature_moments(
                 f"Mismatch mapping categoric feature '{feature}' to one-hot columns."
             )
 
-        for category, out_col in zip(kept_categories, out_cols):
-            idx = feature_index[out_col]
-            p = _rate_lookup(rates, category)
+        disclosed = [_rate_lookup(rates, category) for category in kept_categories]
+        for p, out_col in zip(disclosed, out_cols):
             if p is None:
-                # Category not disclosed: leave it unconstrained (zero loss
-                # regardless of composition) by falling back to the pool's
-                # own rate for this one-hot column, the same way a numeric
-                # feature without a disclosed std falls back to pool_std.
-                means[idx] = pool_mean_vec[idx] if pool_mean_vec is not None else 0.0
-                stds[idx] = pool_std_vec[idx] if pool_std_vec is not None else 0.0
+                # Not disclosed: no constraint, and the placeholder values
+                # (pool mean/std) are never matched against.
                 continue
+            idx = feature_index[out_col]
             means[idx] = p
             stds[idx] = math.sqrt(max(p * (1.0 - p), 0.0))
+            constrained[idx] = True
+
+        if drop_idx is None and all(p is not None for p in disclosed):
+            # All levels disclosed: the first is implied by the others.
+            constrained[feature_index[out_cols[0]]] = False
 
     mean_t = torch.tensor(means, dtype=torch.float32, device=device).reshape(1, -1)
     std_t = torch.tensor(stds, dtype=torch.float32, device=device).reshape(1, -1)
-    return mean_t, std_t
+    return mean_t, std_t, constrained
 
 
-def aggregate_target_constraints(matching_data: MatchingData) -> pd.DataFrame:
+def _quantile_label(q: float) -> str:
+    named = {0.0: "min", 0.5: "median", 1.0: "max"}
+    if q in named:
+        return named[q]
+    pct = 100 * q
+    if pct != int(pct):
+        return f"{q:g} quantile"
+    pct = int(pct)
+    if 10 <= pct % 100 <= 20:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(pct % 10, "th")
+    return f"{pct}{suffix} percentile"
+
+
+def aggregate_target_constraints(
+    matching_data: MatchingData, quantiles_as: str = "proportion"
+) -> pd.DataFrame:
     """
     List every constraint the AggregateTarget of ``matching_data`` discloses,
     next to the value the (current) pool achieves for it.
 
     Returns a DataFrame with columns ``feature``, ``constraint``, ``target``
     and ``pool``. One row per disclosed statistic: a numeric feature's
-    ``mean`` and ``std``, a disclosed quantile ``(q, value)`` as
-    ``P(x <= value)`` (target ``q``), and each disclosed categoric level as
-    ``rate of <level>``. Categoric levels the target does not disclose are
-    unconstrained and therefore omitted.
+    ``mean`` and ``std``, a disclosed quantile, and each disclosed categoric
+    level as ``rate of <level>``. Categoric levels the target does not
+    disclose are unconstrained and therefore omitted.
+
+    :param quantiles_as: How a disclosed quantile ``(q, value)`` is listed.
+        ``"proportion"`` (default) fixes the cutpoint: the row is
+        ``P(x <= value)`` with target ``q`` (a disclosed ``min`` / ``max`` is
+        the 0th / 100th quantile and is labelled as such). ``"value"`` fixes
+        the quantile instead: the row is e.g. ``75th percentile`` with target
+        ``value`` and the pool's own 75th percentile.
     """
+    if quantiles_as not in ("proportion", "value"):
+        raise ValueError(
+            f"quantiles_as must be 'proportion' or 'value'; got {quantiles_as!r}."
+        )
     if not matching_data.has_aggregate_target:
         raise ValueError("matching_data must have an AggregateTarget.")
     target = matching_data.aggregate_target
@@ -256,7 +301,11 @@ def aggregate_target_constraints(matching_data: MatchingData) -> pd.DataFrame:
         if "std" in stats:
             add(feature, "std", stats["std"], raw.std())
         for q, value in stats.get("quantile", []):
-            add(feature, f"P(x <= {value:g})", q, (raw <= value).mean())
+            if quantiles_as == "value":
+                add(feature, _quantile_label(q), value, raw.quantile(q))
+                continue
+            limit = {0.0: " (min)", 1.0: " (max)"}.get(q, "")
+            add(feature, f"P(x <= {value:g}){limit}", q, (raw <= value).mean())
 
     for feature, rates in target.categoric.items():
         for level, rate in rates.items():

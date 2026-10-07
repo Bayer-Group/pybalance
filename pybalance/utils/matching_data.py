@@ -36,7 +36,7 @@ class MatchingHeaders(object):
 
 
 def _normalize_numeric_stats(stats: Dict[str, Any]) -> Dict[str, Any]:
-    extra = set(stats) - {"mean", "std", "median", "quantile"}
+    extra = set(stats) - {"mean", "std", "median", "quantile", "min", "max"}
     if extra:
         raise ValueError(
             f"Unknown numeric aggregate stat key(s) {sorted(extra)}. Got: {stats}"
@@ -50,27 +50,32 @@ def _normalize_numeric_stats(stats: Dict[str, Any]) -> Dict[str, Any]:
     # A disclosed quantile (q, value) means P(raw <= value) = q for the raw
     # column; it is matched by dichotomizing the raw column at `value` and
     # constraining the resulting indicator's rate to 1 - q. 'median' is just
-    # sugar for the single quantile (0.5, value). Quantile constraints are
-    # independent of, and may be disclosed alongside, 'mean'/'std' on the same
-    # raw column. See AggregateTargetBalanceCalculator / FixedNumericBinsEncoder.
+    # sugar for the single quantile (0.5, value), and 'min'/'max' for the 0th and
+    # 100th quantile. Quantile constraints are independent of, and may be
+    # disclosed alongside, 'mean'/'std' on the same raw column. See
+    # AggregateTargetBalanceCalculator / FixedNumericBinsEncoder.
     quantiles = []
+    if "min" in stats:
+        quantiles.append((0.0, float(stats["min"])))
     if "median" in stats:
         quantiles.append((0.5, float(stats["median"])))
+    if "max" in stats:
+        quantiles.append((1.0, float(stats["max"])))
     if "quantile" in stats:
         for q, value in stats["quantile"]:
             q = float(q)
-            if not 0.0 < q < 1.0:
+            if not 0.0 <= q <= 1.0:
                 raise ValueError(
-                    f"Quantile proportion must be strictly between 0 and 1; got {q}."
+                    f"Quantile proportion must be between 0 and 1; got {q}."
                 )
             quantiles.append((q, float(value)))
     if quantiles:
-        out["quantile"] = quantiles
+        out["quantile"] = sorted(quantiles)
 
-    if "mean" not in out and "quantile" not in out:
+    if not out:
         raise ValueError(
-            "Numeric aggregate stats must include 'mean' and/or "
-            f"'median'/'quantile'. Got: {stats}"
+            "Numeric aggregate stats must include at least one of 'mean', 'std', "
+            f"'median', 'min', 'max' or 'quantile'. Got: {stats}"
         )
     return out
 
@@ -143,6 +148,27 @@ def load_target_moments(path: Union[str, Path]) -> Dict[str, Dict[str, float]]:
     return moments
 
 
+AGGREGATE_TARGET_CSV_COLUMNS = ("feature", "statistic", "parameter", "value")
+_NUMERIC_CSV_STATISTICS = ("mean", "std", "median", "min", "max")
+
+
+def _parse_level(text: str) -> Any:
+    # Category levels are stored as text; recover int/float levels where possible.
+    for cast in (int, float):
+        try:
+            return cast(text)
+        except ValueError:
+            pass
+    return text
+
+
+def _csv_float(text: str, what: str, line: int) -> float:
+    try:
+        return float(text)
+    except ValueError:
+        raise ValueError(f"Line {line}: {what} must be a number; got {text!r}.")
+
+
 @dataclass
 class AggregateTarget:
     """
@@ -153,16 +179,21 @@ class AggregateTarget:
     and category prevalences).
 
     :param n: Sample size of the target population.
-    :param numeric: Mapping feature -> {"mean": ..., "std": optional,
-        "median": optional, "quantile": optional}. ``median`` and
+    :param numeric: Mapping feature -> any non-empty subset of {"mean",
+        "std", "median", "quantile", "min", "max"}. Each disclosed statistic is
+        its own constraint; undisclosed ones are not constrained. ``median`` and
         ``quantile`` describe disclosed quantiles of the raw column (e.g. a
         published median, or "80% of patients weigh more than 70kg" as
-        ``{"quantile": [(0.2, 70)]}``) and may be given alongside, or instead
-        of, ``mean``/``std``.
+        ``{"quantile": [(0.2, 70)]}``). A ``std`` without a ``mean`` is the
+        spread around the matched subset's own mean. ``min`` and ``max`` are the
+        0th and 100th quantile; like every other constraint they are *soft*:
+        the matcher penalizes the fraction of patients below ``min`` / above
+        ``max`` rather than forbidding them. (``min`` is exclusive: a patient
+        exactly at ``min`` counts as below it.)
     :param categoric: Mapping feature -> {category: rate}. Categories may be
         partially disclosed -- e.g. a published Table 1 may give only
         "country: US 60%" -- in which case rates need not sum to 1 and
-        unlisted categories are left unconstrained.
+        unlisted categories get no constraint at all.
     :param headers: Optional explicit MatchingHeaders. If omitted, inferred from
         the keys of ``numeric`` and ``categoric``.
     """
@@ -238,6 +269,129 @@ class AggregateTarget:
             categoric=dict(payload.get("categoric", {})),
             headers=headers,
         )
+
+    @classmethod
+    def from_csv(cls, path: Union[str, Path]) -> "AggregateTarget":
+        """
+        Load an AggregateTarget from a CSV file in pybalance's standard
+        aggregate-target format (the inverse of :meth:`to_csv`).
+
+        The file is in long format, one disclosed statistic per row, with
+        columns ``feature``, ``statistic``, ``parameter`` and ``value``::
+
+            feature,statistic,parameter,value
+            ,n,,100
+            age,mean,,52.3
+            age,std,,11.8
+            age,median,,51.0
+            age,max,,75.0
+            weight,quantile,0.2,70.0
+            gender,rate,0,0.45
+            gender,rate,1,0.55
+
+        - ``n`` (blank ``feature``, blank ``parameter``): target sample size.
+          Exactly one row is required.
+        - ``mean``, ``std``, ``median``, ``min``, ``max`` (blank
+          ``parameter``): numeric statistics of ``feature``. ``min`` and
+          ``max`` are soft limits (the 0th and 100th quantile).
+        - ``quantile``: ``parameter`` is the proportion ``q`` in [0, 1] and
+          ``value`` the cutpoint, i.e. P(feature <= value) = q.
+        - ``rate``: ``parameter`` is a category level of ``feature`` and
+          ``value`` its rate. Levels may be omitted (partially disclosed).
+
+        A feature is numeric if it has numeric statistics and categoric if it
+        has ``rate`` rows. Feature order follows first appearance in the file.
+        See :class:`AggregateTarget` for the semantics of each statistic.
+        """
+        df = pd.read_csv(path, dtype=str, keep_default_na=False)
+        missing_cols = set(AGGREGATE_TARGET_CSV_COLUMNS) - set(df.columns)
+        if missing_cols:
+            raise ValueError(
+                f"Aggregate target file {path} missing required columns: "
+                f"{sorted(missing_cols)}"
+            )
+
+        n = None
+        numeric: Dict[str, Dict[str, Any]] = {}
+        categoric: Dict[str, Dict[Any, float]] = {}
+        for i, row in enumerate(df.to_dict("records")):
+            line = i + 2  # 1-based, after the header row
+            feature = row["feature"].strip()
+            statistic = row["statistic"].strip()
+            parameter = row["parameter"].strip()
+            value = _csv_float(row["value"].strip(), "value", line)
+
+            if statistic == "n":
+                if n is not None:
+                    raise ValueError(f"Line {line}: duplicate 'n' row.")
+                if value != int(value):
+                    raise ValueError(f"Line {line}: n must be an integer; got {value}.")
+                n = int(value)
+                continue
+
+            if not feature:
+                raise ValueError(f"Line {line}: statistic '{statistic}' requires a feature.")
+
+            if statistic in _NUMERIC_CSV_STATISTICS:
+                stats = numeric.setdefault(feature, {})
+                if statistic in stats:
+                    raise ValueError(
+                        f"Line {line}: duplicate '{statistic}' for feature '{feature}'."
+                    )
+                stats[statistic] = value
+            elif statistic == "quantile":
+                q = _csv_float(parameter, "quantile parameter", line)
+                numeric.setdefault(feature, {}).setdefault("quantile", []).append(
+                    (q, value)
+                )
+            elif statistic == "rate":
+                if parameter == "":
+                    raise ValueError(f"Line {line}: 'rate' requires a level in 'parameter'.")
+                rates = categoric.setdefault(feature, {})
+                level = _parse_level(parameter)
+                if level in rates:
+                    raise ValueError(
+                        f"Line {line}: duplicate rate for '{feature}'='{parameter}'."
+                    )
+                rates[level] = value
+            else:
+                raise ValueError(
+                    f"Line {line}: unknown statistic '{statistic}'. Expected one of "
+                    "n, mean, std, median, min, max, quantile, rate."
+                )
+
+        if n is None:
+            raise ValueError(f"Aggregate target file {path} has no 'n' row.")
+        return cls(n=n, numeric=numeric, categoric=categoric)
+
+    def to_csv(self, path: Union[str, Path, None] = None) -> Optional[str]:
+        """
+        Write this target in the standard CSV format read by :meth:`from_csv`.
+        Returns the CSV text if ``path`` is None, otherwise writes the file.
+        """
+
+        def py(x):
+            return x.item() if hasattr(x, "item") else x
+
+        rows = [("", "n", "", self.n)]
+        for feature in self.headers.numeric:
+            stats = self.numeric[feature]
+            for statistic in ("mean", "std"):
+                if statistic in stats:
+                    rows.append((feature, statistic, "", stats[statistic]))
+            for q, value in stats.get("quantile", []):
+                named = {0.0: "min", 0.5: "median", 1.0: "max"}
+                if q in named:
+                    rows.append((feature, named[q], "", value))
+                else:
+                    rows.append((feature, "quantile", q, value))
+        for feature in self.headers.categoric:
+            for level, rate in self.categoric[feature].items():
+                rows.append((feature, "rate", py(level), rate))
+
+        # object dtype keeps n as "100" rather than "100.0" next to float values
+        df = pd.DataFrame(rows, columns=list(AGGREGATE_TARGET_CSV_COLUMNS), dtype=object)
+        return df.to_csv(path, index=False)
 
     @classmethod
     def from_moments_csv(
@@ -343,7 +497,7 @@ class AggregateTarget:
                             {
                                 "feature": feature,
                                 "type": "numeric",
-                                "stat": f"quantile_{q}",
+                                "stat": {0.0: "min", 1.0: "max"}.get(q, f"quantile_{q}"),
                                 "value": cutpoint,
                             }
                         )
@@ -842,7 +996,9 @@ Populations:
         # since its rates/counts are already known exactly.
         if normalize:
             for c in pop_columns:
-                out[c] = out[c] / counts.iloc[0][c]
+                n = counts.iloc[0][c]
+                out[c] = out[c] / n
+                out.loc[(f"{self.population_col} size", "N"), c] = n
         else:
             out = out.astype(int)
 
@@ -857,8 +1013,18 @@ Populations:
                     out.loc[(cat, value), self.target_name] = (
                         rate if normalize else round(rate * self.aggregate_target.n)
                     )
+            # A feature the target does not disclose at all is unconstrained, not 0%.
+            undisclosed = [
+                cat
+                for cat in self.headers["categoric"]
+                if cat not in self.aggregate_target.categoric
+            ]
+            for cat in undisclosed:
+                out.loc[cat, self.target_name] = float("nan")
             if not normalize:
-                out[self.target_name] = out[self.target_name].astype(int)
+                out[self.target_name] = out[self.target_name].astype(
+                    "Int64" if undisclosed else int
+                )
 
         return out
 

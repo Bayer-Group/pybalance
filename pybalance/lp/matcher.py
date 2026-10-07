@@ -705,17 +705,15 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
     statistics (an ``AggregateTarget``, e.g. a published Table 1). A subset of
     the pool is selected so that its moments match the target's.
 
-    Only the moments actually disclosed on ``AggregateTarget`` are matched: a
-    numeric feature's mean is always matched (mean is required unless a
-    median/quantile is disclosed instead), and its variance is *additionally*
-    constrained if -- and only if -- the target discloses a "std" for that
-    feature. This makes matching moment-aware: pass a target std to control
-    it, or omit it to leave a feature's spread unconstrained. One
-    consequence: setting a target std of 0 asks the solver for the
-    minimal-variance subset achievable for that feature, subject to
-    everything else. A feature whose target discloses a median/quantile
-    instead of (or alongside) a mean is dichotomized automatically -- see
-    AggregateTargetBalanceCalculator.
+    Every statistic the ``AggregateTarget`` discloses becomes a constraint,
+    and nothing else is constrained: a feature's mean (if disclosed), its
+    variance (if a "std" is disclosed), each disclosed quantile / median /
+    min / max (by dichotomizing the feature -- see
+    AggregateTargetBalanceCalculator) and each disclosed categoric rate. An
+    undisclosed statistic or categoric level is simply left out. Setting a
+    target std of 0 asks the solver for the minimal-variance subset
+    achievable for that feature, subject to everything else. A std without a
+    mean is the variance around the subset's own mean.
 
     The target is a fixed constraint vector and is never subsetted, so several
     ``ConstraintSatisfactionMatcher`` options do not apply here and are
@@ -774,7 +772,20 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         self.orig_pool = self.matching_data.get_population(self.matching_data.pool_name)
 
         self.objective = self._OBJECTIVE
-        self.balance_calculator = BalanceCalculator(self.matching_data, self.objective)
+        # Features in the headers that the target does not disclose take no part in
+        # the solve (they stay on the returned match so they can still be inspected).
+        target = self.matching_data.aggregate_target
+        solve_data = self.matching_data
+        if set(solve_data.headers.all) != set(target.feature_names):
+            solve_data = MatchingData(
+                pool=self.orig_pool,
+                target=target,
+                headers=target.headers,
+                population_col=self.matching_data.population_col,
+                pool_name=self.matching_data.pool_name,
+                target_name=self.matching_data.target_name,
+            )
+        self.balance_calculator = BalanceCalculator(solve_data, self.objective)
 
         pool = self.balance_calculator.pool.cpu().numpy()
         target_mean = self.balance_calculator.target_mean.cpu().numpy().reshape(1, -1)
@@ -786,6 +797,7 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         self.n_pool = len(pool_scaled)
         self.n_features = pool_scaled.shape[1]
         self.weights = self.get_weights()
+        self.pool_size = self._resolve_pool_size(pool_size, max_mismatch)
         # Pass n * mean as a single row so discretization uses the same
         # scale factor as the pool features; the row is already a total.
         target_totals = target_mean_scaled * self.weights * self.n_target
@@ -811,7 +823,6 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
             self.n_target < self.n_pool
         ), "Number of patients in target should be less than the pool."
 
-        self.pool_size = self._resolve_pool_size(pool_size, max_mismatch)
         self.target_size = self.n_target
         self.max_mismatch = max_mismatch
         self.time_limit = time_limit
@@ -819,6 +830,10 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         self.verbose = verbose
 
         self._reset_best_match()
+
+    def get_weights(self):
+        # Only columns the target discloses a mean for are constrained.
+        return [int(c) for c in self.balance_calculator.constrained]
 
     def _get_target_variance_targets(
         self,
@@ -844,6 +859,10 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         variance_scalefac ~ sqrt(scalefac / n_target) instead brings the two
         objective terms back to the same order of magnitude, so neither
         dominates purely due to units.
+
+        A feature whose std is disclosed *without* a mean is flagged with
+        ``"around_subset_mean": True``: its variance is taken around the
+        subset's own mean instead.
 
         Features with no disclosed std (including all categoric features,
         whose variance is already fixed by their mean/rate) are omitted; their
@@ -874,8 +893,33 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         targets = {}
         for feature in numeric_features_with_std:
             stats = self.matching_data.aggregate_target.numeric[feature]
-            out_col = preprocessor.get_feature_names_out(feature)[0]
-            j = feature_index[out_col]
+            j = feature_index[feature]
+
+            if "mean" not in stats:
+                # No target mean to center on, so the variance has to be taken
+                # around the subset's own mean, which is not linear in x (see
+                # match()). Values are centered on the pool only to keep the
+                # integers small; the variance is shift-invariant.
+                m = self.pool_size if self.pool_size is not None else self.n_target
+                scale = max(
+                    1, round(math.sqrt(self.scalefac / (self.n_target * m)))
+                )
+                values = [
+                    round(
+                        self.n_target
+                        * scale
+                        * (pool_scaled[i, j] - pool_scaled[:, j].mean())
+                    )
+                    for i in range(self.n_pool)
+                ]
+                scaled_std = self.n_target * scale * scaler.scale_[j] * stats["std"]
+                targets[j] = {
+                    "target": round(scaled_std**2),
+                    "deviations": values,
+                    "around_subset_mean": True,
+                }
+                continue
+
             weight = self.weights[j]
 
             deviations = [
@@ -1038,6 +1082,39 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
             deviations = variance_spec["deviations"]
             target_variance = variance_spec["target"]
             squared_deviations = [d * d for d in deviations]
+            if variance_spec.get("around_subset_mean"):
+                if not isinstance(pool_size, int):
+                    # The objective ignores variance when the pool size is free.
+                    continue
+                total = sum(abs(d) for d in deviations)
+                bound = (
+                    pool_size * sum(squared_deviations)
+                    + total**2
+                    + pool_size**2 * target_variance
+                )
+                if bound >= 2**62:
+                    logger.warning(
+                        f"Variance constraint bound = {bound} for feature index {j} "
+                        "may exceed integer dynamic range and lead to suboptimal results."
+                    )
+                # m * sum_i x_i v_i^2 - (sum_i x_i v_i)^2 == m^2 * Var(v)
+                subset_sum = model.NewIntVar(-total, total, f"variance_sum[{j}]")
+                model.Add(
+                    sum(deviations[i] * x[i] for i in range(self.n_pool)) == subset_sum
+                )
+                subset_sum_sq = model.NewIntVar(0, total**2, f"variance_sum_sq[{j}]")
+                model.AddMultiplicationEquality(subset_sum_sq, [subset_sum, subset_sum])
+                variance_delta = model.NewIntVar(-bound, bound, f"variance_delta[{j}]")
+                model.Add(
+                    pool_size * sum(squared_deviations[i] * x[i] for i in range(self.n_pool))
+                    - subset_sum_sq
+                    - pool_size**2 * target_variance
+                    == variance_delta
+                )
+                variance_abs_delta = model.NewIntVar(0, bound, f"variance_abs_delta[{j}]")
+                model.AddAbsEquality(variance_abs_delta, variance_delta)
+                variance_abs_deltas.append(variance_abs_delta)
+                continue
             bound = sum(squared_deviations) + self.n_pool * target_variance
             if bound >= 2**62:
                 logger.warning(

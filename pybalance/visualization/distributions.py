@@ -149,7 +149,8 @@ def _overlay_aggregate_target_numeric(fig, matching_data, headers):
         # A disclosed quantile (q, value) says P(raw <= value) = q: mark the cutpoint.
         for q, value in stats.get("quantile", []):
             handles.append(ax.axvline(value, color="k", linestyle=":", linewidth=2))
-            labels.append(f"{target_name} q={q:g} ({value:g})")
+            label = {0.0: "min", 1.0: "max"}.get(q, f"q={q:g}")
+            labels.append(f"{target_name} {label} ({value:g})")
         _merge_legend(ax, handles, labels)
 
 
@@ -721,7 +722,13 @@ def _fractional_differences(
     AggregateTarget frequently does not disclose.
     """
     described = matching_data.describe(normalize=True)
-    features = include_only or matching_data.headers.all
+    if include_only:
+        features = include_only
+    elif matching_data.has_aggregate_target:
+        # features the target does not disclose have nothing to compare against
+        features = matching_data.aggregate_target.feature_names
+    else:
+        features = matching_data.headers.all
 
     def fractional_diff(pool_value, target_value):
         return (pool_value - target_value) / target_value if target_value else np.nan
@@ -872,31 +879,37 @@ def plot_aggregate_target_match(
     include_only: Optional[List[str]] = None,
     col_wrap: int = 4,
     tolerance: float = 0.1,
+    quantiles_as: str = "value",
 ) -> plt.Figure:
     """
     Show, for every constraint an AggregateTarget discloses, where the pool
     lands before vs. after matching relative to the disclosed target value.
 
     One small panel per constraint (a numeric feature's mean / std, a
-    disclosed quantile as ``P(x <= value)``, a disclosed categoric level's
-    rate). Each panel has its own y-axis in the constraint's natural units:
-    the dashed line is the disclosed target value, the shaded band is
-    +/- ``tolerance`` around it, and the two dots are the pool before and after
-    matching. A successful match moves the "after" dot onto the dashed line.
-    Categoric levels the target does not disclose are unconstrained and not
-    shown. See ``pybalance.utils.aggregate_target_constraints`` for the
-    underlying table.
+    disclosed quantile, a disclosed categoric level's rate; a ``median`` /
+    ``min`` / ``max`` is the 0.5 / 0 / 1 quantile). Each panel has its own
+    y-axis in the constraint's natural units: the dashed line is the disclosed
+    target value, the shaded band is +/- ``tolerance`` around it, and the two
+    dots are the pool before and after matching. A successful match moves the
+    "after" dot onto the dashed line. Categoric levels the target does not
+    disclose are unconstrained and not shown. See
+    ``pybalance.utils.aggregate_target_constraints`` for the underlying table.
 
     :param before: MatchingData with the unmatched pool and the AggregateTarget.
     :param after: MatchingData returned by the matcher (same AggregateTarget).
     :param include_only: Restrict to these features.
     :param col_wrap: Number of panels per row.
     :param tolerance: Half-width of the shaded band, as a fraction of the target value.
+    :param quantiles_as: ``"value"`` (default) fixes the quantile and shows the
+        pool's e.g. 75th percentile -- in the feature's units -- against the
+        disclosed one. ``"proportion"`` fixes the disclosed cutpoint instead and
+        shows the fraction of the pool at or below it against the disclosed
+        quantile ``q``.
     """
     from pybalance.utils.aggregate import aggregate_target_constraints
 
-    merged = aggregate_target_constraints(before).merge(
-        aggregate_target_constraints(after),
+    merged = aggregate_target_constraints(before, quantiles_as).merge(
+        aggregate_target_constraints(after, quantiles_as),
         on=["feature", "constraint", "target"],
         suffixes=("_before", "_after"),
     )
@@ -930,7 +943,11 @@ def plot_aggregate_target_match(
                 f"{v:.3g}", (x, v), textcoords="offset points", xytext=(0, 8), ha="center", fontsize=8
             )
         ax.set_xlim(-0.6, 1.6)
-        ax.set_ylim(target - half, target + half)
+        if row["constraint"].startswith(("P(x", "rate of")):
+            # proportions
+            ax.set_ylim(max(target - half, -0.05), min(target + half, 1.05))
+        else:
+            ax.set_ylim(target - half, target + half)
         ax.set_xticks([0, 1])
         ax.set_xticklabels(["before", "after"])
         ax.set_title(f"{row['feature']}\n{row['constraint']}  (target {target:.3g})", fontsize=9)

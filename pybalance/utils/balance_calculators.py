@@ -140,13 +140,22 @@ class BaseBalanceCalculator:
             self.pool = self._preprocess(pool)
             pool_std = torch.std(self.pool, 0, keepdim=True).to(self.device)
             pool_mean = torch.mean(self.pool, 0, keepdim=True).to(self.device)
-            self.target_mean, self.target_std = compute_aggregate_feature_moments(
+            (
+                self.target_mean,
+                self.target_std,
+                self.constrained,
+            ) = compute_aggregate_feature_moments(
                 matching_data.aggregate_target,
                 self.preprocessor,
                 pool_std=pool_std,
                 pool_mean=pool_mean,
                 device=self.device,
             )
+            # Columns the target does not disclose are not constrained: no weight.
+            if self.constrained.any():
+                mask = torch.tensor(self.constrained, device=self.device)
+                weights = self.feature_weights * mask
+                self.feature_weights = weights / weights.sum()
         else:
             target, pool = split_target_pool(matching_data)
             self.target = self._preprocess(target)
@@ -387,6 +396,11 @@ class AggregateTargetBalanceCalculator(BaseBalanceCalculator):
     ``numeric={"psa": {"mean": 68.0, "std": 12.0, "median": 65}}``), in which
     case both the raw column and its dichotomized indicator(s) are matched.
     See FixedNumericBinsEncoder.
+
+    Every disclosed statistic is its own constraint, and only disclosed
+    statistics are constrained: a feature or categoric level the target says
+    nothing about gets zero weight. To that end categoric levels are encoded
+    without dropping one (``drop=None``), so each disclosed level has a column.
     """
 
     name = "aggregate_beta"
@@ -396,7 +410,7 @@ class AggregateTargetBalanceCalculator(BaseBalanceCalculator):
         matching_data: MatchingData,
         feature_weights: Optional[Dict[str, float]] = None,
         device: Optional[str] = None,
-        drop: bool = "first",
+        drop: Optional[str] = None,
         standardize_difference: bool = True,
     ):
         if not matching_data.has_aggregate_target:
@@ -438,7 +452,8 @@ class AggregateTargetBalanceCalculator(BaseBalanceCalculator):
         for feature, stats in aggregate_target.numeric.items():
             if "quantile" in stats:
                 thresholds[feature] = list(stats["quantile"])
-                if "mean" in stats:
+                # the raw column is still needed for a disclosed mean and/or std
+                if "mean" in stats or "std" in stats:
                     keep_raw.append(feature)
         return thresholds, keep_raw
 

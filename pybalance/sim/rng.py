@@ -3,7 +3,7 @@ import os
 import numpy as np
 from scipy.stats import truncnorm, uniform
 import pandas as pd
-from pybalance.utils import MatchingData
+from pybalance.utils import AggregateTarget, MatchingData, MatchingHeaders
 
 
 def generate_truncated_distributions(rng, mn, mx, size):
@@ -181,6 +181,93 @@ def generate_toy_dataset(n_pool=10000, n_target=1000, seed=45):
     feature_data = pd.concat([pool, target])
     feature_data.loc[:, "patient_id"] = list(range(len(feature_data)))
     return MatchingData(feature_data)
+
+
+# Each use case is a different way a trial might disclose its target population.
+# Features not listed (e.g. height, country) are not disclosed at all.
+DEMO_AGGREGATE_USE_CASES = {
+    "means": "Age and weight means, gender rates.",
+    "means_std": "Age and weight means and stds, gender rates.",
+    "quantiles": "Age quartiles and weight median (no means), gender rates.",
+}
+
+# The packaged demo files describe generate_toy_dataset with these arguments.
+_DEMO_TOY_DATASET_KWARGS = dict(n_pool=1000, n_target=100, seed=7)
+_DEMO_HEADERS = dict(numeric=["age", "weight"], categoric=["gender"])
+
+
+def _check_demo_use_case(use_case):
+    if use_case not in DEMO_AGGREGATE_USE_CASES:
+        raise ValueError(
+            f"Unknown use_case {use_case!r}; expected one of "
+            f"{sorted(DEMO_AGGREGATE_USE_CASES)}."
+        )
+
+
+def generate_aggregate_target(use_case="means_std", matching_data=None, population=None):
+    """
+    Derive an AggregateTarget from the patient-level target of a toy dataset,
+    keeping only the summary statistics a trial publication might disclose.
+
+    :param use_case: One of DEMO_AGGREGATE_USE_CASES (keys: "means", "means_std",
+        "quantiles"; values describe each).
+    :param matching_data: Patient-level MatchingData to summarize. Defaults to
+        generate_toy_dataset(n_pool=1000, n_target=100, seed=7). Must contain
+        columns age, weight and gender.
+    :param population: Population of matching_data to summarize. Defaults to
+        its target population.
+    """
+    _check_demo_use_case(use_case)
+    if matching_data is None:
+        matching_data = generate_toy_dataset(**_DEMO_TOY_DATASET_KWARGS)
+    if population is None:
+        population = matching_data.target_name
+    df = matching_data.get_population(population)
+
+    numeric = {}
+    for feature in _DEMO_HEADERS["numeric"]:
+        if use_case == "quantiles":
+            qs = [0.25, 0.5, 0.75] if feature == "age" else [0.5]
+            numeric[feature] = {
+                "quantile": [(q, float(df[feature].quantile(q))) for q in qs]
+            }
+        else:
+            numeric[feature] = {"mean": float(df[feature].mean())}
+            if use_case == "means_std":
+                numeric[feature]["std"] = float(df[feature].std())
+
+    gender = {
+        k.item() if hasattr(k, "item") else k: float(v)
+        for k, v in df["gender"].value_counts(normalize=True).items()
+    }
+    return AggregateTarget(
+        n=len(df),
+        numeric=numeric,
+        categoric={"gender": gender},
+        headers=MatchingHeaders(**_DEMO_HEADERS),
+    )
+
+
+def get_demo_aggregate_target_path(use_case="means_std"):
+    """
+    Get the path to the packaged aggregate target CSV for a use case (see
+    generate_aggregate_target). A good template for writing your own file.
+    """
+    _check_demo_use_case(use_case)
+    return os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "data",
+        f"aggregate_target_{use_case}.csv",
+    )
+
+
+def load_demo_aggregate_target(use_case="means_std"):
+    """
+    Load the packaged AggregateTarget for a use case. It summarizes the target of
+    generate_toy_dataset(n_pool=1000, n_target=100, seed=7), whose pool is a
+    suitable one to match against.
+    """
+    return AggregateTarget.from_csv(get_demo_aggregate_target_path(use_case))
 
 
 def get_paper_dataset_path():

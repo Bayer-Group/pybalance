@@ -1,3 +1,5 @@
+import pytest
+
 import numpy as np
 import pandas as pd
 
@@ -74,3 +76,46 @@ def test_debin():
     assert indices["x"] == [0, 1]
     assert indices["y"] == [4]
     assert indices["z"] == [2, 3]
+
+
+@pytest.mark.parametrize(
+    "numeric, categoric, n_panels",
+    [
+        ({"age": {"mean": 55.0}}, {"country": {"US": 0.5, "DE": 0.3, "FR": 0.2}}, 4),
+        ({"age": {"mean": 55.0, "std": 0.0}, "weight": {"mean": 80.0, "std": 9.0}}, {}, 4),
+        (
+            {
+                "age": {"quantile": [(0.25, 48.0), (0.75, 62.0)], "median": 55.0, "min": 30.0, "max": 80.0},
+                "weight": {"mean": 80.0, "max": 500.0},
+            },
+            {},
+            7,
+        ),
+        ({}, {"country": {"US": 0.4}}, 1),
+    ],
+)
+def test_plot_aggregate_target_match_handles_every_target_type(numeric, categoric, n_panels):
+    pool = _aggregate_matching_data().get_population("pool")
+    target = AggregateTarget(n=80, numeric=numeric, categoric=categoric)
+    before = MatchingData(pool=pool, target=target, headers=target.headers)
+    after = MatchingData(pool=pool.sample(80, random_state=0), target=target, headers=target.headers)
+
+    for quantiles_as in ("value", "proportion"):
+        fig = plot_aggregate_target_match(before, after, quantiles_as=quantiles_as)
+        assert sum(ax.get_visible() for ax in fig.axes) == n_panels
+        # proportions never leave [0, 1] by more than the margin
+        for ax in fig.axes:
+            if not ax.get_visible():
+                continue
+            if ax.get_title().split("\n")[1].startswith(("P(x", "rate of")):
+                assert ax.get_ylim()[0] >= -0.05 and ax.get_ylim()[1] <= 1.05
+
+
+def test_quantile_constraints_can_be_listed_by_value():
+    data = _aggregate_matching_data()
+    by_value = aggregate_target_constraints(data, quantiles_as="value")
+    row = by_value.set_index("constraint").loc["median"]
+    assert row["target"] == 50.0
+    pool_age = data.get_population("pool")["age"]
+    assert row["pool"] == pool_age.median()
+    assert set(by_value["constraint"]) == {"median", "mean", "20th percentile", "rate of US"}

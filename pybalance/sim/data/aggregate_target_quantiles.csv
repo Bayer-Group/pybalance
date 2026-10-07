@@ -1,0 +1,8 @@
+feature,statistic,parameter,value
+,n,,100
+age,quantile,0.25,41.37572755384545
+age,median,,53.71747134991201
+age,quantile,0.75,63.69799477706703
+weight,median,,82.66384310636546
+gender,rate,0.0,0.55
+gender,rate,1.0,0.45

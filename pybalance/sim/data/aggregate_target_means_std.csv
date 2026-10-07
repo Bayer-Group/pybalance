@@ -1,0 +1,8 @@
+feature,statistic,parameter,value
+,n,,100
+age,mean,,50.79597308488883
+age,std,,15.019029997189094
+weight,mean,,82.07903986232829
+weight,std,,18.721164130484865
+gender,rate,0.0,0.55
+gender,rate,1.0,0.45
