@@ -41,7 +41,7 @@ in non-randomized populations. In `pybalance`, we start with measures of "balanc
 different, and we think almost always better, from the well-known propensity score
 approach, in which the probability of treatment assignment is modelled, but balance metrics
 are almost always anyway implicitly defining the success criterion
-(see our [demo](https://bayer-group.github.io/pybalance/demos/ps_matcher.html)).
+(see our [demo](https://bayer-group.github.io/pybalance/demos/matching_01_propensity.html)).
 Our approach here is to explicitly define and directly optimize the balance metric that
 is relevant for the given problem.
 
