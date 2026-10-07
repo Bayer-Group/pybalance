@@ -119,3 +119,32 @@ def test_quantile_constraints_can_be_listed_by_value():
     pool_age = data.get_population("pool")["age"]
     assert row["pool"] == pool_age.median()
     assert set(by_value["constraint"]) == {"median", "mean", "20th percentile", "rate of US"}
+
+
+def test_plot_aggregate_target_match_accepts_weights():
+    data = _aggregate_matching_data()
+    pool = data.get_population("pool").copy()
+    # weight the pool toward older patients
+    pool["w"] = np.exp(0.05 * (pool["age"] - pool["age"].mean()))
+    weighted = MatchingData(pool=pool, target=data.aggregate_target, headers=data.headers)
+
+    plain = aggregate_target_constraints(weighted).set_index("constraint")
+    by_weight = aggregate_target_constraints(weighted, weights="w").set_index("constraint")
+    assert by_weight.loc["mean", "pool"] > plain.loc["mean", "pool"]
+    assert by_weight.loc["P(x <= 50)", "pool"] < plain.loc["P(x <= 50)", "pool"]
+    assert by_weight.loc["P(x <= 50)", "pool"] == pytest.approx(
+        np.average(pool["age"] <= 50, weights=pool["w"])
+    )
+
+    # equal weights reproduce the unweighted statistics
+    pool["w"] = 3.0
+    uniform = MatchingData(pool=pool, target=data.aggregate_target, headers=data.headers)
+    assert aggregate_target_constraints(uniform, weights="w")["pool"].tolist() == pytest.approx(
+        aggregate_target_constraints(uniform)["pool"].tolist(), rel=1e-2
+    )
+
+    pool["w"] = np.exp(0.05 * (pool["age"] - pool["age"].mean()))
+    fig = plot_aggregate_target_match(data, weighted, weights="w")
+    assert any(ax.get_visible() for ax in fig.axes)
+    with pytest.raises(ValueError, match="not found"):
+        plot_aggregate_target_match(data, weighted, weights="nope")

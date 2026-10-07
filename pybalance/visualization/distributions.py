@@ -880,6 +880,7 @@ def plot_aggregate_target_match(
     col_wrap: int = 4,
     tolerance: float = 0.1,
     quantiles_as: str = "value",
+    weights: Optional[str] = None,
 ) -> plt.Figure:
     """
     Show, for every constraint an AggregateTarget discloses, where the pool
@@ -905,11 +906,22 @@ def plot_aggregate_target_match(
         disclosed one. ``"proportion"`` fixes the disclosed cutpoint instead and
         shows the fraction of the pool at or below it against the disclosed
         quantile ``q``.
+    :param weights: Name of the pool column in ``after`` holding patient weights
+        (e.g. ``"sample_weight"`` from a Weighter): the "after" dots are then
+        the *weighted* pool, compared with the unweighted ``before``. A
+        disclosed ``min`` / ``max`` is plotted as the weighted fraction beyond
+        it, since weights stay positive and the extreme value itself never
+        moves.
     """
     from pybalance.utils.aggregate import aggregate_target_constraints
 
-    merged = aggregate_target_constraints(before, quantiles_as).merge(
-        aggregate_target_constraints(after, quantiles_as),
+    weighted = weights is not None
+    merged = aggregate_target_constraints(
+        before, quantiles_as, limits_as_proportion=weighted
+    ).merge(
+        aggregate_target_constraints(
+            after, quantiles_as, weights=weights, limits_as_proportion=weighted
+        ),
         on=["feature", "constraint", "target"],
         suffixes=("_before", "_after"),
     )

@@ -207,3 +207,57 @@ def test_iptw_trim_quantiles_caps_extreme_weights():
     with pytest.raises(ValueError):
         IPTWWeighter(md, trim_quantiles=(0.9, 0.1), verbose=False)
 
+
+
+def _toy_pool(n=1000, seed=7):
+    m = generate_toy_dataset(n_pool=n, n_target=0, seed=seed)
+    return m.get_population("pool").reset_index(drop=True)
+
+
+def test_weighter_only_constrains_disclosed_statistics():
+    pool = _toy_pool()
+    headers = MatchingHeaders(numeric=["age", "height"], categoric=["country"])
+    target = AggregateTarget(n=100, numeric={"age": {"mean": 60.0}}, categoric={"country": {1: 0.3}})
+    weighter = MAICWeighter(MatchingData(pool=pool, target=target, headers=headers), verbose=False)
+    weighter.match()
+
+    table = weighted_balance_table(weighter).set_index("feature")
+    assert weighter.diagnostics["converged"]
+    assert table.loc["age", "weighted_pool"] == pytest.approx(60.0, abs=1e-3)
+    assert table.loc["country_1", "weighted_pool"] == pytest.approx(0.3, abs=1e-3)
+    # undisclosed features have no target and are free to move, not pinned to the pool
+    for feature in ("height", "country_2", "country_3"):
+        assert np.isnan(table.loc[feature, "target"])
+        assert abs(table.loc[feature, "weighted_pool"] - table.loc[feature, "unweighted_pool"]) > 0.005
+
+
+def test_weighter_matches_quantiles_and_softly_limits_max():
+    pool = _toy_pool()
+    headers = MatchingHeaders(numeric=["age", "weight"], categoric=[])
+    numeric = {"age": {"median": 53.0}, "weight": {"median": 82.0, "max": 100.0}}
+    weighter = MAICWeighter(
+        MatchingData(pool=pool, target=AggregateTarget(n=100, numeric=numeric), headers=headers),
+        verbose=False,
+    )
+    weighter.match()
+
+    table = weighted_balance_table(weighter).set_index("feature")
+    assert weighter.diagnostics["converged"]
+    assert table.loc["age_q0.5_1.0", "weighted_pool"] == pytest.approx(0.5, abs=1e-3)
+    assert table.loc["weight_q0.5_1.0", "weighted_pool"] == pytest.approx(0.5, abs=1e-3)
+    # the max is soft: the weight above it shrinks a lot but need not reach 0
+    above = (pool["weight"] > 100).values
+    assert above.mean() > 0.1
+    share = weighter.weights[above].sum() / weighter.weights.sum()
+    assert 0 < share < 0.03
+    assert weighter.diagnostics["max_soft_violation"] > 0
+
+
+def test_weighter_rejects_variance_without_a_mean():
+    pool = _toy_pool(300)
+    headers = MatchingHeaders(numeric=["age"], categoric=[])
+    data = MatchingData(
+        pool=pool, target=AggregateTarget(n=50, numeric={"age": {"std": 5.0}}), headers=headers
+    )
+    with pytest.raises(ValueError, match="no mean"):
+        EntropyBalanceWeighter(data, match_variance=True)

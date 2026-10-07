@@ -144,6 +144,7 @@ class BaseBalanceCalculator:
                 self.target_mean,
                 self.target_std,
                 self.constrained,
+                self.disclosed,
             ) = compute_aggregate_feature_moments(
                 matching_data.aggregate_target,
                 self.preprocessor,
@@ -163,6 +164,7 @@ class BaseBalanceCalculator:
             self.target_mean = torch.mean(self.target, 0, True).to(self.device)
             self.target_std = torch.std(self.target, 0, keepdim=True).to(self.device)
             pool_std = torch.std(self.pool, 0, keepdim=True).to(self.device)
+            self.constrained = self.disclosed = np.ones(self.pool.shape[1], dtype=bool)
 
         # Zero variances are bad and can lead to infinite loss.
         if any((self.target_std == 0)[0]):

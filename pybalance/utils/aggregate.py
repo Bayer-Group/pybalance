@@ -102,13 +102,16 @@ def compute_aggregate_feature_moments(
     """
     Map an AggregateTarget into the fitted preprocessor's output feature space.
 
-    Returns ``(target_mean, target_std, constrained)``. The first two have
-    shape ``(1, n_features)``; ``constrained`` is a boolean vector marking the
-    output columns for which the target actually discloses a mean (a numeric
-    mean, the rate of a quantile indicator, or the rate of a categoric level).
-    Every other column is *not* constrained: its entries in ``target_mean`` /
-    ``target_std`` are only placeholders (the pool's own values when
-    provided, otherwise 0) and callers must give it no weight.
+    Returns ``(target_mean, target_std, constrained, disclosed)``. The first
+    two have shape ``(1, n_features)``; the others are boolean vectors over the
+    output columns. ``disclosed`` marks columns whose target mean is known (a
+    numeric mean, the rate of a quantile indicator, or the rate of a categoric
+    level). ``constrained`` is the subset of those that should actually be
+    matched: it leaves out a level implied by the others (the "0" level of a
+    quantile indicator, the first level of a fully disclosed categoric).
+    Columns that are not ``disclosed`` have only placeholder entries in
+    ``target_mean`` / ``target_std`` (the pool's own values when provided,
+    otherwise 0) and callers must not match them.
 
     Disclosed categoric rates use ``sqrt(p * (1 - p))`` for std; a numeric
     feature without a disclosed std falls back to the pool std when provided.
@@ -149,6 +152,7 @@ def compute_aggregate_feature_moments(
         else np.zeros(len(output_features), dtype=np.float32)
     )
     constrained = np.zeros(len(output_features), dtype=bool)
+    disclosed = np.zeros(len(output_features), dtype=bool)
 
     for feature in aggregate_target.headers.numeric:
         stats = aggregate_target.numeric[feature]
@@ -164,7 +168,7 @@ def compute_aggregate_feature_moments(
             idx = feature_index[feature]
             if "mean" in stats:
                 means[idx] = stats["mean"]
-                constrained[idx] = True
+                constrained[idx] = disclosed[idx] = True
             if "std" in stats:
                 stds[idx] = stats["std"]
         for q, value in stats.get("quantile", []):
@@ -194,6 +198,7 @@ def compute_aggregate_feature_moments(
                 means[idx] = rate
                 stds[idx] = math.sqrt(max(rate * (1.0 - rate), 0.0))
                 constrained[idx] = is_above
+                disclosed[idx] = True
 
     for feature in aggregate_target.headers.categoric:
         if onehot is None:
@@ -218,8 +223,8 @@ def compute_aggregate_feature_moments(
                 f"Mismatch mapping categoric feature '{feature}' to one-hot columns."
             )
 
-        disclosed = [_rate_lookup(rates, category) for category in kept_categories]
-        for p, out_col in zip(disclosed, out_cols):
+        level_rates = [_rate_lookup(rates, category) for category in kept_categories]
+        for p, out_col in zip(level_rates, out_cols):
             if p is None:
                 # Not disclosed: no constraint, and the placeholder values
                 # (pool mean/std) are never matched against.
@@ -227,15 +232,15 @@ def compute_aggregate_feature_moments(
             idx = feature_index[out_col]
             means[idx] = p
             stds[idx] = math.sqrt(max(p * (1.0 - p), 0.0))
-            constrained[idx] = True
+            constrained[idx] = disclosed[idx] = True
 
-        if drop_idx is None and all(p is not None for p in disclosed):
+        if drop_idx is None and all(p is not None for p in level_rates):
             # All levels disclosed: the first is implied by the others.
             constrained[feature_index[out_cols[0]]] = False
 
     mean_t = torch.tensor(means, dtype=torch.float32, device=device).reshape(1, -1)
     std_t = torch.tensor(stds, dtype=torch.float32, device=device).reshape(1, -1)
-    return mean_t, std_t, constrained
+    return mean_t, std_t, constrained, disclosed
 
 
 def _quantile_label(q: float) -> str:
@@ -253,8 +258,19 @@ def _quantile_label(q: float) -> str:
     return f"{pct}{suffix} percentile"
 
 
+def _weighted_quantile(values: np.ndarray, weights: np.ndarray, q: float) -> float:
+    # Smallest value whose cumulative weight reaches q (the weighted inverse CDF).
+    order = np.argsort(values, kind="stable")
+    cumulative = np.cumsum(weights[order]) / weights.sum()
+    idx = min(int(np.searchsorted(cumulative, q - 1e-12, side="left")), len(values) - 1)
+    return float(values[order][idx])
+
+
 def aggregate_target_constraints(
-    matching_data: MatchingData, quantiles_as: str = "proportion"
+    matching_data: MatchingData,
+    quantiles_as: str = "proportion",
+    weights: Optional[str] = None,
+    limits_as_proportion: bool = False,
 ) -> pd.DataFrame:
     """
     List every constraint the AggregateTarget of ``matching_data`` discloses,
@@ -272,6 +288,14 @@ def aggregate_target_constraints(
         the 0th / 100th quantile and is labelled as such). ``"value"`` fixes
         the quantile instead: the row is e.g. ``75th percentile`` with target
         ``value`` and the pool's own 75th percentile.
+    :param weights: Name of a pool column holding patient weights (e.g. from a
+        Weighter). The pool's statistics are then weighted, so a reweighted
+        pool can be compared to the target without selecting a subset. The
+        std is the weighted population std.
+    :param limits_as_proportion: List a disclosed ``min`` / ``max`` as
+        ``P(x <= limit)`` even when ``quantiles_as="value"``. For a weighted
+        pool this is the meaningful form: every patient keeps a positive
+        weight, so the extreme *value* never moves, only the weight beyond it.
     """
     if quantiles_as not in ("proportion", "value"):
         raise ValueError(
@@ -281,6 +305,12 @@ def aggregate_target_constraints(
         raise ValueError("matching_data must have an AggregateTarget.")
     target = matching_data.aggregate_target
     pool = matching_data.get_population(matching_data.pool_name)
+    if weights is None:
+        w = np.ones(len(pool))
+    elif weights in pool.columns:
+        w = pool[weights].to_numpy(dtype=float)
+    else:
+        raise ValueError(f"Weight column {weights!r} not found in the pool.")
 
     rows = []
 
@@ -295,17 +325,27 @@ def aggregate_target_constraints(
         )
 
     for feature, stats in target.numeric.items():
-        raw = pool[feature].astype(float)
+        raw = pool[feature].to_numpy(dtype=float)
         if "mean" in stats:
-            add(feature, "mean", stats["mean"], raw.mean())
+            add(feature, "mean", stats["mean"], np.average(raw, weights=w))
         if "std" in stats:
-            add(feature, "std", stats["std"], raw.std())
+            if weights is None:
+                std = raw.std(ddof=1)
+            else:
+                std = math.sqrt(np.average((raw - np.average(raw, weights=w)) ** 2, weights=w))
+            add(feature, "std", stats["std"], std)
         for q, value in stats.get("quantile", []):
-            if quantiles_as == "value":
-                add(feature, _quantile_label(q), value, raw.quantile(q))
+            is_limit = q in (0.0, 1.0)
+            if quantiles_as == "value" and not (limits_as_proportion and is_limit):
+                pool_value = (
+                    np.quantile(raw, q)
+                    if weights is None
+                    else _weighted_quantile(raw, w, q)
+                )
+                add(feature, _quantile_label(q), value, pool_value)
                 continue
             limit = {0.0: " (min)", 1.0: " (max)"}.get(q, "")
-            add(feature, f"P(x <= {value:g}){limit}", q, (raw <= value).mean())
+            add(feature, f"P(x <= {value:g}){limit}", q, np.average(raw <= value, weights=w))
 
     for feature, rates in target.categoric.items():
         for level, rate in rates.items():
@@ -313,6 +353,6 @@ def aggregate_target_constraints(
             if not mask.any():
                 # Tolerate int/float/str mismatches between a published table and the pool.
                 mask = pool[feature].astype(str) == str(level)
-            add(feature, f"rate of {level}", rate, mask.mean())
+            add(feature, f"rate of {level}", rate, np.average(mask.to_numpy(), weights=w))
 
     return pd.DataFrame(rows, columns=["feature", "constraint", "target", "pool"])
