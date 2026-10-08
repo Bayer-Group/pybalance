@@ -71,12 +71,9 @@ setting is presented [here](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352
 
 ## Limitations
 
-`pybalance` implements matching routines as well as weighting methods (see
-`pybalance.weighting`, e.g. `MAICWeighter` for Matching-Adjusted Indirect
-Comparison, the more general `EntropyBalanceWeighter`, and `IPTWWeighter` for
-propensity-score-based inverse probability weighting). Further weighting
-methods (e.g. overlap/matching weights, CBPS) may be added in future
-releases.
+Weighting support currently covers MAIC, general entropy balancing, and
+IPTW. Other common estimators (overlap/matching weights, CBPS, stabilized
+IPTW) are not yet implemented.
 
 ## Citation
 
