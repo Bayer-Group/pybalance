@@ -19,9 +19,16 @@ Problem Statement
 Consider two groups of study subjects, together with a set of :math:`F`
 covariates (e.g., age, height, smoker/non-smoker) describing the characteristics
 of the two groups. By convention, we refer to the smaller group as the "target"
-population and the larger group as the "pool". Our goal is to draw subjects from
-the pool such that the chosen subset "matches" (to be defined) as close as
-possible the target population.
+population and the larger group as the "pool". Our goal is to adjust the pool
+so that, on these covariates, it resembles the target population as closely as
+possible. `pybalance` supports two ways of doing this: **matching**, which
+draws a subset of the pool, and **weighting**, which reweights every pool
+subject. Both are instances of the same underlying optimization problem,
+described below.
+
+
+Matching
+--------
 
 More formally, given a pool of size :math:`M` and a target of size :math:`N`,
 our goal is to choose :math:`N` patients from the pool that best resemble the
@@ -86,14 +93,12 @@ see our publication `here
 <https://onlinelibrary.wiley.com/doi/10.1002/pst.2352>`_.
 
 
-Weighting: Matching With Real-Valued Weights
-=============================================
+Weighting
+---------
 
-Matching is a special case of a more general problem: instead of restricting
-each pool subject to be either fully included (:math:`x_m=1`) or fully
-excluded (:math:`x_m=0`), we can let every subject keep a non-negative,
-real-valued weight :math:`w_m \geq 0`. The balance constraint from
-:eq:`cost1` becomes
+Rather than keeping or dropping each pool subject outright, we can instead let
+every subject keep a non-negative, real-valued weight :math:`w_m \geq 0`. The
+balance constraint from :eq:`cost1` becomes
 
 ..	math::
 	:label: cost2
@@ -104,12 +109,6 @@ real-valued weight :math:`w_m \geq 0`. The balance constraint from
 		Minimize~\sum_{f=1}^{F}a_f:& \\
 		\mbox{Subject to :}\sum_{m=1}^{M} w_{m} = N,\ w_m \geq 0.
 	\end{align*}
-
-Put side by side with :eq:`cost1`, the only thing that has changed is the
-domain of the decision variable: :math:`x_m \in \{0, 1\}` for matching versus
-:math:`w_m \in [0, \infty)` for weighting. In other words, matching is just
-weighting with integer (0/1) weights -- a nice way to see why both live in the
-same library and share the same balance calculators.
 
 Letting weights move continuously rather than snapping to 0 or 1 relaxes the
 combinatorial search into a smooth optimization problem, which is solved very
@@ -122,3 +121,7 @@ produce large weights for poorly-overlapping subjects (uses all the data, at
 the cost of a sometimes-fragile effective sample size). See the
 `Weighting demos <02_demos.html>`_ for the methods `pybalance` implements
 (MAIC, entropy balancing, IPTW).
+
+Comparing :eq:`cost1` and :eq:`cost2`, matching is simply the special case of
+weighting where weights are constrained to be integers, :math:`w_m \in \{0,
+1\}`, instead of real-valued, :math:`w_m \in [0, \infty)`.
