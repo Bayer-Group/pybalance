@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Set up runner 📦
-        run: pip3 install black==24.4.2
+        run: pip3 install black==26.5.1
       - name: "Black: Code Formatting 👮🏽‍♀️"
         run: black --diff . && black -v --check .
       - name: install requirements
