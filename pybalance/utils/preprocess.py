@@ -445,9 +445,7 @@ class FixedNumericBinsEncoder(BaseMatchingPreprocessor):
         thresholds: Dict[str, List[Tuple[float, float]]],
         keep_raw: Optional[List[str]] = None,
     ):
-        self.thresholds = {
-            feature: sorted(qvs) for feature, qvs in thresholds.items()
-        }
+        self.thresholds = {feature: sorted(qvs) for feature, qvs in thresholds.items()}
         self.keep_raw = set(keep_raw or [])
         super(FixedNumericBinsEncoder, self).__init__()
 

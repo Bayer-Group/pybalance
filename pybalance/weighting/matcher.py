@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Tuple
 
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from scipy.optimize import minimize
 from sklearn.base import BaseEstimator, clone
 from sklearn.linear_model import LogisticRegression
@@ -396,7 +399,9 @@ class EntropyBalanceWeighter(BaseWeighter):
         for j in range(n_features):
             if not constrained[j]:
                 continue
-            penalty.append(self.limit_penalty if out_features[j] in limit_columns else 0.0)
+            penalty.append(
+                self.limit_penalty if out_features[j] in limit_columns else 0.0
+            )
             scale = (
                 target_std[j]
                 if target_std[j] > 0
@@ -624,8 +629,10 @@ class IPTWWeighter(BaseWeighter):
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
-        clf = clone(self.classifier) if self.classifier is not None else LogisticRegression(
-            max_iter=1000
+        clf = (
+            clone(self.classifier)
+            if self.classifier is not None
+            else LogisticRegression(max_iter=1000)
         )
         clf.fit(X, y)
 
@@ -634,6 +641,9 @@ class IPTWWeighter(BaseWeighter):
         # (near-)perfectly separable model.
         propensity_score = np.clip(propensity_score, 1e-4, 1 - 1e-4)
         weights = propensity_score / (1 - propensity_score)
+        # Also kept (unclipped) so plot_iptw_propensity_distributions() can show
+        # where the target itself sits on the fitted model.
+        target_propensity_score = clf.predict_proba(X[n_pool:])[:, 1]
 
         n_trimmed = 0
         if self.trim_quantiles is not None:
@@ -643,6 +653,7 @@ class IPTWWeighter(BaseWeighter):
 
         self.propensity_model = clf
         self.propensity_score = propensity_score
+        self.target_propensity_score = target_propensity_score
         self.weights = weights
         self.diagnostics = {
             "effective_sample_size": effective_sample_size(weights),
@@ -718,3 +729,97 @@ def weighted_balance_table(weighter: BaseWeighter) -> pd.DataFrame:
             )
 
     return pd.DataFrame(rows)
+
+
+def _check_is_iptw(weighter: BaseWeighter) -> None:
+    if not hasattr(weighter, "propensity_score"):
+        raise TypeError(
+            "plot_iptw_propensity_distributions() requires an IPTWWeighter "
+            f"(got {type(weighter).__name__}), since only IPTWWeighter fits a "
+            "propensity model -- MAICWeighter/EntropyBalanceWeighter solve "
+            "directly for balancing weights without one."
+        )
+
+
+def plot_iptw_propensity_distributions(weighter: "IPTWWeighter"):
+    """
+    Plot histograms of the estimated propensity score for the pool and target
+    populations, before vs. after IPTW weighting -- the weighting analogue of
+    ``pybalance.propensity.plot_propensity_score_match_distributions``.
+
+    Unlike a Matcher, a Weighter never drops patients, so there is no matched
+    subset to compare against; instead, the "before" panel shows every pool
+    patient counted equally and the "after" panel shows the same propensity
+    scores counted by their fitted IPTW weight (the target always keeps
+    weight 1). A successful fit should show the "after" pool histogram move
+    towards the target's.
+
+    :param weighter: A fitted ``IPTWWeighter``, i.e. one on which match() has
+        already been called.
+    """
+    _check_fitted(weighter)
+    _check_is_iptw(weighter)
+    md = weighter.matching_data
+    pool_name, target_name = md.pool_name, md.target_name
+
+    data = pd.concat(
+        [
+            pd.DataFrame.from_dict(
+                {
+                    "propensity": weighter.propensity_score,
+                    "weight": np.ones_like(weighter.propensity_score),
+                    "weighted": False,
+                    "population": pool_name,
+                }
+            ),
+            pd.DataFrame.from_dict(
+                {
+                    "propensity": weighter.target_propensity_score,
+                    "weight": np.ones_like(weighter.target_propensity_score),
+                    "weighted": False,
+                    "population": target_name,
+                }
+            ),
+            pd.DataFrame.from_dict(
+                {
+                    "propensity": weighter.propensity_score,
+                    "weight": weighter.weights,
+                    "weighted": True,
+                    "population": pool_name,
+                }
+            ),
+            pd.DataFrame.from_dict(
+                {
+                    "propensity": weighter.target_propensity_score,
+                    "weight": np.ones_like(weighter.target_propensity_score),
+                    "weighted": True,
+                    "population": target_name,
+                }
+            ),
+        ]
+    )
+
+    g = sns.FacetGrid(
+        data=data, col="weighted", col_order=[False, True], height=4, xlim=[0, 1]
+    )
+    g.map_dataframe(
+        sns.histplot,
+        bins=24,
+        binrange=(0, 1),
+        x="propensity",
+        weights="weight",
+        hue="population",
+        hue_order=[pool_name, target_name],
+        alpha=0.5,
+        common_norm=False,
+        stat="probability",
+    )
+    [ax.grid(True) for axes in g.axes for ax in axes]
+
+    legend_patches = [
+        matplotlib.patches.Patch(color=sns.color_palette()[0], label=pool_name),
+        matplotlib.patches.Patch(color=sns.color_palette()[1], label=target_name),
+    ]
+    plt.legend(handles=legend_patches)
+
+    return g

@@ -82,10 +82,19 @@ def test_debin():
     "numeric, categoric, n_panels",
     [
         ({"age": {"mean": 55.0}}, {"country": {"US": 0.5, "DE": 0.3, "FR": 0.2}}, 4),
-        ({"age": {"mean": 55.0, "std": 0.0}, "weight": {"mean": 80.0, "std": 9.0}}, {}, 4),
+        (
+            {"age": {"mean": 55.0, "std": 0.0}, "weight": {"mean": 80.0, "std": 9.0}},
+            {},
+            4,
+        ),
         (
             {
-                "age": {"quantile": [(0.25, 48.0), (0.75, 62.0)], "median": 55.0, "min": 30.0, "max": 80.0},
+                "age": {
+                    "quantile": [(0.25, 48.0), (0.75, 62.0)],
+                    "median": 55.0,
+                    "min": 30.0,
+                    "max": 80.0,
+                },
                 "weight": {"mean": 80.0, "max": 500.0},
             },
             {},
@@ -94,11 +103,15 @@ def test_debin():
         ({}, {"country": {"US": 0.4}}, 1),
     ],
 )
-def test_plot_aggregate_target_match_handles_every_target_type(numeric, categoric, n_panels):
+def test_plot_aggregate_target_match_handles_every_target_type(
+    numeric, categoric, n_panels
+):
     pool = _aggregate_matching_data().get_population("pool")
     target = AggregateTarget(n=80, numeric=numeric, categoric=categoric)
     before = MatchingData(pool=pool, target=target, headers=target.headers)
-    after = MatchingData(pool=pool.sample(80, random_state=0), target=target, headers=target.headers)
+    after = MatchingData(
+        pool=pool.sample(80, random_state=0), target=target, headers=target.headers
+    )
 
     for quantiles_as in ("value", "proportion"):
         fig = plot_aggregate_target_match(before, after, quantiles_as=quantiles_as)
@@ -118,7 +131,12 @@ def test_quantile_constraints_can_be_listed_by_value():
     assert row["target"] == 50.0
     pool_age = data.get_population("pool")["age"]
     assert row["pool"] == pool_age.median()
-    assert set(by_value["constraint"]) == {"median", "mean", "20th percentile", "rate of US"}
+    assert set(by_value["constraint"]) == {
+        "median",
+        "mean",
+        "20th percentile",
+        "rate of US",
+    }
 
 
 def test_plot_aggregate_target_match_accepts_weights():
@@ -126,10 +144,14 @@ def test_plot_aggregate_target_match_accepts_weights():
     pool = data.get_population("pool").copy()
     # weight the pool toward older patients
     pool["w"] = np.exp(0.05 * (pool["age"] - pool["age"].mean()))
-    weighted = MatchingData(pool=pool, target=data.aggregate_target, headers=data.headers)
+    weighted = MatchingData(
+        pool=pool, target=data.aggregate_target, headers=data.headers
+    )
 
     plain = aggregate_target_constraints(weighted).set_index("constraint")
-    by_weight = aggregate_target_constraints(weighted, weights="w").set_index("constraint")
+    by_weight = aggregate_target_constraints(weighted, weights="w").set_index(
+        "constraint"
+    )
     assert by_weight.loc["mean", "pool"] > plain.loc["mean", "pool"]
     assert by_weight.loc["P(x <= 50)", "pool"] < plain.loc["P(x <= 50)", "pool"]
     assert by_weight.loc["P(x <= 50)", "pool"] == pytest.approx(
@@ -138,8 +160,12 @@ def test_plot_aggregate_target_match_accepts_weights():
 
     # equal weights reproduce the unweighted statistics
     pool["w"] = 3.0
-    uniform = MatchingData(pool=pool, target=data.aggregate_target, headers=data.headers)
-    assert aggregate_target_constraints(uniform, weights="w")["pool"].tolist() == pytest.approx(
+    uniform = MatchingData(
+        pool=pool, target=data.aggregate_target, headers=data.headers
+    )
+    assert aggregate_target_constraints(uniform, weights="w")[
+        "pool"
+    ].tolist() == pytest.approx(
         aggregate_target_constraints(uniform)["pool"].tolist(), rel=1e-2
     )
 

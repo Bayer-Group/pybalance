@@ -330,7 +330,9 @@ class AggregateTarget:
                 continue
 
             if not feature:
-                raise ValueError(f"Line {line}: statistic '{statistic}' requires a feature.")
+                raise ValueError(
+                    f"Line {line}: statistic '{statistic}' requires a feature."
+                )
 
             if statistic in _NUMERIC_CSV_STATISTICS:
                 stats = numeric.setdefault(feature, {})
@@ -346,7 +348,9 @@ class AggregateTarget:
                 )
             elif statistic == "rate":
                 if parameter == "":
-                    raise ValueError(f"Line {line}: 'rate' requires a level in 'parameter'.")
+                    raise ValueError(
+                        f"Line {line}: 'rate' requires a level in 'parameter'."
+                    )
                 rates = categoric.setdefault(feature, {})
                 level = _parse_level(parameter)
                 if level in rates:
@@ -390,7 +394,9 @@ class AggregateTarget:
                 rows.append((feature, "rate", py(level), rate))
 
         # object dtype keeps n as "100" rather than "100.0" next to float values
-        df = pd.DataFrame(rows, columns=list(AGGREGATE_TARGET_CSV_COLUMNS), dtype=object)
+        df = pd.DataFrame(
+            rows, columns=list(AGGREGATE_TARGET_CSV_COLUMNS), dtype=object
+        )
         return df.to_csv(path, index=False)
 
     @classmethod
@@ -497,7 +503,9 @@ class AggregateTarget:
                             {
                                 "feature": feature,
                                 "type": "numeric",
-                                "stat": {0.0: "min", 1.0: "max"}.get(q, f"quantile_{q}"),
+                                "stat": {0.0: "min", 1.0: "max"}.get(
+                                    q, f"quantile_{q}"
+                                ),
                                 "value": cutpoint,
                             }
                         )
@@ -685,12 +693,10 @@ class MatchingData(object):
             self._data = data
             self._set_headers(headers)
             if population_col not in self._data.columns:
-                raise KeyError(
-                    f"""
+                raise KeyError(f"""
             Cannot split into populations based on {population_col}. Column not
             present in data frame.
-            """
-                )
+            """)
             return
 
         pool_df = _load_matching_data(pool) if isinstance(pool, str) else pool.copy()
@@ -1069,12 +1075,10 @@ def split_target_pool(
         pool = matching_data.get_population(pool_name)
     elif isinstance(target_name, str) or isinstance(pool_name, str):
         if len(matching_data.populations) != 2:
-            raise ValueError(
-                f"""
+            raise ValueError(f"""
             Cannot split into exactly two populations based on {matching_data.population_col}.
             Found populations: {','.join(matching_data.populations)}.
-            """
-            )
+            """)
         if isinstance(target_name, str):
             pool_name = [p for p in matching_data.populations if p != target_name][0]
         if isinstance(pool_name, str):
@@ -1083,12 +1087,10 @@ def split_target_pool(
         pool = matching_data.get_population(pool_name)
     else:
         if len(matching_data.populations) != 2:
-            raise ValueError(
-                f"""
+            raise ValueError(f"""
             Cannot split into exactly two populations based on {matching_data.population_col}.
             Found populations: {','.join(matching_data.populations)}.
-            """
-            )
+            """)
         inferred_pool_name = matching_data.populations[0]
         inferred_target_name = matching_data.populations[1]
         target = matching_data.get_population(inferred_target_name)

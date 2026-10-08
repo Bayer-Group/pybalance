@@ -204,7 +204,9 @@ def _check_demo_use_case(use_case):
         )
 
 
-def generate_aggregate_target(use_case="means_std", matching_data=None, population=None):
+def generate_aggregate_target(
+    use_case="means_std", matching_data=None, population=None
+):
     """
     Derive an AggregateTarget from the patient-level target of a toy dataset,
     keeping only the summary statistics a trial publication might disclose.

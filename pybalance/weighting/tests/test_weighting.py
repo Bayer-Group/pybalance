@@ -3,17 +3,25 @@ import pandas as pd
 import pytest
 
 from pybalance.sim import generate_toy_dataset
-from pybalance.utils import AggregateTarget, MatchingData, MatchingHeaders, split_target_pool
+from pybalance.utils import (
+    AggregateTarget,
+    MatchingData,
+    MatchingHeaders,
+    split_target_pool,
+)
 from pybalance.weighting import (
     EntropyBalanceWeighter,
     MAICWeighter,
     IPTWWeighter,
     effective_sample_size,
     weighted_balance_table,
+    plot_iptw_propensity_distributions,
 )
 
 
-def _biased_pool_subsample(pool_df: pd.DataFrame, n: int, seed: int = 0) -> pd.DataFrame:
+def _biased_pool_subsample(
+    pool_df: pd.DataFrame, n: int, seed: int = 0
+) -> pd.DataFrame:
     """
     Draw a covariate-shifted (but not adversarially so) subsample of the pool
     to use as a target population. Because the target is literally a sample
@@ -32,7 +40,9 @@ def _biased_pool_subsample(pool_df: pd.DataFrame, n: int, seed: int = 0) -> pd.D
     return pool_df.iloc[idx].reset_index(drop=True)
 
 
-def _aggregate_target_from_frame(df: pd.DataFrame, headers: MatchingHeaders) -> AggregateTarget:
+def _aggregate_target_from_frame(
+    df: pd.DataFrame, headers: MatchingHeaders
+) -> AggregateTarget:
     numeric = {
         col: {"mean": float(df[col].mean()), "std": float(df[col].std())}
         for col in headers.numeric
@@ -41,7 +51,9 @@ def _aggregate_target_from_frame(df: pd.DataFrame, headers: MatchingHeaders) -> 
         col: {k: float(v) for k, v in df[col].value_counts(normalize=True).items()}
         for col in headers.categoric
     }
-    return AggregateTarget(n=len(df), numeric=numeric, categoric=categoric, headers=headers)
+    return AggregateTarget(
+        n=len(df), numeric=numeric, categoric=categoric, headers=headers
+    )
 
 
 def test_effective_sample_size():
@@ -54,7 +66,9 @@ def test_effective_sample_size():
 
 def test_maic_patient_level_target_matches_mean():
     matching_data = generate_toy_dataset(n_pool=3000, n_target=300, seed=1)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
     target_df = _biased_pool_subsample(pool_df, n=300, seed=1)
 
     md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
@@ -74,11 +88,15 @@ def test_maic_patient_level_target_matches_mean():
 
 def test_maic_aggregate_target_matches_mean():
     matching_data = generate_toy_dataset(n_pool=3000, n_target=300, seed=2)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
     target_df = _biased_pool_subsample(pool_df, n=300, seed=2)
     aggregate_target = _aggregate_target_from_frame(target_df, matching_data.headers)
 
-    md = MatchingData(pool=pool_df, target=aggregate_target, headers=matching_data.headers)
+    md = MatchingData(
+        pool=pool_df, target=aggregate_target, headers=matching_data.headers
+    )
 
     weighter = MAICWeighter(md, verbose=False)
     weighter.match()
@@ -92,7 +110,9 @@ def test_maic_aggregate_target_matches_mean():
 
 def test_entropy_balance_weighter_matches_variance():
     matching_data = generate_toy_dataset(n_pool=3000, n_target=300, seed=3)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
     target_df = _biased_pool_subsample(pool_df, n=300, seed=3)
 
     md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
@@ -111,7 +131,9 @@ def test_entropy_balance_weighter_matches_variance():
 
 def test_normalize_options_scale_weights_without_changing_balance():
     matching_data = generate_toy_dataset(n_pool=1000, n_target=100, seed=4)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
     target_df = _biased_pool_subsample(pool_df, n=100, seed=4)
     md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
 
@@ -161,7 +183,9 @@ def test_hard_covariate_shift_reports_diagnostics_without_crashing():
 
 def test_iptw_improves_balance_over_unweighted_pool():
     matching_data = generate_toy_dataset(n_pool=3000, n_target=300, seed=7)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
     target_df = _biased_pool_subsample(pool_df, n=300, seed=7)
 
     md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
@@ -180,10 +204,16 @@ def test_iptw_improves_balance_over_unweighted_pool():
 
 def test_iptw_rejects_aggregate_target():
     matching_data = generate_toy_dataset(n_pool=500, n_target=100, seed=8)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
-    target_df = matching_data.get_population(matching_data.target_name).reset_index(drop=True)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
+    target_df = matching_data.get_population(matching_data.target_name).reset_index(
+        drop=True
+    )
     aggregate_target = _aggregate_target_from_frame(target_df, matching_data.headers)
-    md = MatchingData(pool=pool_df, target=aggregate_target, headers=matching_data.headers)
+    md = MatchingData(
+        pool=pool_df, target=aggregate_target, headers=matching_data.headers
+    )
 
     with pytest.raises(ValueError):
         IPTWWeighter(md, verbose=False)
@@ -191,7 +221,9 @@ def test_iptw_rejects_aggregate_target():
 
 def test_iptw_trim_quantiles_caps_extreme_weights():
     matching_data = generate_toy_dataset(n_pool=2000, n_target=200, seed=9)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(drop=True)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
     target_df = _biased_pool_subsample(pool_df, n=200, seed=9)
     md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
 
@@ -208,6 +240,25 @@ def test_iptw_trim_quantiles_caps_extreme_weights():
         IPTWWeighter(md, trim_quantiles=(0.9, 0.1), verbose=False)
 
 
+def test_plot_iptw_propensity_distributions():
+    matching_data = generate_toy_dataset(n_pool=1000, n_target=150, seed=10)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
+    target_df = _biased_pool_subsample(pool_df, n=150, seed=10)
+    md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
+
+    weighter = IPTWWeighter(md, verbose=False)
+    weighter.match()
+    g = plot_iptw_propensity_distributions(weighter)
+    assert len(g.axes.flat) == 2
+
+    # only IPTWWeighter fits a propensity model; others have nothing to plot
+    maic_weighter = MAICWeighter(md, verbose=False)
+    maic_weighter.match()
+    with pytest.raises(TypeError):
+        plot_iptw_propensity_distributions(maic_weighter)
+
 
 def _toy_pool(n=1000, seed=7):
     m = generate_toy_dataset(n_pool=n, n_target=0, seed=seed)
@@ -217,8 +268,12 @@ def _toy_pool(n=1000, seed=7):
 def test_weighter_only_constrains_disclosed_statistics():
     pool = _toy_pool()
     headers = MatchingHeaders(numeric=["age", "height"], categoric=["country"])
-    target = AggregateTarget(n=100, numeric={"age": {"mean": 60.0}}, categoric={"country": {1: 0.3}})
-    weighter = MAICWeighter(MatchingData(pool=pool, target=target, headers=headers), verbose=False)
+    target = AggregateTarget(
+        n=100, numeric={"age": {"mean": 60.0}}, categoric={"country": {1: 0.3}}
+    )
+    weighter = MAICWeighter(
+        MatchingData(pool=pool, target=target, headers=headers), verbose=False
+    )
     weighter.match()
 
     table = weighted_balance_table(weighter).set_index("feature")
@@ -228,7 +283,13 @@ def test_weighter_only_constrains_disclosed_statistics():
     # undisclosed features have no target and are free to move, not pinned to the pool
     for feature in ("height", "country_2", "country_3"):
         assert np.isnan(table.loc[feature, "target"])
-        assert abs(table.loc[feature, "weighted_pool"] - table.loc[feature, "unweighted_pool"]) > 0.005
+        assert (
+            abs(
+                table.loc[feature, "weighted_pool"]
+                - table.loc[feature, "unweighted_pool"]
+            )
+            > 0.005
+        )
 
 
 def test_weighter_matches_quantiles_and_softly_limits_max():
@@ -236,7 +297,9 @@ def test_weighter_matches_quantiles_and_softly_limits_max():
     headers = MatchingHeaders(numeric=["age", "weight"], categoric=[])
     numeric = {"age": {"median": 53.0}, "weight": {"median": 82.0, "max": 100.0}}
     weighter = MAICWeighter(
-        MatchingData(pool=pool, target=AggregateTarget(n=100, numeric=numeric), headers=headers),
+        MatchingData(
+            pool=pool, target=AggregateTarget(n=100, numeric=numeric), headers=headers
+        ),
         verbose=False,
     )
     weighter.match()
@@ -257,7 +320,9 @@ def test_weighter_rejects_variance_without_a_mean():
     pool = _toy_pool(300)
     headers = MatchingHeaders(numeric=["age"], categoric=[])
     data = MatchingData(
-        pool=pool, target=AggregateTarget(n=50, numeric={"age": {"std": 5.0}}), headers=headers
+        pool=pool,
+        target=AggregateTarget(n=50, numeric={"age": {"std": 5.0}}),
+        headers=headers,
     )
     with pytest.raises(ValueError, match="no mean"):
         EntropyBalanceWeighter(data, match_variance=True)

@@ -81,7 +81,9 @@ def _assert_preprocessor_supports_aggregates(
         return
 
     if all(
-        isinstance(step, (CategoricOneHotEncoder, FloatEncoder, FixedNumericBinsEncoder))
+        isinstance(
+            step, (CategoricOneHotEncoder, FloatEncoder, FixedNumericBinsEncoder)
+        )
         for step in steps
     ):
         return
@@ -176,9 +178,7 @@ def compute_aggregate_feature_moments(
             # CategoricOneHotEncoder then suffixes with the level (e.g.
             # "..._1.0"), so match by prefix rather than an exact name.
             prefix = f"{feature}_q{q}"
-            matches = [
-                c for c in out_cols if c == prefix or c.startswith(prefix + "_")
-            ]
+            matches = [c for c in out_cols if c == prefix or c.startswith(prefix + "_")]
             if not matches:
                 raise ValueError(
                     f"Numeric feature '{feature}' discloses a quantile (q={q}) "
@@ -332,7 +332,9 @@ def aggregate_target_constraints(
             if weights is None:
                 std = raw.std(ddof=1)
             else:
-                std = math.sqrt(np.average((raw - np.average(raw, weights=w)) ** 2, weights=w))
+                std = math.sqrt(
+                    np.average((raw - np.average(raw, weights=w)) ** 2, weights=w)
+                )
             add(feature, "std", stats["std"], std)
         for q, value in stats.get("quantile", []):
             is_limit = q in (0.0, 1.0)
@@ -345,7 +347,12 @@ def aggregate_target_constraints(
                 add(feature, _quantile_label(q), value, pool_value)
                 continue
             limit = {0.0: " (min)", 1.0: " (max)"}.get(q, "")
-            add(feature, f"P(x <= {value:g}){limit}", q, np.average(raw <= value, weights=w))
+            add(
+                feature,
+                f"P(x <= {value:g}){limit}",
+                q,
+                np.average(raw <= value, weights=w),
+            )
 
     for feature, rates in target.categoric.items():
         for level, rate in rates.items():
@@ -353,6 +360,11 @@ def aggregate_target_constraints(
             if not mask.any():
                 # Tolerate int/float/str mismatches between a published table and the pool.
                 mask = pool[feature].astype(str) == str(level)
-            add(feature, f"rate of {level}", rate, np.average(mask.to_numpy(), weights=w))
+            add(
+                feature,
+                f"rate of {level}",
+                rate,
+                np.average(mask.to_numpy(), weights=w),
+            )
 
     return pd.DataFrame(rows, columns=["feature", "constraint", "target", "pool"])

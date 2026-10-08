@@ -901,9 +901,7 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
                 # match()). Values are centered on the pool only to keep the
                 # integers small; the variance is shift-invariant.
                 m = self.pool_size if self.pool_size is not None else self.n_target
-                scale = max(
-                    1, round(math.sqrt(self.scalefac / (self.n_target * m)))
-                )
+                scale = max(1, round(math.sqrt(self.scalefac / (self.n_target * m))))
                 values = [
                     round(
                         self.n_target
@@ -1106,12 +1104,15 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
                 model.AddMultiplicationEquality(subset_sum_sq, [subset_sum, subset_sum])
                 variance_delta = model.NewIntVar(-bound, bound, f"variance_delta[{j}]")
                 model.Add(
-                    pool_size * sum(squared_deviations[i] * x[i] for i in range(self.n_pool))
+                    pool_size
+                    * sum(squared_deviations[i] * x[i] for i in range(self.n_pool))
                     - subset_sum_sq
                     - pool_size**2 * target_variance
                     == variance_delta
                 )
-                variance_abs_delta = model.NewIntVar(0, bound, f"variance_abs_delta[{j}]")
+                variance_abs_delta = model.NewIntVar(
+                    0, bound, f"variance_abs_delta[{j}]"
+                )
                 model.AddAbsEquality(variance_abs_delta, variance_delta)
                 variance_abs_deltas.append(variance_abs_delta)
                 continue

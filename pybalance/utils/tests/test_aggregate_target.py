@@ -197,7 +197,11 @@ def test_aggregate_target_csv_roundtrip(tmp_path):
         n=120,
         numeric={
             "age": {"median": 41.0},
-            "weight": {"mean": 80.5, "std": 12.25, "quantile": [(0.2, 70.0), (0.9, 95.0)]},
+            "weight": {
+                "mean": 80.5,
+                "std": 12.25,
+                "quantile": [(0.2, 70.0), (0.9, 95.0)],
+            },
         },
         categoric={"gender": {0.0: 0.4, 1.0: 0.6}, "country": {"US": 0.3, "DE": 0.1}},
     )
@@ -246,7 +250,9 @@ def test_aggregate_match_keeps_undisclosed_features_unconstrained():
     target = AggregateTarget(
         n=40, numeric={"age": {"mean": 60.0}}, categoric={"gender": {0: 0.5, 1: 0.5}}
     )
-    headers = MatchingHeaders(numeric=["age", "height"], categoric=["gender", "country"])
+    headers = MatchingHeaders(
+        numeric=["age", "height"], categoric=["gender", "country"]
+    )
     data = MatchingData(pool=pool, target=target, headers=headers)
     match = AggregateConstraintSatisfactionMatcher(
         data, time_limit=20, num_workers=1, verbose=False
@@ -265,11 +271,16 @@ def test_aggregate_match_keeps_undisclosed_features_unconstrained():
 
 
 def test_aggregate_target_min_max_are_0th_and_100th_quantile(tmp_path):
-    target = AggregateTarget(n=50, numeric={"age": {"median": 50.0, "min": 18.0, "max": 75.0}})
+    target = AggregateTarget(
+        n=50, numeric={"age": {"median": 50.0, "min": 18.0, "max": 75.0}}
+    )
     assert target.numeric["age"]["quantile"] == [(0.0, 18.0), (0.5, 50.0), (1.0, 75.0)]
-    assert AggregateTarget(
-        n=50, numeric={"age": {"quantile": [(0.0, 18.0), (0.5, 50.0), (1.0, 75.0)]}}
-    ).numeric == target.numeric
+    assert (
+        AggregateTarget(
+            n=50, numeric={"age": {"quantile": [(0.0, 18.0), (0.5, 50.0), (1.0, 75.0)]}}
+        ).numeric
+        == target.numeric
+    )
 
     path = tmp_path / "t.csv"
     target.to_csv(path)
@@ -288,11 +299,16 @@ def test_aggregate_match_max_is_a_soft_limit():
 
     def match(numeric):
         data = MatchingData(
-            pool=pool, target=AggregateTarget(n=50, numeric=numeric, categoric=gender), headers=headers
+            pool=pool,
+            target=AggregateTarget(n=50, numeric=numeric, categoric=gender),
+            headers=headers,
         )
-        return data, AggregateConstraintSatisfactionMatcher(
-            data, time_limit=20, num_workers=1, verbose=False
-        ).match()
+        return (
+            data,
+            AggregateConstraintSatisfactionMatcher(
+                data, time_limit=20, num_workers=1, verbose=False
+            ).match(),
+        )
 
     before, after = match({"weight": {"median": 85.0, "max": 100.0}})
     assert (before.get_population("pool")["weight"] > 100).mean() > 0.1
@@ -304,7 +320,9 @@ def test_aggregate_match_max_is_a_soft_limit():
 
 
 def test_aggregate_target_needs_only_one_statistic():
-    assert AggregateTarget(n=5, numeric={"age": {"std": 3.0}}).numeric == {"age": {"std": 3.0}}
+    assert AggregateTarget(n=5, numeric={"age": {"std": 3.0}}).numeric == {
+        "age": {"std": 3.0}
+    }
     with pytest.raises(ValueError):
         AggregateTarget(n=5, numeric={"age": {}})
 
@@ -316,9 +334,12 @@ def _aggregate_match(numeric, categoric, headers, **kwargs):
         target=AggregateTarget(n=50, numeric=numeric, categoric=categoric),
         headers=headers,
     )
-    return data, AggregateConstraintSatisfactionMatcher(
-        data, time_limit=20, num_workers=1, verbose=False, **kwargs
-    ).match()
+    return (
+        data,
+        AggregateConstraintSatisfactionMatcher(
+            data, time_limit=20, num_workers=1, verbose=False, **kwargs
+        ).match(),
+    )
 
 
 def test_aggregate_match_std_without_a_mean():
@@ -329,7 +350,10 @@ def test_aggregate_match_std_without_a_mean():
 
     # a std of 0 asks for the most homogeneous subset
     _, after = _aggregate_match({"weight": {"std": 0.0}}, {}, headers)
-    assert after.get_population("pool")["weight"].std() < before.get_population("pool")["weight"].std() / 3
+    assert (
+        after.get_population("pool")["weight"].std()
+        < before.get_population("pool")["weight"].std() / 3
+    )
 
 
 def test_aggregate_match_does_not_constrain_undisclosed_levels():
@@ -340,4 +364,7 @@ def test_aggregate_match_does_not_constrain_undisclosed_levels():
     assert abs(rates[1] - 0.3) < 0.03
     # the other levels are free to absorb the rest, not pinned to their pool rates
     pool_rates = before.get_population("pool")["country"].value_counts(normalize=True)
-    assert max(abs(rates.get(k, 0) - pool_rates[k]) for k in pool_rates.index if k != 1) > 0.03
+    assert (
+        max(abs(rates.get(k, 0) - pool_rates[k]) for k in pool_rates.index if k != 1)
+        > 0.03
+    )
