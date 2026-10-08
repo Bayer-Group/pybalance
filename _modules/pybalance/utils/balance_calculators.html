@@ -92,7 +92,11 @@
     <span class="n">MatchingData</span><span class="p">,</span>
     <span class="n">split_target_pool</span><span class="p">,</span>
     <span class="n">BaseMatchingPreprocessor</span><span class="p">,</span>
+    <span class="n">CategoricOneHotEncoder</span><span class="p">,</span>
+    <span class="n">ChainPreprocessor</span><span class="p">,</span>
     <span class="n">DecisionTreeEncoder</span><span class="p">,</span>
+    <span class="n">FixedNumericBinsEncoder</span><span class="p">,</span>
+    <span class="n">FloatEncoder</span><span class="p">,</span>
     <span class="n">StandardMatchingPreprocessor</span><span class="p">,</span>
     <span class="n">BetaXPreprocessor</span><span class="p">,</span>
     <span class="n">GammaPreprocessor</span><span class="p">,</span>
@@ -218,12 +222,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
             <span class="n">pool_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span> <span class="o">=</span> <span class="n">compute_aggregate_feature_moments</span><span class="p">(</span>
+            <span class="n">pool_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">constrained</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">disclosed</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">compute_aggregate_feature_moments</span><span class="p">(</span>
                 <span class="n">matching_data</span><span class="o">.</span><span class="n">aggregate_target</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="p">,</span>
                 <span class="n">pool_std</span><span class="o">=</span><span class="n">pool_std</span><span class="p">,</span>
+                <span class="n">pool_mean</span><span class="o">=</span><span class="n">pool_mean</span><span class="p">,</span>
                 <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="c1"># Columns the target does not disclose are not constrained: no weight.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constrained</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constrained</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_weights</span> <span class="o">*</span> <span class="n">mask</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">target</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="n">matching_data</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
@@ -231,6 +247,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="n">pool_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constrained</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">disclosed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
 
         <span class="c1"># Zero variances are bad and can lead to infinite loss.</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">target_std</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
@@ -446,6 +463,84 @@
             <span class="n">standardize_difference</span><span class="o">=</span><span class="n">standardize_difference</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">AggregateTargetBalanceCalculator</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    BetaBalance for an AggregateTarget. AggregateTarget fully describes the</span>
+<span class="sd">    disclosed constraints (mean/std, and/or disclosed quantiles such as a</span>
+<span class="sd">    median or &quot;80% of patients weigh more than 70kg&quot;); this calculator figures</span>
+<span class="sd">    out what preprocessing those constraints require and computes distance to</span>
+<span class="sd">    them -- the caller never passes dichotomization cutpoints directly.</span>
+
+<span class="sd">    Concretely: a feature with a disclosed quantile (``{&quot;median&quot;: 65}`` or the</span>
+<span class="sd">    equivalent ``{&quot;quantile&quot;: [(0.5, 65)]}``, or e.g. ``{&quot;quantile&quot;: [(0.2, 70)]}``</span>
+<span class="sd">    for &quot;80% of patients weigh more than 70kg&quot;) is automatically dichotomized</span>
+<span class="sd">    at that cutpoint and matched against the implied rate. &#39;mean&#39;/&#39;std&#39; and</span>
+<span class="sd">    quantiles can be disclosed simultaneously for the same feature (e.g.</span>
+<span class="sd">    ``numeric={&quot;psa&quot;: {&quot;mean&quot;: 68.0, &quot;std&quot;: 12.0, &quot;median&quot;: 65}}``), in which</span>
+<span class="sd">    case both the raw column and its dichotomized indicator(s) are matched.</span>
+<span class="sd">    See FixedNumericBinsEncoder.</span>
+
+<span class="sd">    Every disclosed statistic is its own constraint, and only disclosed</span>
+<span class="sd">    statistics are constrained: a feature or categoric level the target says</span>
+<span class="sd">    nothing about gets zero weight. To that end categoric levels are encoded</span>
+<span class="sd">    without dropping one (``drop=None``), so each disclosed level has a column.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;aggregate_beta&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+        <span class="n">feature_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">drop</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">standardize_difference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">has_aggregate_target</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;AggregateTargetBalanceCalculator requires MatchingData with an &quot;</span>
+                <span class="s2">&quot;AggregateTarget. For a patient-level target, use BetaBalance.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">thresholds</span><span class="p">,</span> <span class="n">keep_raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thresholds_from_target</span><span class="p">(</span>
+            <span class="n">matching_data</span><span class="o">.</span><span class="n">aggregate_target</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">thresholds</span><span class="p">:</span>
+            <span class="n">preprocessor</span> <span class="o">=</span> <span class="n">ChainPreprocessor</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">FixedNumericBinsEncoder</span><span class="p">(</span><span class="n">thresholds</span><span class="p">,</span> <span class="n">keep_raw</span><span class="o">=</span><span class="n">keep_raw</span><span class="p">),</span>
+                    <span class="n">CategoricOneHotEncoder</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">),</span>
+                    <span class="n">FloatEncoder</span><span class="p">(),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">preprocessor</span> <span class="o">=</span> <span class="n">StandardMatchingPreprocessor</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="n">drop</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AggregateTargetBalanceCalculator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">matching_data</span><span class="o">=</span><span class="n">matching_data</span><span class="p">,</span>
+            <span class="n">preprocessor</span><span class="o">=</span><span class="n">preprocessor</span><span class="p">,</span>
+            <span class="n">feature_weights</span><span class="o">=</span><span class="n">feature_weights</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">standardize_difference</span><span class="o">=</span><span class="n">standardize_difference</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_thresholds_from_target</span><span class="p">(</span><span class="n">aggregate_target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Derive FixedNumericBinsEncoder&#39;s `thresholds`/`keep_raw` entirely from</span>
+<span class="sd">        AggregateTarget&#39;s disclosed quantiles -- the caller never supplies</span>
+<span class="sd">        cutpoints directly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">thresholds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">keep_raw</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">stats</span> <span class="ow">in</span> <span class="n">aggregate_target</span><span class="o">.</span><span class="n">numeric</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;quantile&quot;</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+                <span class="n">thresholds</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;quantile&quot;</span><span class="p">])</span>
+                <span class="c1"># the raw column is still needed for a disclosed mean and/or std</span>
+                <span class="k">if</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">in</span> <span class="n">stats</span> <span class="ow">or</span> <span class="s2">&quot;std&quot;</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+                    <span class="n">keep_raw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">thresholds</span><span class="p">,</span> <span class="n">keep_raw</span>
 
 
 <div class="viewcode-block" id="BetaSquaredBalance"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BetaSquaredBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BetaSquaredBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
@@ -818,6 +913,7 @@
 <span class="n">BALANCE_CALCULATORS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">BaseBalanceCalculator</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">BaseBalanceCalculator</span><span class="p">,</span>
     <span class="n">BetaBalance</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">BetaBalance</span><span class="p">,</span>
+    <span class="n">AggregateTargetBalanceCalculator</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">AggregateTargetBalanceCalculator</span><span class="p">,</span>
     <span class="n">BetaXBalance</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">BetaXBalance</span><span class="p">,</span>
     <span class="n">BetaXSquaredBalance</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">BetaXSquaredBalance</span><span class="p">,</span>
     <span class="n">BetaMaxBalance</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">BetaMaxBalance</span><span class="p">,</span>

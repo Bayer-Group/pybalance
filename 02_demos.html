@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Matching Data" href="demos/matching_data.html" />
+    <link rel="next" title="Matching Data" href="demos/core_01_matching_data.html" />
     <link rel="prev" title="Installation instructions" href="01_installation.html" /> 
 </head>
 
@@ -48,12 +48,15 @@
 <li class="toctree-l1"><a class="reference internal" href="00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="01_installation.html">Installation instructions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Demos</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/matching_data.html">Matching Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/balance_calculators.html">Balance Calculators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/ps_matcher.html">Propensity Score Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/ea_matcher.html">Genetic Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/lp_matcher.html">Constraint Satisfaction Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/card_matcher.html">Cardinality matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html">Balance Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 </li>
 </ul>
@@ -94,43 +97,78 @@
   <section id="demos">
 <h1>Demos<a class="headerlink" href="#demos" title="Permalink to this heading"></a></h1>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Demos</span></p>
+<p class="caption" role="heading"><span class="caption-text">Core</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="demos/matching_data.html">Matching Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/matching_data.html#Initializing-MatchingData">Initializing MatchingData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/matching_data.html#Exploring-MatchingData">Exploring MatchingData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/matching_data.html#Visualizing-MatchingData">Visualizing MatchingData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/core_01_matching_data.html">Matching Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_01_matching_data.html#Initializing-MatchingData">Initializing MatchingData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_01_matching_data.html#Exploring-MatchingData">Exploring MatchingData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_01_matching_data.html#Visualizing-MatchingData">Visualizing MatchingData</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="demos/balance_calculators.html">Balance Calculators</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/balance_calculators.html#Fit-Balance-Calculator">Fit Balance Calculator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/balance_calculators.html#Balance-between-pool-and-target">Balance between pool and target</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/balance_calculators.html#Balance-between-subset-of-pool-and-target">Balance between subset of pool and target</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/balance_calculators.html#Balance-between-several-subsets-simultaneously">Balance between several subsets simultaneously</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/balance_calculators.html#Basic-Genetic-Optimizer">Basic Genetic Optimizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/core_02_balance_calculators.html">Balance Calculators</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Fit-Balance-Calculator">Fit Balance Calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Balance-between-pool-and-target">Balance between pool and target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Balance-between-subset-of-pool-and-target">Balance between subset of pool and target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Balance-between-several-subsets-simultaneously">Balance between several subsets simultaneously</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Basic-Genetic-Optimizer">Basic Genetic Optimizer</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="demos/ps_matcher.html">Propensity Score Matcher</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/ps_matcher.html#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/ps_matcher.html#Improve-upon-PropensityScoreMatcher-solution-with-ConstraintSatisfactionMatcher">Improve upon PropensityScoreMatcher solution with ConstraintSatisfactionMatcher</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Matching</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_01_propensity.html">Propensity Score Matcher</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_01_propensity.html#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_01_propensity.html#Improve-upon-PropensityScoreMatcher-solution-with-ConstraintSatisfactionMatcher">Improve upon PropensityScoreMatcher solution with ConstraintSatisfactionMatcher</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="demos/ea_matcher.html">Genetic Matcher</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/ea_matcher.html#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/ea_matcher.html#Optimize-Beta^2">Optimize Beta^2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/ea_matcher.html#Optimize-Gamma-(Area-Between-CDFs)">Optimize Gamma (Area Between CDFs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_02_linear_program.html">Constraint Satisfaction Matcher</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_02_linear_program.html#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_02_linear_program.html#Optimize-Beta-With-Cross-Terms-Added">Optimize Beta With Cross Terms Added</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_02_linear_program.html#Optimize-Gamma-(Area-Between-CDFs)">Optimize Gamma (Area Between CDFs)</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="demos/lp_matcher.html">Constraint Satisfaction Matcher</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/lp_matcher.html#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/lp_matcher.html#Optimize-Beta-With-Cross-Terms-Added">Optimize Beta With Cross Terms Added</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/lp_matcher.html#Optimize-Gamma-(Area-Between-CDFs)">Optimize Gamma (Area Between CDFs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_03_cardinality.html">Cardinality matching</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_03_cardinality.html#Optimize-pool-size-with-balance-constraint">Optimize pool size with balance constraint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_03_cardinality.html#Optimize-balance-with-size-and-balance-constraints">Optimize balance with size and balance constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_03_cardinality.html#Optimize-balance-without-balance-constraint">Optimize balance without balance constraint</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="demos/card_matcher.html">Cardinality matching</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/card_matcher.html#Optimize-pool-size-with-balance-constraint">Optimize pool size with balance constraint</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/card_matcher.html#Optimize-balance-with-size-and-balance-constraints">Optimize balance with size and balance constraints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/card_matcher.html#Optimize-balance-without-balance-constraint">Optimize balance without balance constraint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_04_genetic.html">Genetic Matcher</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_04_genetic.html#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_04_genetic.html#Optimize-Beta^2">Optimize Beta^2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_04_genetic.html#Optimize-Gamma-(Area-Between-CDFs)">Optimize Gamma (Area Between CDFs)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_05_aggregate.html">Matching a pool to an aggregate target</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_05_aggregate.html#1.-A-patient-level-(synthetic)-pool">1. A patient-level (synthetic) pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_05_aggregate.html#2.-Use-case-1----specifying-means-only">2. Use case 1 – specifying means only</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_05_aggregate.html#3.-Use-case-2----adding-stds">3. Use case 2 – adding stds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_05_aggregate.html#4.-Use-case-3----medians-and-quantiles-instead-of-means">4. Use case 3 – medians and quantiles instead of means</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_05_aggregate.html#Takeaways">Takeaways</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Weighting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#1.-Synthetic-data:-two-genuinely-different,-patient-level-populations">1. Synthetic data: two genuinely different, patient-level populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#2.-Fit-IPTWWeighter">2. Fit <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#3.-Checking-overlap:-propensity-score-and-weight-distributions">3. Checking overlap: propensity score and weight distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#4.-Trimming-extreme-weights">4. Trimming extreme weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#Takeaways">Takeaways</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_02_maic.html#1.-A-patient-level-(synthetic)-pool">1. A patient-level (synthetic) pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_02_maic.html#2.-Use-case-1----specifying-means-only">2. Use case 1 – specifying means only</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_02_maic.html#3.-Use-case-2----adding-stds">3. Use case 2 – adding stds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_02_maic.html#4.-Use-case-3----medians-and-quantiles-instead-of-means">4. Use case 3 – medians and quantiles instead of means</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_02_maic.html#5.-When-the-target-lies-outside-the-pool's-support">5. When the target lies outside the pool’s support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_02_maic.html#Takeaways">Takeaways</a></li>
 </ul>
 </li>
 </ul>
@@ -142,7 +180,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="01_installation.html" class="btn btn-neutral float-left" title="Installation instructions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="demos/matching_data.html" class="btn btn-neutral float-right" title="Matching Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="demos/core_01_matching_data.html" class="btn btn-neutral float-right" title="Matching Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

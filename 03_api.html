@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="License" href="04_license.html" />
-    <link rel="prev" title="Cardinality matching" href="demos/card_matcher.html" /> 
+    <link rel="prev" title="Weighting with MAIC / entropy balancing" href="demos/weighting_02_maic.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -908,20 +908,22 @@ up in a later release.</p>
 patient-level, but the reference population is known only through summary
 statistics (an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>, e.g. a published Table 1). A subset of
 the pool is selected so that its moments match the target’s.</p>
-<p>Only the moments actually disclosed on <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> are matched: a
-numeric feature’s mean is always matched (mean is required), and its
-variance is <em>additionally</em> constrained if – and only if – the target
-discloses a “std” for that feature. This makes matching moment-aware: pass
-a target std to control it, or omit it to leave a feature’s spread
-unconstrained. One consequence: setting a target std of 0 asks the solver
-for the minimal-variance subset achievable for that feature, subject to
-everything else.</p>
+<p>Every statistic the <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> discloses becomes a constraint,
+and nothing else is constrained: a feature’s mean (if disclosed), its
+variance (if a “std” is disclosed), each disclosed quantile / median /
+min / max (by dichotomizing the feature – see
+AggregateTargetBalanceCalculator) and each disclosed categoric rate. An
+undisclosed statistic or categoric level is simply left out. Setting a
+target std of 0 asks the solver for the minimal-variance subset
+achievable for that feature, subject to everything else. A std without a
+mean is the variance around the subset’s own mean.</p>
 <p>The target is a fixed constraint vector and is never subsetted, so several
 <code class="docutils literal notranslate"><span class="pre">ConstraintSatisfactionMatcher</span></code> options do not apply here and are
 intentionally absent:</p>
 <ul class="simple">
-<li><p>no <code class="docutils literal notranslate"><span class="pre">objective</span></code>: only the beta / mean-matching formulation is defined
-against aggregate moments, so it is used unconditionally;</p></li>
+<li><p>no <code class="docutils literal notranslate"><span class="pre">objective</span></code>: only the beta / mean-matching formulation (via
+AggregateTargetBalanceCalculator) is defined against aggregate moments,
+so it is used unconditionally;</p></li>
 <li><p>no <code class="docutils literal notranslate"><span class="pre">target_size</span></code> / <code class="docutils literal notranslate"><span class="pre">match_size</span></code>: the target cannot be subsetted, so
 the effective target size is always <code class="docutils literal notranslate"><span class="pre">AggregateTarget.n</span></code>;</p></li>
 <li><p>no <code class="docutils literal notranslate"><span class="pre">ps_hinting</span></code> / solver hints: there is no patient-level target to
@@ -972,10 +974,9 @@ Returns a MatchingData instance containing the matched pool and the
 <dd><p>Plot the one-dimensional marginal distributions for all numerical features
 and all treatment groups found in matching_data. Extra keyword arguments are
 passed to seaborn.histplot and override defaults.</p>
-<p>If matching_data has an AggregateTarget, it has no patient-level rows to
-plot a distribution for; instead, each feature’s disclosed mean is
-overlaid as a dashed vertical line, and its mean +/- std (when disclosed)
-as a shaded band.</p>
+<p>If matching_data has an AggregateTarget, it has no patient-level rows to plot a
+distribution for and a warning is logged; use plot_aggregate_target_match()
+instead to compare the pool against its disclosed statistics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -996,9 +997,9 @@ all numeric features are plotted.</p></li>
 <dd><p>Plot the one-dimensional marginal distributions for all categoric features
 and all treatment groups found in matching_data. Extra keyword arguments are
 passed to seaborn.histplot and override defaults.</p>
-<p>If matching_data has an AggregateTarget, it has no patient-level rows to
-plot a distribution for; instead, each feature’s disclosed rate(s) are
-overlaid as diamond markers.</p>
+<p>If matching_data has an AggregateTarget, it has no patient-level rows to plot a
+distribution for and a warning is logged; use plot_aggregate_target_match()
+instead to compare the pool against its disclosed statistics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1125,7 +1126,7 @@ generate_random_feature_data_rwd and generate_random_feature_data_rct.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="demos/card_matcher.html" class="btn btn-neutral float-left" title="Cardinality matching" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="demos/weighting_02_maic.html" class="btn btn-neutral float-left" title="Weighting with MAIC / entropy balancing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="04_license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

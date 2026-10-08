@@ -118,12 +118,48 @@
         <span class="p">]</span></div>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_numeric_stats</span><span class="p">(</span><span class="n">stats</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Numeric aggregate stats must include &#39;mean&#39;. Got: </span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">])}</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_numeric_stats</span><span class="p">(</span><span class="n">stats</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">extra</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unknown numeric aggregate stat key(s) </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">extra</span><span class="p">)</span><span class="si">}</span><span class="s2">. Got: </span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">])</span>
     <span class="k">if</span> <span class="s2">&quot;std&quot;</span> <span class="ow">in</span> <span class="n">stats</span> <span class="ow">and</span> <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">])</span>
+
+    <span class="c1"># A disclosed quantile (q, value) means P(raw &lt;= value) = q for the raw</span>
+    <span class="c1"># column; it is matched by dichotomizing the raw column at `value` and</span>
+    <span class="c1"># constraining the resulting indicator&#39;s rate to 1 - q. &#39;median&#39; is just</span>
+    <span class="c1"># sugar for the single quantile (0.5, value), and &#39;min&#39;/&#39;max&#39; for the 0th and</span>
+    <span class="c1"># 100th quantile. Quantile constraints are independent of, and may be</span>
+    <span class="c1"># disclosed alongside, &#39;mean&#39;/&#39;std&#39; on the same raw column. See</span>
+    <span class="c1"># AggregateTargetBalanceCalculator / FixedNumericBinsEncoder.</span>
+    <span class="n">quantiles</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s2">&quot;min&quot;</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+        <span class="n">quantiles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">])))</span>
+    <span class="k">if</span> <span class="s2">&quot;median&quot;</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+        <span class="n">quantiles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;median&quot;</span><span class="p">])))</span>
+    <span class="k">if</span> <span class="s2">&quot;max&quot;</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+        <span class="n">quantiles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">])))</span>
+    <span class="k">if</span> <span class="s2">&quot;quantile&quot;</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;quantile&quot;</span><span class="p">]:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">q</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Quantile proportion must be between 0 and 1; got </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">quantiles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">q</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">quantiles</span><span class="p">:</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;quantile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">quantiles</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">out</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Numeric aggregate stats must include at least one of &#39;mean&#39;, &#39;std&#39;, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;median&#39;, &#39;min&#39;, &#39;max&#39; or &#39;quantile&#39;. Got: </span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span>
 
 
@@ -131,10 +167,21 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">rates</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Categoric feature &#39;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&#39; has empty rate dictionary.&quot;</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rates</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;</span> <span class="n">rate</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Categoric rate for &#39;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&#39;=&#39;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2">&#39; must be strictly &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;between 0 and 1; got </span><span class="si">{</span><span class="n">rate</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+    <span class="c1"># Categories are allowed to be partially disclosed -- e.g. a published</span>
+    <span class="c1"># Table 1 may give &quot;country: US 60%&quot; without breaking out every other</span>
+    <span class="c1"># country -- in which case the rest are left unconstrained. Only the</span>
+    <span class="c1"># impossible case (rates summing to more than 1) is rejected.</span>
     <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">1e-3</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Categoric rates for &#39;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&#39; must sum to 1.0 (got </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Categoric rates for &#39;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&#39; must not sum to more than 1.0 &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(got </span><span class="si">{</span><span class="n">total</span><span class="si">}</span><span class="s2">).&quot;</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span>
 
@@ -184,6 +231,27 @@
     <span class="k">return</span> <span class="n">moments</span>
 
 
+<span class="n">AGGREGATE_TARGET_CSV_COLUMNS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;feature&quot;</span><span class="p">,</span> <span class="s2">&quot;statistic&quot;</span><span class="p">,</span> <span class="s2">&quot;parameter&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+<span class="n">_NUMERIC_CSV_STATISTICS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_level</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="c1"># Category levels are stored as text; recover int/float levels where possible.</span>
+    <span class="k">for</span> <span class="n">cast</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_csv_float</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">what</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> must be a number; got </span><span class="si">{</span><span class="n">text</span><span class="si">!r}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AggregateTarget</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -194,8 +262,21 @@
 <span class="sd">    and category prevalences).</span>
 
 <span class="sd">    :param n: Sample size of the target population.</span>
-<span class="sd">    :param numeric: Mapping feature -&gt; {&quot;mean&quot;: ..., &quot;std&quot;: optional}.</span>
-<span class="sd">    :param categoric: Mapping feature -&gt; {category: rate}, rates summing to ~1.</span>
+<span class="sd">    :param numeric: Mapping feature -&gt; any non-empty subset of {&quot;mean&quot;,</span>
+<span class="sd">        &quot;std&quot;, &quot;median&quot;, &quot;quantile&quot;, &quot;min&quot;, &quot;max&quot;}. Each disclosed statistic is</span>
+<span class="sd">        its own constraint; undisclosed ones are not constrained. ``median`` and</span>
+<span class="sd">        ``quantile`` describe disclosed quantiles of the raw column (e.g. a</span>
+<span class="sd">        published median, or &quot;80% of patients weigh more than 70kg&quot; as</span>
+<span class="sd">        ``{&quot;quantile&quot;: [(0.2, 70)]}``). A ``std`` without a ``mean`` is the</span>
+<span class="sd">        spread around the matched subset&#39;s own mean. ``min`` and ``max`` are the</span>
+<span class="sd">        0th and 100th quantile; like every other constraint they are *soft*:</span>
+<span class="sd">        the matcher penalizes the fraction of patients below ``min`` / above</span>
+<span class="sd">        ``max`` rather than forbidding them. (``min`` is exclusive: a patient</span>
+<span class="sd">        exactly at ``min`` counts as below it.)</span>
+<span class="sd">    :param categoric: Mapping feature -&gt; {category: rate}. Categories may be</span>
+<span class="sd">        partially disclosed -- e.g. a published Table 1 may give only</span>
+<span class="sd">        &quot;country: US 60%&quot; -- in which case rates need not sum to 1 and</span>
+<span class="sd">        unlisted categories get no constraint at all.</span>
 <span class="sd">    :param headers: Optional explicit MatchingHeaders. If omitted, inferred from</span>
 <span class="sd">        the keys of ``numeric`` and ``categoric``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -271,6 +352,135 @@
             <span class="n">categoric</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;categoric&quot;</span><span class="p">,</span> <span class="p">{})),</span>
             <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_csv</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;AggregateTarget&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load an AggregateTarget from a CSV file in pybalance&#39;s standard</span>
+<span class="sd">        aggregate-target format (the inverse of :meth:`to_csv`).</span>
+
+<span class="sd">        The file is in long format, one disclosed statistic per row, with</span>
+<span class="sd">        columns ``feature``, ``statistic``, ``parameter`` and ``value``::</span>
+
+<span class="sd">            feature,statistic,parameter,value</span>
+<span class="sd">            ,n,,100</span>
+<span class="sd">            age,mean,,52.3</span>
+<span class="sd">            age,std,,11.8</span>
+<span class="sd">            age,median,,51.0</span>
+<span class="sd">            age,max,,75.0</span>
+<span class="sd">            weight,quantile,0.2,70.0</span>
+<span class="sd">            gender,rate,0,0.45</span>
+<span class="sd">            gender,rate,1,0.55</span>
+
+<span class="sd">        - ``n`` (blank ``feature``, blank ``parameter``): target sample size.</span>
+<span class="sd">          Exactly one row is required.</span>
+<span class="sd">        - ``mean``, ``std``, ``median``, ``min``, ``max`` (blank</span>
+<span class="sd">          ``parameter``): numeric statistics of ``feature``. ``min`` and</span>
+<span class="sd">          ``max`` are soft limits (the 0th and 100th quantile).</span>
+<span class="sd">        - ``quantile``: ``parameter`` is the proportion ``q`` in [0, 1] and</span>
+<span class="sd">          ``value`` the cutpoint, i.e. P(feature &lt;= value) = q.</span>
+<span class="sd">        - ``rate``: ``parameter`` is a category level of ``feature`` and</span>
+<span class="sd">          ``value`` its rate. Levels may be omitted (partially disclosed).</span>
+
+<span class="sd">        A feature is numeric if it has numeric statistics and categoric if it</span>
+<span class="sd">        has ``rate`` rows. Feature order follows first appearance in the file.</span>
+<span class="sd">        See :class:`AggregateTarget` for the semantics of each statistic.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">keep_default_na</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">missing_cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">AGGREGATE_TARGET_CSV_COLUMNS</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">missing_cols</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Aggregate target file </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> missing required columns: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing_cols</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">numeric</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">categoric</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s2">&quot;records&quot;</span><span class="p">)):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span>  <span class="c1"># 1-based, after the header row</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;feature&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">statistic</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;statistic&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">parameter</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;parameter&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">_csv_float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">statistic</span> <span class="o">==</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: duplicate &#39;n&#39; row.&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: n must be an integer; got </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">feature</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: statistic &#39;</span><span class="si">{</span><span class="n">statistic</span><span class="si">}</span><span class="s2">&#39; requires a feature.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">statistic</span> <span class="ow">in</span> <span class="n">_NUMERIC_CSV_STATISTICS</span><span class="p">:</span>
+                <span class="n">stats</span> <span class="o">=</span> <span class="n">numeric</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">if</span> <span class="n">statistic</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: duplicate &#39;</span><span class="si">{</span><span class="n">statistic</span><span class="si">}</span><span class="s2">&#39; for feature &#39;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">stats</span><span class="p">[</span><span class="n">statistic</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">elif</span> <span class="n">statistic</span> <span class="o">==</span> <span class="s2">&quot;quantile&quot;</span><span class="p">:</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">_csv_float</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="s2">&quot;quantile parameter&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+                <span class="n">numeric</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">statistic</span> <span class="o">==</span> <span class="s2">&quot;rate&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: &#39;rate&#39; requires a level in &#39;parameter&#39;.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">rates</span> <span class="o">=</span> <span class="n">categoric</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="n">_parse_level</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">rates</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: duplicate rate for &#39;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&#39;=&#39;</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">rates</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">: unknown statistic &#39;</span><span class="si">{</span><span class="n">statistic</span><span class="si">}</span><span class="s2">&#39;. Expected one of &quot;</span>
+                    <span class="s2">&quot;n, mean, std, median, min, max, quantile, rate.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Aggregate target file </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> has no &#39;n&#39; row.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">numeric</span><span class="o">=</span><span class="n">numeric</span><span class="p">,</span> <span class="n">categoric</span><span class="o">=</span><span class="n">categoric</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write this target in the standard CSV format read by :meth:`from_csv`.</span>
+<span class="sd">        Returns the CSV text if ``path`` is None, otherwise writes the file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">py</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">numeric</span><span class="p">:</span>
+            <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numeric</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">statistic</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">statistic</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+                    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="n">statistic</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">stats</span><span class="p">[</span><span class="n">statistic</span><span class="p">]))</span>
+            <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="n">named</span> <span class="o">=</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">:</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">:</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">:</span> <span class="s2">&quot;max&quot;</span><span class="p">}</span>
+                <span class="k">if</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">named</span><span class="p">:</span>
+                    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="n">named</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">categoric</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">level</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">categoric</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="s2">&quot;rate&quot;</span><span class="p">,</span> <span class="n">py</span><span class="p">(</span><span class="n">level</span><span class="p">),</span> <span class="n">rate</span><span class="p">))</span>
+
+        <span class="c1"># object dtype keeps n as &quot;100&quot; rather than &quot;100.0&quot; next to float values</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">rows</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">AGGREGATE_TARGET_CSV_COLUMNS</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_moments_csv</span><span class="p">(</span>
@@ -370,6 +580,19 @@
         <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">stats</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numeric</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">stat</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">stats</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">stat</span> <span class="o">==</span> <span class="s2">&quot;quantile&quot;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">cutpoint</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">{</span>
+                                <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;numeric&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;stat&quot;</span><span class="p">:</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">:</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">:</span> <span class="s2">&quot;max&quot;</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                                    <span class="n">q</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;quantile_</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span>
+                                <span class="p">),</span>
+                                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">cutpoint</span><span class="p">,</span>
+                            <span class="p">}</span>
+                        <span class="p">)</span>
+                    <span class="k">continue</span>
                 <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
                         <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
@@ -553,12 +776,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_headers</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">population_col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">            Cannot split into populations based on </span><span class="si">{</span><span class="n">population_col</span><span class="si">}</span><span class="s2">. Column not</span>
 <span class="s2">            present in data frame.</span>
-<span class="s2">            &quot;&quot;&quot;</span>
-                <span class="p">)</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">pool_df</span> <span class="o">=</span> <span class="n">_load_matching_data</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">pool</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -864,7 +1085,9 @@
         <span class="c1"># since its rates/counts are already known exactly.</span>
         <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pop_columns</span><span class="p">:</span>
-                <span class="n">out</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">/</span> <span class="n">counts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">population_col</span><span class="si">}</span><span class="s2"> size&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">),</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
@@ -879,8 +1102,18 @@
                     <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">cat</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">rate</span> <span class="k">if</span> <span class="n">normalize</span> <span class="k">else</span> <span class="nb">round</span><span class="p">(</span><span class="n">rate</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
                     <span class="p">)</span>
+            <span class="c1"># A feature the target does not disclose at all is unconstrained, not 0%.</span>
+            <span class="n">undisclosed</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">cat</span>
+                <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;categoric&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">cat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">categoric</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">undisclosed</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">normalize</span><span class="p">:</span>
-                <span class="n">out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                    <span class="s2">&quot;Int64&quot;</span> <span class="k">if</span> <span class="n">undisclosed</span> <span class="k">else</span> <span class="nb">int</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">out</span></div>
 
@@ -925,12 +1158,10 @@
         <span class="n">pool</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">pool_name</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">            Cannot split into exactly two populations based on </span><span class="si">{</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="si">}</span><span class="s2">.</span>
 <span class="s2">            Found populations: </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span>
-<span class="s2">            &quot;&quot;&quot;</span>
-            <span class="p">)</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">pool_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="n">target_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -939,12 +1170,10 @@
         <span class="n">pool</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">pool_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">            Cannot split into exactly two populations based on </span><span class="si">{</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="si">}</span><span class="s2">.</span>
 <span class="s2">            Found populations: </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span>
-<span class="s2">            &quot;&quot;&quot;</span>
-            <span class="p">)</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
         <span class="n">inferred_pool_name</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">inferred_target_name</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">target</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">inferred_target_name</span><span class="p">)</span>

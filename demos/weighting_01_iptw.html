@@ -1,0 +1,653 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inverse Probability of Treatment Weighting (IPTW) &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=860ec0ee"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Weighting with MAIC / entropy balancing" href="weighting_02_maic.html" />
+    <link rel="prev" title="Matching a pool to an aggregate target" href="matching_05_aggregate.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="core_02_balance_calculators.html">Balance Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Inverse Probability of Treatment Weighting (IPTW)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#1.-Synthetic-data:-two-genuinely-different,-patient-level-populations">1. Synthetic data: two genuinely different, patient-level populations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#2.-Fit-IPTWWeighter">2. Fit <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#3.-Checking-overlap:-propensity-score-and-weight-distributions">3. Checking overlap: propensity score and weight distributions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#4.-Trimming-extreme-weights">4. Trimming extreme weights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Takeaways">Takeaways</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
+      <li class="breadcrumb-item active">Inverse Probability of Treatment Weighting (IPTW)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/demos/weighting_01_iptw.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Inverse-Probability-of-Treatment-Weighting-(IPTW)">
+<h1>Inverse Probability of Treatment Weighting (IPTW)<a class="headerlink" href="#Inverse-Probability-of-Treatment-Weighting-(IPTW)" title="Permalink to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code> is a propensity-score-based weighter: rather than selecting a subset of the pool (as the genetic/LP/propensity matchers elsewhere in <code class="docutils literal notranslate"><span class="pre">pybalance</span></code> do), it <strong>reweights every pool patient</strong>. It:</p>
+<ol class="arabic simple">
+<li><p>fits a propensity model <span class="math notranslate nohighlight">\(p(X) = P(\mathrm{target} \mid X)\)</span> that classifies pool vs. target patients on their covariates (<code class="docutils literal notranslate"><span class="pre">sklearn.linear_model.LogisticRegression</span></code> by default), then</p></li>
+<li><p>weights each pool patient by the odds <span class="math notranslate nohighlight">\(p / (1 - p)\)</span>.</p></li>
+</ol>
+<p>The target population keeps weight 1, so this is the <strong>ATT estimand</strong>, with the target playing the role of the fixed/reference (“treated”) group – the natural fit for this package’s typical use case of reweighting a real-world data (RWD) pool to represent a trial population.</p>
+<p>IPTW:</p>
+<ul class="simple">
+<li><p><strong>requires a patient-level target</strong> (there’s no pool-vs-target classification problem to fit against a published, aggregate-only Table 1);</p></li>
+<li><p><strong>does not guarantee exact balance</strong> on any particular moment – only asymptotically, and only if the propensity model is well specified;</p></li>
+<li><p>is nonetheless the most widely used and reported method for this kind of reweighting in the observational literature (Rosenbaum &amp; Rubin, 1983; Austin, 2011).</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_toy_dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">MatchingHeaders</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_categoric_features</span><span class="p">,</span> <span class="n">plot_numeric_features</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.weighting</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">IPTWWeighter</span><span class="p">,</span>
+    <span class="n">plot_iptw_propensity_distributions</span><span class="p">,</span>
+    <span class="n">weighted_balance_table</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="c1"># show effective-sample-size / trimming diagnostics logged during fit()</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="1.-Synthetic-data:-two-genuinely-different,-patient-level-populations">
+<h2>1. Synthetic data: two genuinely different, patient-level populations<a class="headerlink" href="#1.-Synthetic-data:-two-genuinely-different,-patient-level-populations" title="Permalink to this heading"></a></h2>
+<p>IPTW needs patient-level covariates on <em>both</em> sides so it can fit a pool-vs-target classifier. We use <code class="docutils literal notranslate"><span class="pre">generate_toy_dataset</span></code>’s pool and target populations directly, with no aggregation step.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">generate_toy_dataset</span><span class="p">(</span><span class="n">n_pool</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">pool_df</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s2">&quot;pool&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">population_col</span><span class="p">])</span>
+<span class="n">target_df</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">population_col</span><span class="p">])</span>
+
+<span class="n">headers</span> <span class="o">=</span> <span class="n">MatchingHeaders</span><span class="p">(</span><span class="n">numeric</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="n">categoric</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">,</span> <span class="s2">&quot;haircolor&quot;</span><span class="p">])</span>
+<span class="n">matching_data</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">pool</span><span class="o">=</span><span class="n">pool_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target_df</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+<span class="n">matching_data</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>pool</th>
+      <th>target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>population size</th>
+      <th>N</th>
+      <td>2000.0000</td>
+      <td>300.000000</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">gender</th>
+      <th>0.0</th>
+      <td>0.4830</td>
+      <td>0.553333</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>0.5170</td>
+      <td>0.446667</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">haircolor</th>
+      <th>0.0</th>
+      <td>0.3935</td>
+      <td>0.176667</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>0.3045</td>
+      <td>0.403333</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.3020</td>
+      <td>0.420000</td>
+    </tr>
+    <tr>
+      <th rowspan="7" valign="top">age</th>
+      <th>mean</th>
+      <td>55.4200</td>
+      <td>46.710000</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>13.1500</td>
+      <td>13.720000</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>18.2700</td>
+      <td>18.720000</td>
+    </tr>
+    <tr>
+      <th>q25</th>
+      <td>46.6200</td>
+      <td>36.290000</td>
+    </tr>
+    <tr>
+      <th>median</th>
+      <td>57.4700</td>
+      <td>47.410000</td>
+    </tr>
+    <tr>
+      <th>q75</th>
+      <td>66.1700</td>
+      <td>55.930000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>74.9900</td>
+      <td>74.600000</td>
+    </tr>
+    <tr>
+      <th rowspan="7" valign="top">weight</th>
+      <th>mean</th>
+      <td>88.7000</td>
+      <td>82.100000</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>16.4400</td>
+      <td>19.110000</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>50.2200</td>
+      <td>50.160000</td>
+    </tr>
+    <tr>
+      <th>q25</th>
+      <td>76.7700</td>
+      <td>65.520000</td>
+    </tr>
+    <tr>
+      <th>median</th>
+      <td>89.4800</td>
+      <td>81.130000</td>
+    </tr>
+    <tr>
+      <th>q75</th>
+      <td>101.1000</td>
+      <td>96.190000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>119.9500</td>
+      <td>119.660000</td>
+    </tr>
+    <tr>
+      <th rowspan="7" valign="top">height</th>
+      <th>mean</th>
+      <td>159.0500</td>
+      <td>155.180000</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>19.5900</td>
+      <td>17.190000</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>125.0400</td>
+      <td>125.160000</td>
+    </tr>
+    <tr>
+      <th>q25</th>
+      <td>142.1000</td>
+      <td>140.920000</td>
+    </tr>
+    <tr>
+      <th>median</th>
+      <td>158.7400</td>
+      <td>154.890000</td>
+    </tr>
+    <tr>
+      <th>q75</th>
+      <td>175.3700</td>
+      <td>167.800000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>194.9500</td>
+      <td>194.230000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="2.-Fit-IPTWWeighter">
+<h2>2. Fit <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code><a class="headerlink" href="#2.-Fit-IPTWWeighter" title="Permalink to this heading"></a></h2>
+<p>As with the other weighters, <code class="docutils literal notranslate"><span class="pre">match()</span></code> fits (if needed) and returns a <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code> with every pool patient retained, plus a new <code class="docutils literal notranslate"><span class="pre">sample_weight</span></code> column. <code class="docutils literal notranslate"><span class="pre">weighted_balance_table()</span></code> compares each feature’s target moment to the unweighted and weighted pool moment – but, unlike an exact-balance weighter, don’t expect the “weighted” column to land exactly on target.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weighter</span> <span class="o">=</span> <span class="n">IPTWWeighter</span><span class="p">(</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">matched</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+
+<span class="n">weighted_balance_table</span><span class="p">(</span><span class="n">weighter</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+IPTWWeighter fit LogisticRegression. Effective sample size: 946.5 / 2000 pool patients.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>feature</th>
+      <th>moment</th>
+      <th>target</th>
+      <th>unweighted_pool</th>
+      <th>weighted_pool</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>gender_1.0</td>
+      <td>mean</td>
+      <td>0.446667</td>
+      <td>0.517000</td>
+      <td>0.498286</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>haircolor_1</td>
+      <td>mean</td>
+      <td>0.403333</td>
+      <td>0.304500</td>
+      <td>0.403873</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>haircolor_2</td>
+      <td>mean</td>
+      <td>0.420000</td>
+      <td>0.302000</td>
+      <td>0.414048</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>age</td>
+      <td>mean</td>
+      <td>46.705231</td>
+      <td>55.417328</td>
+      <td>47.326641</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>weight</td>
+      <td>mean</td>
+      <td>82.095245</td>
+      <td>88.704041</td>
+      <td>82.229043</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>height</td>
+      <td>mean</td>
+      <td>155.177505</td>
+      <td>159.050598</td>
+      <td>153.852687</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Effective sample size: </span><span class="si">{</span><span class="n">weighter</span><span class="o">.</span><span class="n">effective_sample_size</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pool_df</span><span class="p">)</span><span class="si">}</span><span class="s2"> pool patients&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Propensity model: </span><span class="si">{</span><span class="n">weighter</span><span class="o">.</span><span class="n">propensity_model</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">matched</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">pool_name</span><span class="p">)[</span><span class="s2">&quot;sample_weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Effective sample size: 946.5 / 2000 pool patients
+Propensity model: LogisticRegression(max_iter=1000)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+count    2000.000000
+mean        0.146556
+std         0.154660
+min         0.006937
+25%         0.052532
+50%         0.094784
+75%         0.184358
+max         1.642370
+Name: sample_weight, dtype: float64
+</pre></div></div>
+</div>
+</section>
+<section id="3.-Checking-overlap:-propensity-score-and-weight-distributions">
+<h2>3. Checking overlap: propensity score and weight distributions<a class="headerlink" href="#3.-Checking-overlap:-propensity-score-and-weight-distributions" title="Permalink to this heading"></a></h2>
+<p>IPTW relies on <strong>positivity</strong>: every pool patient needs a realistic chance of looking like the target on the fitted model. A propensity score distribution piled up near 0 or 1, or a handful of huge weights, is the practical warning sign – the reweighting is leaning hard on a small, possibly unrepresentative slice of the pool (the same concern <code class="docutils literal notranslate"><span class="pre">effective_sample_size()</span></code> summarizes in one number).</p>
+<p><code class="docutils literal notranslate"><span class="pre">plot_iptw_propensity_distributions()</span></code> is the weighting counterpart to <code class="docutils literal notranslate"><span class="pre">pybalance.propensity.plot_propensity_score_match_distributions()</span></code>: instead of a matched subset’s “before” vs. “after” panels, it shows the same pool/target propensity scores counted equally (“before”) vs. counted by the fitted IPTW weight (“after”) – the weighted pool histogram should move towards the target’s.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_iptw_propensity_distributions</span><span class="p">(</span><span class="n">weighter</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_weighting_01_iptw_8_0.png" src="../_images/demos_weighting_01_iptw_8_0.png" />
+</div>
+</div>
+<p>Both <code class="docutils literal notranslate"><span class="pre">plot_numeric_features</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_categoric_features</span></code> accept a <code class="docutils literal notranslate"><span class="pre">weights=</span></code> column, so the unweighted pool (every patient counted equally) and the IPTW-weighted pool can be plotted side by side against the same target, to see what the reweighting actually bought.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">weighter</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Pool weights, $\hat</span><span class="si">{p}</span><span class="s2"> / (1 - \hat</span><span class="si">{p}</span><span class="s2">)$&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_weighting_01_iptw_10_0.png" src="../_images/demos_weighting_01_iptw_10_0.png" />
+</div>
+</div>
+<p>To see the effect on the covariates themselves (rather than the propensity score), put the unweighted pool, the IPTW-weighted pool and the target into a single <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code> – the same trick the matching demos use to show “pool (prematch)” alongside “pool” and “target” in one plot – and pass <code class="docutils literal notranslate"><span class="pre">weights=</span></code> through to <code class="docutils literal notranslate"><span class="pre">plot_numeric_features</span></code>/<code class="docutils literal notranslate"><span class="pre">plot_categoric_features</span></code>. The unweighted pool copy gets weight 1, so a single call draws all three distributions together instead of two separate
+before/after figures.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">before_pool</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">pool_name</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">before_pool</span><span class="p">[</span><span class="n">weighter</span><span class="o">.</span><span class="n">weight_col</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+<span class="n">combined</span> <span class="o">=</span> <span class="n">matched</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">combined</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">before_pool</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;pool (before)&quot;</span><span class="p">)</span>
+<span class="n">hue_order</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pool (before)&quot;</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">pool_name</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span><span class="p">]</span>
+
+<span class="n">plot_numeric_features</span><span class="p">(</span>
+    <span class="n">combined</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weighter</span><span class="o">.</span><span class="n">weight_col</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="n">hue_order</span><span class="p">,</span> <span class="n">include_only</span><span class="o">=</span><span class="n">headers</span><span class="o">.</span><span class="n">numeric</span><span class="p">,</span> <span class="n">col_wrap</span><span class="o">=</span><span class="mi">3</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Pool vs. target, before vs. after IPTW weighting (numeric)&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.05</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_weighting_01_iptw_12_0.png" src="../_images/demos_weighting_01_iptw_12_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_categoric_features</span><span class="p">(</span>
+    <span class="n">combined</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weighter</span><span class="o">.</span><span class="n">weight_col</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="n">hue_order</span><span class="p">,</span> <span class="n">include_only</span><span class="o">=</span><span class="n">headers</span><span class="o">.</span><span class="n">categoric</span><span class="p">,</span> <span class="n">col_wrap</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Pool vs. target, before vs. after IPTW weighting (categoric)&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.05</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_weighting_01_iptw_13_0.png" src="../_images/demos_weighting_01_iptw_13_0.png" />
+</div>
+</div>
+</section>
+<section id="4.-Trimming-extreme-weights">
+<h2>4. Trimming extreme weights<a class="headerlink" href="#4.-Trimming-extreme-weights" title="Permalink to this heading"></a></h2>
+<p>The main practical failure mode of IPTW is a small number of extreme weights, driven by pool patients whose covariates make the model almost certain they’re pool (weight -&gt; 0) or almost certain they’re target (weight -&gt; large). <code class="docutils literal notranslate"><span class="pre">trim_quantiles=(low,</span> <span class="pre">high)</span></code> clips fitted weights at the given quantiles – a standard bias/variance trade-off: a little exact balance is sacrificed in exchange for a much more stable, lower-variance set of weights.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trimmed</span> <span class="o">=</span> <span class="n">IPTWWeighter</span><span class="p">(</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">trim_quantiles</span><span class="o">=</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">trimmed</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Untrimmed: ESS=</span><span class="si">{</span><span class="n">weighter</span><span class="o">.</span><span class="n">effective_sample_size</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, max weight=</span><span class="si">{</span><span class="n">weighter</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trimmed:   ESS=</span><span class="si">{</span><span class="n">trimmed</span><span class="o">.</span><span class="n">effective_sample_size</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, max weight=</span><span class="si">{</span><span class="n">trimmed</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, n_trimmed=</span><span class="si">{</span><span class="n">trimmed</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;n_trimmed&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">weighter</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;untrimmed&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">trimmed</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;trimmed (5th/95th pctile)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+IPTWWeighter fit LogisticRegression. Effective sample size: 1148.0 / 2000 pool patients. Trimmed 200 extreme weights.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Untrimmed: ESS=946.5, max weight=1.64
+Trimmed:   ESS=1148.0, max weight=0.46, n_trimmed=200
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/demos_weighting_01_iptw_15_2.png" src="../_images/demos_weighting_01_iptw_15_2.png" />
+</div>
+</div>
+</section>
+<section id="Takeaways">
+<h2>Takeaways<a class="headerlink" href="#Takeaways" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code> fits a pool-vs-target propensity model and weights the pool by <span class="math notranslate nohighlight">\(\hat p / (1 - \hat p)\)</span>; the target keeps weight 1 (the ATT estimand, target-as-reference).</p></li>
+<li><p>It requires a <strong>patient-level</strong> target – there’s no aggregate-only (“published Table 1”) variant.</p></li>
+<li><p>It does <strong>not</strong> solve for exact balance, so always check <code class="docutils literal notranslate"><span class="pre">weighted_balance_table()</span></code> and <code class="docutils literal notranslate"><span class="pre">effective_sample_size()</span></code> on the fitted result, the same as for any other weighter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trim_quantiles</span></code> caps extreme weights, trading a little bias for a large reduction in variance – worth reaching for whenever a handful of patients end up dominating the effective sample size.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="matching_05_aggregate.html" class="btn btn-neutral float-left" title="Matching a pool to an aggregate target" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="weighting_02_maic.html" class="btn btn-neutral float-right" title="Weighting with MAIC / entropy balancing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

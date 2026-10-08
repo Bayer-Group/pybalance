@@ -86,7 +86,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">truncnorm</span><span class="p">,</span> <span class="n">uniform</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatchingData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">AggregateTarget</span><span class="p">,</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">MatchingHeaders</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_truncated_distributions</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">mn</span><span class="p">,</span> <span class="n">mx</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
@@ -264,6 +264,95 @@
     <span class="n">feature_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">])</span>
     <span class="n">feature_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;patient_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_data</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span><span class="n">feature_data</span><span class="p">)</span></div>
+
+
+<span class="c1"># Each use case is a different way a trial might disclose its target population.</span>
+<span class="c1"># Features not listed (e.g. height, country) are not disclosed at all.</span>
+<span class="n">DEMO_AGGREGATE_USE_CASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;means&quot;</span><span class="p">:</span> <span class="s2">&quot;Age and weight means, gender rates.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;means_std&quot;</span><span class="p">:</span> <span class="s2">&quot;Age and weight means and stds, gender rates.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;quantiles&quot;</span><span class="p">:</span> <span class="s2">&quot;Age quartiles and weight median (no means), gender rates.&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># The packaged demo files describe generate_toy_dataset with these arguments.</span>
+<span class="n">_DEMO_TOY_DATASET_KWARGS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_pool</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">_DEMO_HEADERS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">numeric</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">],</span> <span class="n">categoric</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_demo_use_case</span><span class="p">(</span><span class="n">use_case</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">use_case</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEMO_AGGREGATE_USE_CASES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unknown use_case </span><span class="si">{</span><span class="n">use_case</span><span class="si">!r}</span><span class="s2">; expected one of &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">DEMO_AGGREGATE_USE_CASES</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_aggregate_target</span><span class="p">(</span>
+    <span class="n">use_case</span><span class="o">=</span><span class="s2">&quot;means_std&quot;</span><span class="p">,</span> <span class="n">matching_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">population</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derive an AggregateTarget from the patient-level target of a toy dataset,</span>
+<span class="sd">    keeping only the summary statistics a trial publication might disclose.</span>
+
+<span class="sd">    :param use_case: One of DEMO_AGGREGATE_USE_CASES (keys: &quot;means&quot;, &quot;means_std&quot;,</span>
+<span class="sd">        &quot;quantiles&quot;; values describe each).</span>
+<span class="sd">    :param matching_data: Patient-level MatchingData to summarize. Defaults to</span>
+<span class="sd">        generate_toy_dataset(n_pool=1000, n_target=100, seed=7). Must contain</span>
+<span class="sd">        columns age, weight and gender.</span>
+<span class="sd">    :param population: Population of matching_data to summarize. Defaults to</span>
+<span class="sd">        its target population.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_demo_use_case</span><span class="p">(</span><span class="n">use_case</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">matching_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">matching_data</span> <span class="o">=</span> <span class="n">generate_toy_dataset</span><span class="p">(</span><span class="o">**</span><span class="n">_DEMO_TOY_DATASET_KWARGS</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">population</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+
+    <span class="n">numeric</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">_DEMO_HEADERS</span><span class="p">[</span><span class="s2">&quot;numeric&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">use_case</span> <span class="o">==</span> <span class="s2">&quot;quantiles&quot;</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">]</span> <span class="k">if</span> <span class="n">feature</span> <span class="o">==</span> <span class="s2">&quot;age&quot;</span> <span class="k">else</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]</span>
+            <span class="n">numeric</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;quantile&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="n">q</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">q</span><span class="p">)))</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">numeric</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())}</span>
+            <span class="k">if</span> <span class="n">use_case</span> <span class="o">==</span> <span class="s2">&quot;means_std&quot;</span><span class="p">:</span>
+                <span class="n">numeric</span><span class="p">[</span><span class="n">feature</span><span class="p">][</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+
+    <span class="n">gender</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;gender&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">AggregateTarget</span><span class="p">(</span>
+        <span class="n">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">),</span>
+        <span class="n">numeric</span><span class="o">=</span><span class="n">numeric</span><span class="p">,</span>
+        <span class="n">categoric</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;gender&quot;</span><span class="p">:</span> <span class="n">gender</span><span class="p">},</span>
+        <span class="n">headers</span><span class="o">=</span><span class="n">MatchingHeaders</span><span class="p">(</span><span class="o">**</span><span class="n">_DEMO_HEADERS</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_demo_aggregate_target_path</span><span class="p">(</span><span class="n">use_case</span><span class="o">=</span><span class="s2">&quot;means_std&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the path to the packaged aggregate target CSV for a use case (see</span>
+<span class="sd">    generate_aggregate_target). A good template for writing your own file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_demo_use_case</span><span class="p">(</span><span class="n">use_case</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;aggregate_target_</span><span class="si">{</span><span class="n">use_case</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load_demo_aggregate_target</span><span class="p">(</span><span class="n">use_case</span><span class="o">=</span><span class="s2">&quot;means_std&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the packaged AggregateTarget for a use case. It summarizes the target of</span>
+<span class="sd">    generate_toy_dataset(n_pool=1000, n_target=100, seed=7), whose pool is a</span>
+<span class="sd">    suitable one to match against.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">AggregateTarget</span><span class="o">.</span><span class="n">from_csv</span><span class="p">(</span><span class="n">get_demo_aggregate_target_path</span><span class="p">(</span><span class="n">use_case</span><span class="p">))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">get_paper_dataset_path</span><span class="p">():</span>

@@ -82,7 +82,7 @@
              
   <h1>Source code for pybalance.utils.preprocess</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -491,6 +491,105 @@
         <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">feature_name_in</span> <span class="ow">in</span> <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">feature_names_out</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">feature_names_out</span></div>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FixedNumericBinsEncoder</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dichotomize numeric covariates at caller-supplied quantile cutpoints,</span>
+<span class="sd">    producing one 0/1 output column per quantile -- anchored at externally</span>
+<span class="sd">    disclosed values (e.g. a published median or threshold) instead of bins</span>
+<span class="sd">    fit from pool quantiles.</span>
+
+<span class="sd">    Useful for matching an AggregateTarget to disclosed statistics that</span>
+<span class="sd">    describe a threshold on a raw covariate rather than its mean, e.g. a</span>
+<span class="sd">    published median (&quot;PSA, median: 65&quot;) or a threshold prevalence</span>
+<span class="sd">    (&quot;ECOG 0: 37%&quot;, i.e. ecog &gt; 0.5 is false for 37% of patients).</span>
+
+<span class="sd">    Every other column (numeric or categoric, including numeric columns not</span>
+<span class="sd">    named in `thresholds`) passes through unchanged.</span>
+
+<span class="sd">    :param thresholds: Mapping feature -&gt; list of (q, cutpoint) pairs, where</span>
+<span class="sd">        q is the disclosed quantile proportion (P(raw &lt;= cutpoint) = q). Each</span>
+<span class="sd">        pair produces an output column named &quot;{feature}_q{q}&quot; equal to</span>
+<span class="sd">        float(raw &gt; cutpoint) -- named after the quantile rather than the</span>
+<span class="sd">        cutpoint so it reads back as &quot;the indicator for the published q=0.2</span>
+<span class="sd">        statistic&quot; rather than an arbitrary float. By default the raw input</span>
+<span class="sd">        column is dropped from the output in favor of its quantile column(s);</span>
+<span class="sd">        pass the feature in `keep_raw` to match both (e.g. a disclosed mean</span>
+<span class="sd">        *and* a disclosed median for the same covariate).</span>
+
+<span class="sd">    :param keep_raw: Features (a subset of `thresholds`&#39; keys) whose raw</span>
+<span class="sd">        column should be kept alongside its quantile column(s), instead of</span>
+<span class="sd">        being dropped.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">thresholds</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+        <span class="n">keep_raw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="p">{</span><span class="n">feature</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">qvs</span><span class="p">)</span> <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">qvs</span> <span class="ow">in</span> <span class="n">thresholds</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep_raw</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keep_raw</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FixedNumericBinsEncoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">numeric</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;FixedNumericBinsEncoder thresholds reference unknown or &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;non-numeric feature(s): </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_output_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">kept_numeric</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">f</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_headers</span><span class="o">.</span><span class="n">numeric</span>
+            <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="ow">or</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_raw</span>
+        <span class="p">]</span>
+        <span class="n">added_categoric</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">_q</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">qvs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">qvs</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">MatchingHeaders</span><span class="p">(</span>
+            <span class="n">numeric</span><span class="o">=</span><span class="n">kept_numeric</span><span class="p">,</span>
+            <span class="n">categoric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_headers</span><span class="o">.</span><span class="n">categoric</span> <span class="o">+</span> <span class="n">added_categoric</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">qvs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">raw</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span>
+            <span class="c1"># A comparison with NaN gives False, so a missing value would</span>
+            <span class="c1"># silently count as &quot;at or below the cutpoint&quot;. Make the caller</span>
+            <span class="c1"># decide how to handle missing data instead.</span>
+            <span class="n">n_missing</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">n_missing</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Feature &#39;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">&#39; has </span><span class="si">{</span><span class="n">n_missing</span><span class="si">}</span><span class="s2"> missing value(s). &quot;</span>
+                    <span class="s2">&quot;FixedNumericBinsEncoder cannot dichotomize a column with &quot;</span>
+                    <span class="s2">&quot;missing values; remove incomplete rows or drop the &quot;</span>
+                    <span class="s2">&quot;feature first.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">cut</span> <span class="ow">in</span> <span class="n">qvs</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">_q</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">raw</span> <span class="o">&gt;</span> <span class="n">cut</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_raw</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_headers</span><span class="p">,</span>
+            <span class="n">population_col</span><span class="o">=</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_feature_names_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">feature_name_in</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span><span class="p">:</span>
+            <span class="n">quantile_cols</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">feature_name_in</span><span class="si">}</span><span class="s2">_q</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span><span class="p">[</span><span class="n">feature_name_in</span><span class="p">]</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">feature_name_in</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_raw</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">feature_name_in</span><span class="p">]</span> <span class="o">+</span> <span class="n">quantile_cols</span>
+            <span class="k">return</span> <span class="n">quantile_cols</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">feature_name_in</span><span class="p">]</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CrossTermsPreprocessor</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>

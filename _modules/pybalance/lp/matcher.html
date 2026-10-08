@@ -788,21 +788,23 @@
 <span class="sd">    statistics (an ``AggregateTarget``, e.g. a published Table 1). A subset of</span>
 <span class="sd">    the pool is selected so that its moments match the target&#39;s.</span>
 
-<span class="sd">    Only the moments actually disclosed on ``AggregateTarget`` are matched: a</span>
-<span class="sd">    numeric feature&#39;s mean is always matched (mean is required), and its</span>
-<span class="sd">    variance is *additionally* constrained if -- and only if -- the target</span>
-<span class="sd">    discloses a &quot;std&quot; for that feature. This makes matching moment-aware: pass</span>
-<span class="sd">    a target std to control it, or omit it to leave a feature&#39;s spread</span>
-<span class="sd">    unconstrained. One consequence: setting a target std of 0 asks the solver</span>
-<span class="sd">    for the minimal-variance subset achievable for that feature, subject to</span>
-<span class="sd">    everything else.</span>
+<span class="sd">    Every statistic the ``AggregateTarget`` discloses becomes a constraint,</span>
+<span class="sd">    and nothing else is constrained: a feature&#39;s mean (if disclosed), its</span>
+<span class="sd">    variance (if a &quot;std&quot; is disclosed), each disclosed quantile / median /</span>
+<span class="sd">    min / max (by dichotomizing the feature -- see</span>
+<span class="sd">    AggregateTargetBalanceCalculator) and each disclosed categoric rate. An</span>
+<span class="sd">    undisclosed statistic or categoric level is simply left out. Setting a</span>
+<span class="sd">    target std of 0 asks the solver for the minimal-variance subset</span>
+<span class="sd">    achievable for that feature, subject to everything else. A std without a</span>
+<span class="sd">    mean is the variance around the subset&#39;s own mean.</span>
 
 <span class="sd">    The target is a fixed constraint vector and is never subsetted, so several</span>
 <span class="sd">    ``ConstraintSatisfactionMatcher`` options do not apply here and are</span>
 <span class="sd">    intentionally absent:</span>
 
-<span class="sd">    - no ``objective``: only the beta / mean-matching formulation is defined</span>
-<span class="sd">      against aggregate moments, so it is used unconditionally;</span>
+<span class="sd">    - no ``objective``: only the beta / mean-matching formulation (via</span>
+<span class="sd">      AggregateTargetBalanceCalculator) is defined against aggregate moments,</span>
+<span class="sd">      so it is used unconditionally;</span>
 <span class="sd">    - no ``target_size`` / ``match_size``: the target cannot be subsetted, so</span>
 <span class="sd">      the effective target size is always ``AggregateTarget.n``;</span>
 <span class="sd">    - no ``ps_hinting`` / solver hints: there is no patient-level target to</span>
@@ -829,8 +831,10 @@
 <span class="sd">    :param verbose: Verbose solving.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Only the beta / mean-matching formulation is defined against aggregate moments.</span>
-    <span class="n">_OBJECTIVE</span> <span class="o">=</span> <span class="s2">&quot;beta&quot;</span>
+    <span class="c1"># Only the beta / mean-matching formulation (AggregateTargetBalanceCalculator)</span>
+    <span class="c1"># is defined against aggregate moments; it also dichotomizes any</span>
+    <span class="c1"># median/quantile-disclosed features automatically.</span>
+    <span class="n">_OBJECTIVE</span> <span class="o">=</span> <span class="s2">&quot;aggregate_beta&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -851,7 +855,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">orig_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">pool_name</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_OBJECTIVE</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BalanceCalculator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">)</span>
+        <span class="c1"># Features in the headers that the target does not disclose take no part in</span>
+        <span class="c1"># the solve (they stay on the returned match so they can still be inspected).</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">aggregate_target</span>
+        <span class="n">solve_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">solve_data</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">all</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">feature_names</span><span class="p">):</span>
+            <span class="n">solve_data</span> <span class="o">=</span> <span class="n">MatchingData</span><span class="p">(</span>
+                <span class="n">pool</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_pool</span><span class="p">,</span>
+                <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">population_col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="p">,</span>
+                <span class="n">pool_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">pool_name</span><span class="p">,</span>
+                <span class="n">target_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">target_name</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BalanceCalculator</span><span class="p">(</span><span class="n">solve_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">)</span>
 
         <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="n">target_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target_mean</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -863,6 +880,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool_scaled</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span> <span class="o">=</span> <span class="n">pool_scaled</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_pool_size</span><span class="p">(</span><span class="n">pool_size</span><span class="p">,</span> <span class="n">max_mismatch</span><span class="p">)</span>
         <span class="c1"># Pass n * mean as a single row so discretization uses the same</span>
         <span class="c1"># scale factor as the pool features; the row is already a total.</span>
         <span class="n">target_totals</span> <span class="o">=</span> <span class="n">target_mean_scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
@@ -888,7 +906,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span>
         <span class="p">),</span> <span class="s2">&quot;Number of patients in target should be less than the pool.&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_pool_size</span><span class="p">(</span><span class="n">pool_size</span><span class="p">,</span> <span class="n">max_mismatch</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_mismatch</span> <span class="o">=</span> <span class="n">max_mismatch</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">=</span> <span class="n">time_limit</span>
@@ -896,6 +913,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_best_match</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Only columns the target discloses a mean for are constrained.</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">constrained</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_target_variance_targets</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -921,6 +942,10 @@
 <span class="sd">        variance_scalefac ~ sqrt(scalefac / n_target) instead brings the two</span>
 <span class="sd">        objective terms back to the same order of magnitude, so neither</span>
 <span class="sd">        dominates purely due to units.</span>
+
+<span class="sd">        A feature whose std is disclosed *without* a mean is flagged with</span>
+<span class="sd">        ``&quot;around_subset_mean&quot;: True``: its variance is taken around the</span>
+<span class="sd">        subset&#39;s own mean instead.</span>
 
 <span class="sd">        Features with no disclosed std (including all categoric features,</span>
 <span class="sd">        whose variance is already fixed by their mean/rate) are omitted; their</span>
@@ -951,8 +976,31 @@
         <span class="n">targets</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">numeric_features_with_std</span><span class="p">:</span>
             <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">numeric</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span>
-            <span class="n">out_col</span> <span class="o">=</span> <span class="n">preprocessor</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">(</span><span class="n">feature</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">j</span> <span class="o">=</span> <span class="n">feature_index</span><span class="p">[</span><span class="n">out_col</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">feature_index</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stats</span><span class="p">:</span>
+                <span class="c1"># No target mean to center on, so the variance has to be taken</span>
+                <span class="c1"># around the subset&#39;s own mean, which is not linear in x (see</span>
+                <span class="c1"># match()). Values are centered on the pool only to keep the</span>
+                <span class="c1"># integers small; the variance is shift-invariant.</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+                <span class="n">scale</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalefac</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">*</span> <span class="n">m</span><span class="p">))))</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="nb">round</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span>
+                        <span class="o">*</span> <span class="n">scale</span>
+                        <span class="o">*</span> <span class="p">(</span><span class="n">pool_scaled</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">pool_scaled</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="n">scaled_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">*</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">scaler</span><span class="o">.</span><span class="n">scale_</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">stats</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">]</span>
+                <span class="n">targets</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">scaled_std</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="s2">&quot;deviations&quot;</span><span class="p">:</span> <span class="n">values</span><span class="p">,</span>
+                    <span class="s2">&quot;around_subset_mean&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="k">continue</span>
+
             <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
 
             <span class="n">deviations</span> <span class="o">=</span> <span class="p">[</span>
@@ -1115,6 +1163,42 @@
             <span class="n">deviations</span> <span class="o">=</span> <span class="n">variance_spec</span><span class="p">[</span><span class="s2">&quot;deviations&quot;</span><span class="p">]</span>
             <span class="n">target_variance</span> <span class="o">=</span> <span class="n">variance_spec</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span>
             <span class="n">squared_deviations</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">deviations</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">variance_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;around_subset_mean&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="c1"># The objective ignores variance when the pool size is free.</span>
+                    <span class="k">continue</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">deviations</span><span class="p">)</span>
+                <span class="n">bound</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">pool_size</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="n">squared_deviations</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="n">total</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="o">+</span> <span class="n">pool_size</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">target_variance</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">bound</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">62</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Variance constraint bound = </span><span class="si">{</span><span class="n">bound</span><span class="si">}</span><span class="s2"> for feature index </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2"> &quot;</span>
+                        <span class="s2">&quot;may exceed integer dynamic range and lead to suboptimal results.&quot;</span>
+                    <span class="p">)</span>
+                <span class="c1"># m * sum_i x_i v_i^2 - (sum_i x_i v_i)^2 == m^2 * Var(v)</span>
+                <span class="n">subset_sum</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="o">-</span><span class="n">total</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;variance_sum[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
+                    <span class="nb">sum</span><span class="p">(</span><span class="n">deviations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">))</span> <span class="o">==</span> <span class="n">subset_sum</span>
+                <span class="p">)</span>
+                <span class="n">subset_sum_sq</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;variance_sum_sq[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">AddMultiplicationEquality</span><span class="p">(</span><span class="n">subset_sum_sq</span><span class="p">,</span> <span class="p">[</span><span class="n">subset_sum</span><span class="p">,</span> <span class="n">subset_sum</span><span class="p">])</span>
+                <span class="n">variance_delta</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span><span class="o">-</span><span class="n">bound</span><span class="p">,</span> <span class="n">bound</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;variance_delta[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
+                    <span class="n">pool_size</span>
+                    <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="n">squared_deviations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span><span class="p">))</span>
+                    <span class="o">-</span> <span class="n">subset_sum_sq</span>
+                    <span class="o">-</span> <span class="n">pool_size</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">target_variance</span>
+                    <span class="o">==</span> <span class="n">variance_delta</span>
+                <span class="p">)</span>
+                <span class="n">variance_abs_delta</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">NewIntVar</span><span class="p">(</span>
+                    <span class="mi">0</span><span class="p">,</span> <span class="n">bound</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;variance_abs_delta[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span>
+                <span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">AddAbsEquality</span><span class="p">(</span><span class="n">variance_abs_delta</span><span class="p">,</span> <span class="n">variance_delta</span><span class="p">)</span>
+                <span class="n">variance_abs_deltas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">variance_abs_delta</span><span class="p">)</span>
+                <span class="k">continue</span>
             <span class="n">bound</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">squared_deviations</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pool</span> <span class="o">*</span> <span class="n">target_variance</span>
             <span class="k">if</span> <span class="n">bound</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">62</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
