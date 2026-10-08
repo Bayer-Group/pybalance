@@ -41,7 +41,7 @@ in non-randomized populations. In `pybalance`, we start with measures of "balanc
 different, and we think almost always better, from the well-known propensity score
 approach, in which the probability of treatment assignment is modelled, but balance metrics
 are almost always anyway implicitly defining the success criterion
-(see our [demo](https://bayer-group.github.io/pybalance/demos/ps_matcher.html)).
+(see our [demo](https://bayer-group.github.io/pybalance/demos/matching_01_propensity.html)).
 Our approach here is to explicitly define and directly optimize the balance metric that
 is relevant for the given problem.
 
@@ -62,13 +62,21 @@ setting is presented [here](https://onlinelibrary.wiley.com/doi/10.1002/pst.2352
 - Utilizes integer program solvers and evolutionary solvers for optimization.
 - Includes implementation of propensity score matching for comparison.
 - Offers a variety of balance calculators and matchers.
+- Implements weighting methods, including Matching-Adjusted Indirect
+  Comparison (MAIC), general entropy-balancing weights, and propensity-score
+  (IPTW) weights, for use cases where patients should be reweighted rather
+  than dropped.
 - Provides visualization tools for analysis.
 - Supports simulation of datasets for testing and demonstration purposes.
 
 ## Limitations
 
-At the moment, `pybalance` only implements matching routines. Suport for weighting
-methods is on our roadmap and will appear in a future release.
+`pybalance` implements matching routines as well as weighting methods (see
+`pybalance.weighting`, e.g. `MAICWeighter` for Matching-Adjusted Indirect
+Comparison, the more general `EntropyBalanceWeighter`, and `IPTWWeighter` for
+propensity-score-based inverse probability weighting). Further weighting
+methods (e.g. overlap/matching weights, CBPS) may be added in future
+releases.
 
 ## Citation
 

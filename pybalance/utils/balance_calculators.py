@@ -9,7 +9,11 @@ from pybalance.utils import (
     MatchingData,
     split_target_pool,
     BaseMatchingPreprocessor,
+    CategoricOneHotEncoder,
+    ChainPreprocessor,
     DecisionTreeEncoder,
+    FixedNumericBinsEncoder,
+    FloatEncoder,
     StandardMatchingPreprocessor,
     BetaXPreprocessor,
     GammaPreprocessor,
@@ -135,12 +139,24 @@ class BaseBalanceCalculator:
             self.target = None
             self.pool = self._preprocess(pool)
             pool_std = torch.std(self.pool, 0, keepdim=True).to(self.device)
-            self.target_mean, self.target_std = compute_aggregate_feature_moments(
+            pool_mean = torch.mean(self.pool, 0, keepdim=True).to(self.device)
+            (
+                self.target_mean,
+                self.target_std,
+                self.constrained,
+                self.disclosed,
+            ) = compute_aggregate_feature_moments(
                 matching_data.aggregate_target,
                 self.preprocessor,
                 pool_std=pool_std,
+                pool_mean=pool_mean,
                 device=self.device,
             )
+            # Columns the target does not disclose are not constrained: no weight.
+            if self.constrained.any():
+                mask = torch.tensor(self.constrained, device=self.device)
+                weights = self.feature_weights * mask
+                self.feature_weights = weights / weights.sum()
         else:
             target, pool = split_target_pool(matching_data)
             self.target = self._preprocess(target)
@@ -148,6 +164,7 @@ class BaseBalanceCalculator:
             self.target_mean = torch.mean(self.target, 0, True).to(self.device)
             self.target_std = torch.std(self.target, 0, keepdim=True).to(self.device)
             pool_std = torch.std(self.pool, 0, keepdim=True).to(self.device)
+            self.constrained = self.disclosed = np.ones(self.pool.shape[1], dtype=bool)
 
         # Zero variances are bad and can lead to infinite loss.
         if any((self.target_std == 0)[0]):
@@ -363,6 +380,84 @@ class BetaBalance(BaseBalanceCalculator):
             standardize_difference=standardize_difference,
             device=device,
         )
+
+
+class AggregateTargetBalanceCalculator(BaseBalanceCalculator):
+    """
+    BetaBalance for an AggregateTarget. AggregateTarget fully describes the
+    disclosed constraints (mean/std, and/or disclosed quantiles such as a
+    median or "80% of patients weigh more than 70kg"); this calculator figures
+    out what preprocessing those constraints require and computes distance to
+    them -- the caller never passes dichotomization cutpoints directly.
+
+    Concretely: a feature with a disclosed quantile (``{"median": 65}`` or the
+    equivalent ``{"quantile": [(0.5, 65)]}``, or e.g. ``{"quantile": [(0.2, 70)]}``
+    for "80% of patients weigh more than 70kg") is automatically dichotomized
+    at that cutpoint and matched against the implied rate. 'mean'/'std' and
+    quantiles can be disclosed simultaneously for the same feature (e.g.
+    ``numeric={"psa": {"mean": 68.0, "std": 12.0, "median": 65}}``), in which
+    case both the raw column and its dichotomized indicator(s) are matched.
+    See FixedNumericBinsEncoder.
+
+    Every disclosed statistic is its own constraint, and only disclosed
+    statistics are constrained: a feature or categoric level the target says
+    nothing about gets zero weight. To that end categoric levels are encoded
+    without dropping one (``drop=None``), so each disclosed level has a column.
+    """
+
+    name = "aggregate_beta"
+
+    def __init__(
+        self,
+        matching_data: MatchingData,
+        feature_weights: Optional[Dict[str, float]] = None,
+        device: Optional[str] = None,
+        drop: Optional[str] = None,
+        standardize_difference: bool = True,
+    ):
+        if not matching_data.has_aggregate_target:
+            raise ValueError(
+                "AggregateTargetBalanceCalculator requires MatchingData with an "
+                "AggregateTarget. For a patient-level target, use BetaBalance."
+            )
+        thresholds, keep_raw = self._thresholds_from_target(
+            matching_data.aggregate_target
+        )
+        if thresholds:
+            preprocessor = ChainPreprocessor(
+                [
+                    FixedNumericBinsEncoder(thresholds, keep_raw=keep_raw),
+                    CategoricOneHotEncoder(drop=drop),
+                    FloatEncoder(),
+                ]
+            )
+        else:
+            preprocessor = StandardMatchingPreprocessor(drop=drop)
+        super(AggregateTargetBalanceCalculator, self).__init__(
+            matching_data=matching_data,
+            preprocessor=preprocessor,
+            feature_weights=feature_weights,
+            order=1,
+            standardize_difference=standardize_difference,
+            device=device,
+        )
+
+    @staticmethod
+    def _thresholds_from_target(aggregate_target):
+        """
+        Derive FixedNumericBinsEncoder's `thresholds`/`keep_raw` entirely from
+        AggregateTarget's disclosed quantiles -- the caller never supplies
+        cutpoints directly.
+        """
+        thresholds = {}
+        keep_raw = []
+        for feature, stats in aggregate_target.numeric.items():
+            if "quantile" in stats:
+                thresholds[feature] = list(stats["quantile"])
+                # the raw column is still needed for a disclosed mean and/or std
+                if "mean" in stats or "std" in stats:
+                    keep_raw.append(feature)
+        return thresholds, keep_raw
 
 
 class BetaSquaredBalance(BaseBalanceCalculator):
@@ -735,6 +830,7 @@ class BatchedBalanceCaclulator:
 BALANCE_CALCULATORS = {
     BaseBalanceCalculator.name: BaseBalanceCalculator,
     BetaBalance.name: BetaBalance,
+    AggregateTargetBalanceCalculator.name: AggregateTargetBalanceCalculator,
     BetaXBalance.name: BetaXBalance,
     BetaXSquaredBalance.name: BetaXSquaredBalance,
     BetaMaxBalance.name: BetaMaxBalance,

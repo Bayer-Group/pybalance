@@ -88,82 +88,13 @@ def _plot_1d_marginals(matching_data, headers, col_wrap, height, **plot_params):
     return fig
 
 
-def _merge_legend(ax, new_handles, new_labels):
-    """
-    Add new_handles/new_labels to whatever legend is already on ax (e.g. the
-    one seaborn's histplot creates for hue). Seaborn builds its legend from
-    proxy handles passed directly to ax.legend(handles=..., labels=...)
-    rather than from labeled artists, so a plain ax.legend() call here would
-    not pick them up -- it would silently replace them with only new_handles.
-    Placed above the axes (rather than seaborn's default "best" location)
-    since a categoric probability plot often has bars filling the full
-    y-range, leaving no in-axes corner free of data.
-    """
-    existing = ax.get_legend()
-    if existing is not None:
-        # matplotlib >=3.7 renamed Legend.legendHandles to legend_handles.
-        if hasattr(existing, "legend_handles"):
-            handles = list(existing.legend_handles)
-        else:
-            handles = list(existing.legendHandles)
-        labels = [t.get_text() for t in existing.get_texts()]
-    else:
-        handles, labels = [], []
-    ax.legend(
-        handles=handles + new_handles,
-        labels=labels + new_labels,
-        loc="lower center",
-        bbox_to_anchor=(0.5, 1.02),
-        ncol=2,
-    )
-
-
-def _overlay_aggregate_target_numeric(fig, matching_data, headers):
-    """
-    Draw the AggregateTarget's mean (and std, if disclosed) on each numeric
-    subplot, since an aggregate target has no patient-level rows for
-    histplot to draw in the first place.
-    """
-    target_name = matching_data.target_name
-    for j, feature in enumerate(headers):
-        stats = matching_data.aggregate_target.numeric.get(feature)
-        if stats is None:
-            continue
-        ax = fig.axes[j]
-        handles, labels = [], []
-        handles.append(
-            ax.axvline(stats["mean"], color="k", linestyle="--", linewidth=2)
+def _warn_if_aggregate_target(matching_data: MatchingData) -> None:
+    if matching_data.has_aggregate_target:
+        logger.warning(
+            "matching_data has an AggregateTarget, which has no patient-level rows "
+            "to plot a distribution for; its disclosed statistics cannot be displayed "
+            "here. Use pybalance.visualization.plot_aggregate_target_match() instead."
         )
-        labels.append(f"{target_name} mean")
-        if "std" in stats:
-            handles.append(
-                ax.axvspan(
-                    stats["mean"] - stats["std"],
-                    stats["mean"] + stats["std"],
-                    color="k",
-                    alpha=0.12,
-                )
-            )
-            labels.append(f"{target_name} mean \u00b1 std")
-        _merge_legend(ax, handles, labels)
-
-
-def _overlay_aggregate_target_categoric(fig, matching_data, headers):
-    """
-    Draw the AggregateTarget's rate per level on each categoric subplot,
-    since an aggregate target has no patient-level rows for histplot to draw
-    in the first place.
-    """
-    target_name = matching_data.target_name
-    for j, feature in enumerate(headers):
-        rates = matching_data.aggregate_target.categoric.get(feature)
-        if not rates:
-            continue
-        ax = fig.axes[j]
-        levels = list(rates.keys())
-        values = [rates[level] for level in levels]
-        scatter = ax.scatter(levels, values, marker="D", color="k", s=60, zorder=5)
-        _merge_legend(ax, [scatter], [f"{target_name} rate"])
 
 
 def plot_categoric_features(
@@ -179,9 +110,9 @@ def plot_categoric_features(
     and all treatment groups found in matching_data. Extra keyword arguments are
     passed to seaborn.histplot and override defaults.
 
-    If matching_data has an AggregateTarget, it has no patient-level rows to
-    plot a distribution for; instead, each feature's disclosed rate(s) are
-    overlaid as diamond markers.
+    If matching_data has an AggregateTarget, it has no patient-level rows to plot a
+    distribution for and a warning is logged; use plot_aggregate_target_match()
+    instead to compare the pool against its disclosed statistics.
 
     :param matching_data: MatchingData instance containing at least one population.
     :param include_binary: Whether to include binary features in the plot.
@@ -189,6 +120,8 @@ def plot_categoric_features(
         all categoric features are plotted. If include_binary is False, binary
         features are excluded, even if present in include_only.
     """
+    _warn_if_aggregate_target(matching_data)
+
     # Set up default plotting params for categoric varaibles.
     default_params = {
         "hue": matching_data.population_col,
@@ -219,8 +152,6 @@ def plot_categoric_features(
         fig.axes[j].set_xticks(matching_data[col].unique())
         for j, col in enumerate(headers)
     ]
-    if matching_data.has_aggregate_target:
-        _overlay_aggregate_target_categoric(fig, matching_data, headers)
 
     return fig
 
@@ -237,15 +168,16 @@ def plot_numeric_features(
     and all treatment groups found in matching_data. Extra keyword arguments are
     passed to seaborn.histplot and override defaults.
 
-    If matching_data has an AggregateTarget, it has no patient-level rows to
-    plot a distribution for; instead, each feature's disclosed mean is
-    overlaid as a dashed vertical line, and its mean +/- std (when disclosed)
-    as a shaded band.
+    If matching_data has an AggregateTarget, it has no patient-level rows to plot a
+    distribution for and a warning is logged; use plot_aggregate_target_match()
+    instead to compare the pool against its disclosed statistics.
 
     :param matching_data: MatchingData instance containing at least one population.
     :param include_only: List of features to consider for plotting. Otherwise,
         all numeric features are plotted.
     """
+    _warn_if_aggregate_target(matching_data)
+
     # Set up default plotting params for numeric varaibles.
     default_params = {
         "hue": matching_data.population_col,
@@ -271,8 +203,6 @@ def plot_numeric_features(
 
     # PLOT!
     fig = _plot_1d_marginals(matching_data, headers, col_wrap, height, **default_params)
-    if matching_data.has_aggregate_target:
-        _overlay_aggregate_target_numeric(fig, matching_data, headers)
 
     return fig
 
@@ -716,7 +646,13 @@ def _fractional_differences(
     AggregateTarget frequently does not disclose.
     """
     described = matching_data.describe(normalize=True)
-    features = include_only or matching_data.headers.all
+    if include_only:
+        features = include_only
+    elif matching_data.has_aggregate_target:
+        # features the target does not disclose have nothing to compare against
+        features = matching_data.aggregate_target.feature_names
+    else:
+        features = matching_data.headers.all
 
     def fractional_diff(pool_value, target_value):
         return (pool_value - target_value) / target_value if target_value else np.nan
@@ -858,4 +794,114 @@ def plot_fractional_difference(
     ax.legend()
     fig.tight_layout()
 
+    return fig
+
+
+def plot_aggregate_target_match(
+    before: MatchingData,
+    after: MatchingData,
+    include_only: Optional[List[str]] = None,
+    col_wrap: int = 4,
+    tolerance: float = 0.1,
+    quantiles_as: str = "value",
+    weights: Optional[str] = None,
+) -> plt.Figure:
+    """
+    Show, for every constraint an AggregateTarget discloses, where the pool
+    lands before vs. after matching relative to the disclosed target value.
+
+    One small panel per constraint (a numeric feature's mean / std, a
+    disclosed quantile, a disclosed categoric level's rate; a ``median`` /
+    ``min`` / ``max`` is the 0.5 / 0 / 1 quantile). Each panel has its own
+    y-axis in the constraint's natural units: the dashed line is the disclosed
+    target value, the shaded band is +/- ``tolerance`` around it, and the two
+    dots are the pool before and after matching. A successful match moves the
+    "after" dot onto the dashed line. Categoric levels the target does not
+    disclose are unconstrained and not shown. See
+    ``pybalance.utils.aggregate_target_constraints`` for the underlying table.
+
+    :param before: MatchingData with the unmatched pool and the AggregateTarget.
+    :param after: MatchingData returned by the matcher (same AggregateTarget).
+    :param include_only: Restrict to these features.
+    :param col_wrap: Number of panels per row.
+    :param tolerance: Half-width of the shaded band, as a fraction of the target value.
+    :param quantiles_as: ``"value"`` (default) fixes the quantile and shows the
+        pool's e.g. 75th percentile -- in the feature's units -- against the
+        disclosed one. ``"proportion"`` fixes the disclosed cutpoint instead and
+        shows the fraction of the pool at or below it against the disclosed
+        quantile ``q``.
+    :param weights: Name of the pool column in ``after`` holding patient weights
+        (e.g. ``"sample_weight"`` from a Weighter): the "after" dots are then
+        the *weighted* pool, compared with the unweighted ``before``. A
+        disclosed ``min`` / ``max`` is plotted as the weighted fraction beyond
+        it, since weights stay positive and the extreme value itself never
+        moves.
+    """
+    from pybalance.utils.aggregate import aggregate_target_constraints
+
+    weighted = weights is not None
+    merged = aggregate_target_constraints(
+        before, quantiles_as, limits_as_proportion=weighted
+    ).merge(
+        aggregate_target_constraints(
+            after, quantiles_as, weights=weights, limits_as_proportion=weighted
+        ),
+        on=["feature", "constraint", "target"],
+        suffixes=("_before", "_after"),
+    )
+    if include_only is not None:
+        merged = merged[merged["feature"].isin(include_only)]
+    if merged.empty:
+        raise ValueError("No constraints to plot.")
+
+    ncols = min(col_wrap, len(merged))
+    nrows = 1 + (len(merged) - 1) // ncols
+    fig, axes = plt.subplots(
+        nrows, ncols, figsize=(2.6 * ncols, 2.8 * nrows), squeeze=False
+    )
+
+    for ax, (_, row) in zip(axes.flat, merged.iterrows()):
+        target, b, a = row["target"], row["pool_before"], row["pool_after"]
+        # Keep the band and both dots in view with a margin, instead of
+        # starting at zero, so small residual errors are visible.
+        half = max(
+            1.25 * max(abs(b - target), abs(a - target)),
+            tolerance * abs(target) * 1.5,
+            1e-9,
+        )
+        ax.axhspan(
+            target - tolerance * abs(target),
+            target + tolerance * abs(target),
+            color="k",
+            alpha=0.1,
+        )
+        ax.axhline(target, color="k", linestyle="--", linewidth=1.5)
+        ax.scatter([0], [b], s=70, color="tab:orange", zorder=3)
+        ax.scatter([1], [a], s=70, color="tab:green", zorder=3)
+        for x, v in ((0, b), (1, a)):
+            ax.annotate(
+                f"{v:.3g}",
+                (x, v),
+                textcoords="offset points",
+                xytext=(0, 8),
+                ha="center",
+                fontsize=8,
+            )
+        ax.set_xlim(-0.6, 1.6)
+        if row["constraint"].startswith(("P(x", "rate of")):
+            # proportions
+            ax.set_ylim(max(target - half, -0.05), min(target + half, 1.05))
+        else:
+            ax.set_ylim(target - half, target + half)
+        ax.set_xticks([0, 1])
+        ax.set_xticklabels(["before", "after"])
+        ax.set_title(
+            f"{row['feature']}\n{row['constraint']}  (target {target:.3g})", fontsize=9
+        )
+        ax.grid(True, axis="y", alpha=0.3)
+    for ax in list(axes.flat)[len(merged) :]:
+        ax.set_visible(False)
+
+    fig.suptitle("Aggregate target constraints: pool vs. disclosed target")
+    fig.tight_layout()
     return fig
