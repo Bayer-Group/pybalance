@@ -47,31 +47,37 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="core_01_matching_data.html">Matching Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="core_02_balance_calculators.html">Balance Calculators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_01_propensity.html">Propensity Score Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_03_cardinality.html">Cardinality matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_04_genetic.html">Genetic Matcher</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Matching a pool to an aggregate target</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#1.-A-patient-level-(synthetic)-pool">1. A patient-level (synthetic) pool</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#2.-Use-case-1----specifying-means-only">2. Use case 1 – specifying means only</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.-Use-case-2----adding-stds">3. Use case 2 – adding stds</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#4.-Use-case-3----medians-and-quantiles-instead-of-means">4. Use case 3 – medians and quantiles instead of means</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#A-soft-maximum">A soft maximum</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_02_balance_calculators.html">Balance Calculators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Matching</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Matching a pool to an aggregate target</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#A-patient-level-(synthetic)-pool">A patient-level (synthetic) pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-means-only">Specifying means only</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-means-and-standard-deviations">Specifying means and standard deviations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-medians-and-quantiles-instead-of-means">Specifying medians and quantiles instead of means</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#A-soft-maximum">A soft maximum</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#Takeaways">Takeaways</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Takeaways">Takeaways</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
-</li>
+<p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -97,7 +103,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
       <li class="breadcrumb-item active">Matching a pool to an aggregate target</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/demos/matching_05_aggregate.ipynb.txt" rel="nofollow"> View page source</a>
@@ -152,8 +157,8 @@
 </pre></div>
 </div>
 </div>
-<section id="1.-A-patient-level-(synthetic)-pool">
-<h2>1. A patient-level (synthetic) pool<a class="headerlink" href="#1.-A-patient-level-(synthetic)-pool" title="Permalink to this heading"></a></h2>
+<section id="A-patient-level-(synthetic)-pool">
+<h2>A patient-level (synthetic) pool<a class="headerlink" href="#A-patient-level-(synthetic)-pool" title="Permalink to this heading"></a></h2>
 <p>An aggregate-target match only needs patient-level data for the <strong>pool</strong>. <code class="docutils literal notranslate"><span class="pre">generate_toy_dataset</span></code> returns an entirely simulated one (no real patients); with <code class="docutils literal notranslate"><span class="pre">n_target=0</span></code> it generates no target patients at all, since the target will come from summary statistics instead.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -277,8 +282,8 @@
 </div></div>
 </div>
 </section>
-<section id="2.-Use-case-1----specifying-means-only">
-<h2>2. Use case 1 – specifying means only<a class="headerlink" href="#2.-Use-case-1----specifying-means-only" title="Permalink to this heading"></a></h2>
+<section id="Specifying-means-only">
+<h2>Specifying means only<a class="headerlink" href="#Specifying-means-only" title="Permalink to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> is the target’s sample size <code class="docutils literal notranslate"><span class="pre">n</span></code> plus whatever summary statistics are disclosed:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">numeric</span></code>: per feature, e.g. <code class="docutils literal notranslate"><span class="pre">{&quot;mean&quot;:</span> <span class="pre">...}</span></code>;</p></li>
@@ -662,8 +667,8 @@ Number of solutions found: 8
 </div>
 </div>
 </section>
-<section id="3.-Use-case-2----adding-stds">
-<h2>3. Use case 2 – adding stds<a class="headerlink" href="#3.-Use-case-2----adding-stds" title="Permalink to this heading"></a></h2>
+<section id="Specifying-means-and-standard-deviations">
+<h2>Specifying means and standard deviations<a class="headerlink" href="#Specifying-means-and-standard-deviations" title="Permalink to this heading"></a></h2>
 <p>Now the target also discloses a <strong>std</strong> for each numeric feature. The matcher then constrains each variance toward its disclosed value, in addition to the mean.</p>
 <p>Typing targets out by hand gets long, so <code class="docutils literal notranslate"><span class="pre">pybalance.sim</span></code> ships ready-made ones: summaries of a toy target population that disclose different amounts of information, to be matched against the pool above. <code class="docutils literal notranslate"><span class="pre">load_demo_aggregate_target(use_case)</span></code> returns the packaged <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> and <code class="docutils literal notranslate"><span class="pre">generate_aggregate_target(use_case)</span></code> derives the same thing from the toy dataset – or from your own patient-level <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code>, via its <code class="docutils literal notranslate"><span class="pre">matching_data=</span></code> argument.</p>
 <table class="docutils align-default">
@@ -1108,8 +1113,8 @@ Number of solutions found: 22
 </div>
 </div>
 </section>
-<section id="4.-Use-case-3----medians-and-quantiles-instead-of-means">
-<h2>4. Use case 3 – medians and quantiles instead of means<a class="headerlink" href="#4.-Use-case-3----medians-and-quantiles-instead-of-means" title="Permalink to this heading"></a></h2>
+<section id="Specifying-medians-and-quantiles-instead-of-means">
+<h2>Specifying medians and quantiles instead of means<a class="headerlink" href="#Specifying-medians-and-quantiles-instead-of-means" title="Permalink to this heading"></a></h2>
 <p>Published Table 1s often report a <strong>median</strong> (“age, median: 41”) or other <strong>quantiles</strong> (“age, IQR: 35-52”) instead of a mean for a skewed covariate. A <strong>quantile</strong> <code class="docutils literal notranslate"><span class="pre">(q,</span> <span class="pre">value)</span></code> means P(raw &lt;= value) = q, e.g. <code class="docutils literal notranslate"><span class="pre">(0.2,</span> <span class="pre">70.0)</span></code> for “80% of patients weigh more than 70kg”, and a median is the single quantile 0.5: <code class="docutils literal notranslate"><span class="pre">{&quot;age&quot;:</span> <span class="pre">{&quot;median&quot;:</span> <span class="pre">41.0}}</span></code> is exactly <code class="docutils literal notranslate"><span class="pre">{&quot;age&quot;:</span> <span class="pre">{&quot;quantile&quot;:</span> <span class="pre">[(0.5,</span> <span class="pre">41.0)]}}</span></code>. Either way the disclosed value is the cutpoint: the matcher dichotomizes the raw column there and
 matches the resulting rate, so you never compute the 0/1 column yourself. Here <code class="docutils literal notranslate"><span class="pre">age</span></code> discloses its quartiles (25th, 50th and 75th percentile) and <code class="docutils literal notranslate"><span class="pre">weight</span></code> only a median.</p>
 <p>A target like this is easiest to keep in a file, and that is what <code class="docutils literal notranslate"><span class="pre">load_demo_aggregate_target</span></code> has been reading all along. Here is the packaged <code class="docutils literal notranslate"><span class="pre">quantiles</span></code> file:</p>

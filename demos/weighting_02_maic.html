@@ -47,30 +47,36 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="core_01_matching_data.html">Matching Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="core_02_balance_calculators.html">Balance Calculators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_01_propensity.html">Propensity Score Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_03_cardinality.html">Cardinality matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_04_genetic.html">Genetic Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
-<li class="toctree-l2"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Weighting with MAIC / entropy balancing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#1.-A-patient-level-(synthetic)-pool">1. A patient-level (synthetic) pool</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#2.-Use-case-1----specifying-means-only">2. Use case 1 – specifying means only</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.-Use-case-2----adding-stds">3. Use case 2 – adding stds</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#4.-Use-case-3----medians-and-quantiles-instead-of-means">4. Use case 3 – medians and quantiles instead of means</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#A-soft-maximum">A soft maximum</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_02_balance_calculators.html">Balance Calculators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Matching</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Weighting with MAIC / entropy balancing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#A-patient-level-(synthetic)-pool">A patient-level (synthetic) pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-means-only">Specifying means only</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-means-and-standard-deviations">Specifying means and standard deviations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Specifying-medians-and-quantiles-instead-of-means">Specifying medians and quantiles instead of means</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#A-soft-maximum">A soft maximum</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#5.-When-the-target-lies-outside-the-pool's-support">5. When the target lies outside the pool’s support</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Takeaways">Takeaways</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#When-the-target-lies-outside-the-pool's-support">When the target lies outside the pool’s support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Takeaways">Takeaways</a></li>
 </ul>
 </li>
 </ul>
@@ -98,7 +104,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
       <li class="breadcrumb-item active">Weighting with MAIC / entropy balancing</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/demos/weighting_02_maic.ipynb.txt" rel="nofollow"> View page source</a>
@@ -154,8 +159,8 @@ aggregate-only</strong> statistics (e.g. a Table 1 of means and proportions), en
 </pre></div>
 </div>
 </div>
-<section id="1.-A-patient-level-(synthetic)-pool">
-<h2>1. A patient-level (synthetic) pool<a class="headerlink" href="#1.-A-patient-level-(synthetic)-pool" title="Permalink to this heading"></a></h2>
+<section id="A-patient-level-(synthetic)-pool">
+<h2>A patient-level (synthetic) pool<a class="headerlink" href="#A-patient-level-(synthetic)-pool" title="Permalink to this heading"></a></h2>
 <p>MAIC needs patient-level data only for the <strong>pool</strong> (our “IPD”). <code class="docutils literal notranslate"><span class="pre">generate_toy_dataset</span></code> returns an entirely simulated one (no real patients); with <code class="docutils literal notranslate"><span class="pre">n_target=0</span></code> it generates no target patients at all, since the target will come from summary statistics instead – as in the aggregate-matching demo.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -279,8 +284,8 @@ aggregate-only</strong> statistics (e.g. a Table 1 of means and proportions), en
 </div></div>
 </div>
 </section>
-<section id="2.-Use-case-1----specifying-means-only">
-<h2>2. Use case 1 – specifying means only<a class="headerlink" href="#2.-Use-case-1----specifying-means-only" title="Permalink to this heading"></a></h2>
+<section id="Specifying-means-only">
+<h2>Specifying means only<a class="headerlink" href="#Specifying-means-only" title="Permalink to this heading"></a></h2>
 <p>An <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> is the target’s sample size <code class="docutils literal notranslate"><span class="pre">n</span></code> plus whatever summary statistics are disclosed – a published Table 1:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">numeric</span></code>: per feature, e.g. <code class="docutils literal notranslate"><span class="pre">{&quot;mean&quot;:</span> <span class="pre">...}</span></code>;</p></li>
@@ -534,8 +539,8 @@ Name: sample_weight, dtype: float64
 </div>
 </div>
 </section>
-<section id="3.-Use-case-2----adding-stds">
-<h2>3. Use case 2 – adding stds<a class="headerlink" href="#3.-Use-case-2----adding-stds" title="Permalink to this heading"></a></h2>
+<section id="Specifying-means-and-standard-deviations">
+<h2>Specifying means and standard deviations<a class="headerlink" href="#Specifying-means-and-standard-deviations" title="Permalink to this heading"></a></h2>
 <p>A Table 1 sometimes discloses a standard deviation alongside a mean. <code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code> is the general form <code class="docutils literal notranslate"><span class="pre">MAICWeighter</span></code> is a (mean-only) special case of: pass <code class="docutils literal notranslate"><span class="pre">match_variance=True</span></code> to <em>additionally</em> constrain the weighted variance of every numeric feature whose target discloses a <code class="docutils literal notranslate"><span class="pre">std</span></code> (categoric features are never variance-constrained – their variance is already fixed by their matched rate). The variance is taken around the disclosed mean, so a std needs its mean.</p>
 <p>Typing targets out by hand gets long, so <code class="docutils literal notranslate"><span class="pre">pybalance.sim</span></code> ships ready-made ones, the same as in the aggregate-matching demo: <code class="docutils literal notranslate"><span class="pre">load_demo_aggregate_target(use_case)</span></code> returns the packaged <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> (and <code class="docutils literal notranslate"><span class="pre">generate_aggregate_target(use_case)</span></code> derives the same thing from a toy dataset – or from your own patient-level <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code>).</p>
 <table class="docutils align-default">
@@ -758,8 +763,8 @@ EntropyBalanceWeighter converged in 6 iterations. Effective sample size: 639.1 /
 </div></div>
 </div>
 </section>
-<section id="4.-Use-case-3----medians-and-quantiles-instead-of-means">
-<h2>4. Use case 3 – medians and quantiles instead of means<a class="headerlink" href="#4.-Use-case-3----medians-and-quantiles-instead-of-means" title="Permalink to this heading"></a></h2>
+<section id="Specifying-medians-and-quantiles-instead-of-means">
+<h2>Specifying medians and quantiles instead of means<a class="headerlink" href="#Specifying-medians-and-quantiles-instead-of-means" title="Permalink to this heading"></a></h2>
 <p>Published Table 1s often report a <strong>median</strong> (“age, median: 41”) or other <strong>quantiles</strong> (“age, IQR: 35-52”) instead of a mean for a skewed covariate. A <strong>quantile</strong> <code class="docutils literal notranslate"><span class="pre">(q,</span> <span class="pre">value)</span></code> means P(raw &lt;= value) = q, and a median is the single quantile 0.5: <code class="docutils literal notranslate"><span class="pre">{&quot;age&quot;:</span> <span class="pre">{&quot;median&quot;:</span> <span class="pre">41.0}}</span></code> is exactly <code class="docutils literal notranslate"><span class="pre">{&quot;age&quot;:</span> <span class="pre">{&quot;quantile&quot;:</span> <span class="pre">[(0.5,</span> <span class="pre">41.0)]}}</span></code>. The disclosed value is the cutpoint: the weighter dichotomizes the raw column there and matches the resulting rate, so you never compute the 0/1 column yourself. Here
 <code class="docutils literal notranslate"><span class="pre">age</span></code> discloses its quartiles and <code class="docutils literal notranslate"><span class="pre">weight</span></code> only a median.</p>
 <p>A target like this is easiest to keep in a file, and that is what <code class="docutils literal notranslate"><span class="pre">load_demo_aggregate_target</span></code> has been reading all along. Here is the packaged <code class="docutils literal notranslate"><span class="pre">quantiles</span></code> file:</p>
@@ -1244,8 +1249,8 @@ it rises from 73% to about 99%, but not all the way to the dashed line at 1.</p>
 </div>
 </section>
 </section>
-<section id="5.-When-the-target-lies-outside-the-pool's-support">
-<h2>5. When the target lies outside the pool’s support<a class="headerlink" href="#5.-When-the-target-lies-outside-the-pool's-support" title="Permalink to this heading"></a></h2>
+<section id="When-the-target-lies-outside-the-pool's-support">
+<h2>When the target lies outside the pool’s support<a class="headerlink" href="#When-the-target-lies-outside-the-pool's-support" title="Permalink to this heading"></a></h2>
 <p>MAIC/entropy balancing needs the target to lie within the pool’s covariate support – there must be <em>some</em> valid (possibly very uneven) weighting of the pool that reproduces the target’s moments. Unlike subset-selection matching (which always terminates, just possibly with poor balance), reweighting can fail outright when this “positivity” assumption breaks down.</p>
 <p>The toy pool is deliberately built with <strong>zero</strong> <code class="docutils literal notranslate"><span class="pre">country=0</span></code> patients, while the target has a nonzero <code class="docutils literal notranslate"><span class="pre">country=0</span></code> rate. Since every pool patient’s <code class="docutils literal notranslate"><span class="pre">country</span></code> is one of <code class="docutils literal notranslate"><span class="pre">{1,</span> <span class="pre">...,</span> <span class="pre">5}</span></code>, <em>any</em> reweighting of the pool necessarily puts 100% of its mass on those five categories – it’s mathematically impossible to also match the target’s five corresponding rates, which sum to less than 100% (the rest being the unreachable <code class="docutils literal notranslate"><span class="pre">country=0</span></code>). We use the actual patient-level target here (rather than
 an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>) to make this concrete: an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> that discloses a rate for a category the pool doesn’t contain at all silently drops that category from the constraint set (it has no matching one-hot column to constrain), which would mask the very infeasibility we want to demonstrate.</p>

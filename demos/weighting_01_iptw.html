@@ -47,28 +47,34 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../02_demos.html">Demos</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="core_01_matching_data.html">Matching Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="core_02_balance_calculators.html">Balance Calculators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_01_propensity.html">Propensity Score Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_03_cardinality.html">Cardinality matching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_04_genetic.html">Genetic Matcher</a></li>
-<li class="toctree-l2"><a class="reference internal" href="matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Inverse Probability of Treatment Weighting (IPTW)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#1.-Synthetic-data:-two-genuinely-different,-patient-level-populations">1. Synthetic data: two genuinely different, patient-level populations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#2.-Fit-IPTWWeighter">2. Fit <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#3.-Checking-overlap:-propensity-score-and-weight-distributions">3. Checking overlap: propensity score and weight distributions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#4.-Trimming-extreme-weights">4. Trimming extreme weights</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Takeaways">Takeaways</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_02_balance_calculators.html">Balance Calculators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Matching</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Inverse Probability of Treatment Weighting (IPTW)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Synthetic-data:-two-genuinely-different,-patient-level-populations">Synthetic data: two genuinely different, patient-level populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Fit-IPTWWeighter">Fit <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Checking-overlap:-propensity-score-and-weight-distributions">Checking overlap: propensity score and weight distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Trimming-extreme-weights">Trimming extreme weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Takeaways">Takeaways</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -94,7 +100,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../02_demos.html">Demos</a></li>
       <li class="breadcrumb-item active">Inverse Probability of Treatment Weighting (IPTW)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/demos/weighting_01_iptw.ipynb.txt" rel="nofollow"> View page source</a>
@@ -143,8 +148,8 @@
 </pre></div>
 </div>
 </div>
-<section id="1.-Synthetic-data:-two-genuinely-different,-patient-level-populations">
-<h2>1. Synthetic data: two genuinely different, patient-level populations<a class="headerlink" href="#1.-Synthetic-data:-two-genuinely-different,-patient-level-populations" title="Permalink to this heading"></a></h2>
+<section id="Synthetic-data:-two-genuinely-different,-patient-level-populations">
+<h2>Synthetic data: two genuinely different, patient-level populations<a class="headerlink" href="#Synthetic-data:-two-genuinely-different,-patient-level-populations" title="Permalink to this heading"></a></h2>
 <p>IPTW needs patient-level covariates on <em>both</em> sides so it can fit a pool-vs-target classifier. We use <code class="docutils literal notranslate"><span class="pre">generate_toy_dataset</span></code>’s pool and target populations directly, with no aggregation step.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -335,8 +340,8 @@
 </div></div>
 </div>
 </section>
-<section id="2.-Fit-IPTWWeighter">
-<h2>2. Fit <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code><a class="headerlink" href="#2.-Fit-IPTWWeighter" title="Permalink to this heading"></a></h2>
+<section id="Fit-IPTWWeighter">
+<h2>Fit <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code><a class="headerlink" href="#Fit-IPTWWeighter" title="Permalink to this heading"></a></h2>
 <p>As with the other weighters, <code class="docutils literal notranslate"><span class="pre">match()</span></code> fits (if needed) and returns a <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code> with every pool patient retained, plus a new <code class="docutils literal notranslate"><span class="pre">sample_weight</span></code> column. <code class="docutils literal notranslate"><span class="pre">weighted_balance_table()</span></code> compares each feature’s target moment to the unweighted and weighted pool moment – but, unlike an exact-balance weighter, don’t expect the “weighted” column to land exactly on target.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -477,8 +482,8 @@ Name: sample_weight, dtype: float64
 </pre></div></div>
 </div>
 </section>
-<section id="3.-Checking-overlap:-propensity-score-and-weight-distributions">
-<h2>3. Checking overlap: propensity score and weight distributions<a class="headerlink" href="#3.-Checking-overlap:-propensity-score-and-weight-distributions" title="Permalink to this heading"></a></h2>
+<section id="Checking-overlap:-propensity-score-and-weight-distributions">
+<h2>Checking overlap: propensity score and weight distributions<a class="headerlink" href="#Checking-overlap:-propensity-score-and-weight-distributions" title="Permalink to this heading"></a></h2>
 <p>IPTW relies on <strong>positivity</strong>: every pool patient needs a realistic chance of looking like the target on the fitted model. A propensity score distribution piled up near 0 or 1, or a handful of huge weights, is the practical warning sign – the reweighting is leaning hard on a small, possibly unrepresentative slice of the pool (the same concern <code class="docutils literal notranslate"><span class="pre">effective_sample_size()</span></code> summarizes in one number).</p>
 <p><code class="docutils literal notranslate"><span class="pre">plot_iptw_propensity_distributions()</span></code> is the weighting counterpart to <code class="docutils literal notranslate"><span class="pre">pybalance.propensity.plot_propensity_score_match_distributions()</span></code>: instead of a matched subset’s “before” vs. “after” panels, it shows the same pool/target propensity scores counted equally (“before”) vs. counted by the fitted IPTW weight (“after”) – the weighted pool histogram should move towards the target’s.</p>
 <div class="nbinput docutils container">
@@ -562,8 +567,8 @@ before/after figures.</p>
 </div>
 </div>
 </section>
-<section id="4.-Trimming-extreme-weights">
-<h2>4. Trimming extreme weights<a class="headerlink" href="#4.-Trimming-extreme-weights" title="Permalink to this heading"></a></h2>
+<section id="Trimming-extreme-weights">
+<h2>Trimming extreme weights<a class="headerlink" href="#Trimming-extreme-weights" title="Permalink to this heading"></a></h2>
 <p>The main practical failure mode of IPTW is a small number of extreme weights, driven by pool patients whose covariates make the model almost certain they’re pool (weight -&gt; 0) or almost certain they’re target (weight -&gt; large). <code class="docutils literal notranslate"><span class="pre">trim_quantiles=(low,</span> <span class="pre">high)</span></code> clips fitted weights at the given quantiles – a standard bias/variance trade-off: a little exact balance is sacrificed in exchange for a much more stable, lower-variance set of weights.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:

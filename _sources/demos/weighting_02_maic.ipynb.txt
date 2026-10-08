@@ -71,7 +71,7 @@
    "id": "ba2df1a5",
    "metadata": {},
    "source": [
-    "## 1. A patient-level (synthetic) pool\n",
+    "## A patient-level (synthetic) pool\n",
     "\n",
     "MAIC needs patient-level data only for the **pool** (our \"IPD\"). `generate_toy_dataset` returns an\n",
     "entirely simulated one (no real patients); with `n_target=0` it generates no target patients at\n",
@@ -226,7 +226,7 @@
    "id": "caa419ae",
    "metadata": {},
    "source": [
-    "## 2. Use case 1 -- specifying means only\n",
+    "## Specifying means only\n",
     "\n",
     "An `AggregateTarget` is the target's sample size `n` plus whatever summary statistics are disclosed\n",
     "-- a published Table 1:\n",
@@ -569,7 +569,7 @@
    "id": "b54c007a",
    "metadata": {},
    "source": [
-    "## 3. Use case 2 -- adding stds\n",
+    "## Specifying means and standard deviations\n",
     "\n",
     "A Table 1 sometimes discloses a standard deviation alongside a mean. `EntropyBalanceWeighter` is the\n",
     "general form `MAICWeighter` is a (mean-only) special case of: pass `match_variance=True` to\n",
@@ -829,7 +829,7 @@
    "id": "d37a97b1",
    "metadata": {},
    "source": [
-    "## 4. Use case 3 -- medians and quantiles instead of means\n",
+    "## Specifying medians and quantiles instead of means\n",
     "\n",
     "Published Table 1s often report a **median** (\"age, median: 41\") or other **quantiles** (\"age, IQR:\n",
     "35-52\") instead of a mean for a skewed covariate. A **quantile** `(q, value)` means\n",
@@ -1437,7 +1437,7 @@
    "id": "c2c80b30",
    "metadata": {},
    "source": [
-    "## 5. When the target lies outside the pool's support\n",
+    "## When the target lies outside the pool's support\n",
     "\n",
     "MAIC/entropy balancing needs the target to lie within the pool's covariate support -- there must\n",
     "be *some* valid (possibly very uneven) weighting of the pool that reproduces the target's moments.\n",

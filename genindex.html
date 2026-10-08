@@ -44,7 +44,24 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="01_installation.html">Installation instructions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="demos/core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/core_02_balance_calculators.html">Balance Calculators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Matching</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -88,6 +105,7 @@
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
@@ -98,6 +116,7 @@
  | <a href="#P"><strong>P</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="_">_</h2>
@@ -136,6 +155,8 @@
       <li><a href="03_api.html#pybalance.utils.BaseBalanceCalculator">BaseBalanceCalculator (class in pybalance.utils)</a>
 </li>
       <li><a href="03_api.html#pybalance.utils.BaseMatchingPreprocessor">BaseMatchingPreprocessor (class in pybalance.utils)</a>
+</li>
+      <li><a href="03_api.html#pybalance.weighting.BaseWeighter">BaseWeighter (class in pybalance.weighting)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -184,6 +205,22 @@
   </ul></td>
 </tr></table>
 
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="03_api.html#pybalance.weighting.effective_sample_size">effective_sample_size() (in module pybalance.weighting)</a>
+
+      <ul>
+        <li><a href="03_api.html#pybalance.weighting.BaseWeighter.effective_sample_size">(pybalance.weighting.BaseWeighter method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="03_api.html#pybalance.weighting.EntropyBalanceWeighter">EntropyBalanceWeighter (class in pybalance.weighting)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -201,15 +238,17 @@
 </li>
       <li><a href="03_api.html#pybalance.utils.GammaXTreeBalance">GammaXTreeBalance (class in pybalance.utils)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="03_api.html#pybalance.sim.generate_toy_dataset">generate_toy_dataset() (in module pybalance.sim)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="03_api.html#pybalance.genetic.GeneticMatcher">GeneticMatcher (class in pybalance.genetic)</a>
 </li>
       <li><a href="03_api.html#pybalance.genetic.get_global_defaults">get_global_defaults() (in module pybalance.genetic)</a>
 </li>
       <li><a href="03_api.html#pybalance.utils.MatchingData.get_population">get_population() (pybalance.utils.MatchingData method)</a>
+</li>
+      <li><a href="03_api.html#pybalance.weighting.BaseWeighter.get_weights">get_weights() (pybalance.weighting.BaseWeighter method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -228,6 +267,10 @@
       <li><a href="03_api.html#pybalance.utils.infer_matching_headers">infer_matching_headers() (in module pybalance.utils)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="03_api.html#pybalance.weighting.IPTWWeighter">IPTWWeighter (class in pybalance.weighting)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="L">L</h2>
@@ -241,6 +284,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="03_api.html#pybalance.weighting.MAICWeighter">MAICWeighter (class in pybalance.weighting)</a>
+</li>
       <li><a href="03_api.html#pybalance.genetic.GeneticMatcher.match">match() (pybalance.genetic.GeneticMatcher method)</a>
 
       <ul>
@@ -249,6 +294,8 @@
         <li><a href="03_api.html#pybalance.lp.ConstraintSatisfactionMatcher.match">(pybalance.lp.ConstraintSatisfactionMatcher method)</a>
 </li>
         <li><a href="03_api.html#pybalance.propensity.PropensityScoreMatcher.match">(pybalance.propensity.PropensityScoreMatcher method)</a>
+</li>
+        <li><a href="03_api.html#pybalance.weighting.BaseWeighter.match">(pybalance.weighting.BaseWeighter method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -276,6 +323,8 @@
       <li><a href="03_api.html#pybalance.visualization.plot_binary_features">plot_binary_features() (in module pybalance.visualization)</a>
 </li>
       <li><a href="03_api.html#pybalance.visualization.plot_categoric_features">plot_categoric_features() (in module pybalance.visualization)</a>
+</li>
+      <li><a href="03_api.html#pybalance.weighting.plot_iptw_propensity_distributions">plot_iptw_propensity_distributions() (in module pybalance.weighting)</a>
 </li>
       <li><a href="03_api.html#pybalance.visualization.plot_joint_numeric_categoric_distributions">plot_joint_numeric_categoric_distributions() (in module pybalance.visualization)</a>
 </li>
@@ -320,6 +369,14 @@
       <li><a href="03_api.html#pybalance.utils.MatchingData.to_csv">to_csv() (pybalance.utils.MatchingData method)</a>
 </li>
       <li><a href="03_api.html#pybalance.utils.MatchingData.to_parquet">to_parquet() (pybalance.utils.MatchingData method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="03_api.html#pybalance.weighting.weighted_balance_table">weighted_balance_table() (in module pybalance.weighting)</a>
 </li>
   </ul></td>
 </tr></table>

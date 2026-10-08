@@ -1,0 +1,955 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybalance.weighting.matcher &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=860ec0ee"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/core_02_balance_calculators.html">Balance Calculators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Matching</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../03_api.html">API documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybalance.weighting.matcher</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybalance.weighting.matcher</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">clone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">BalanceCalculator</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_fitted</span><span class="p">(</span><span class="n">weighter</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">weighter</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Weighter has not been fitted!&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="effective_sample_size"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.effective_sample_size">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">effective_sample_size</span><span class="p">(</span><span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Kish&#39;s effective sample size: ``(sum w)**2 / sum(w**2)``. Invariant to the</span>
+<span class="sd">    overall scale of the weights. A large drop relative to ``len(weights)``</span>
+<span class="sd">    indicates the reweighting is relying heavily on a small number of pool</span>
+<span class="sd">    patients to match the target, and results should be interpreted</span>
+<span class="sd">    cautiously (e.g. the target may lie outside the range of the pool&#39;s</span>
+<span class="sd">    covariates).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_softmax_weights</span><span class="p">(</span><span class="n">Z</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lam</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">linpred</span> <span class="o">=</span> <span class="n">Z</span> <span class="o">@</span> <span class="n">lam</span>
+    <span class="n">linpred</span> <span class="o">=</span> <span class="n">linpred</span> <span class="o">-</span> <span class="n">linpred</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">linpred</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span> <span class="o">/</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_solve_entropy_weights</span><span class="p">(</span>
+    <span class="n">Z</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">,</span>
+    <span class="n">ridge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solve for weights ``w_i = softmax(Z @ lambda)_i`` (so ``sum_i w_i == 1`` by</span>
+<span class="sd">    construction) by minimizing the (convex, smooth) dual of the</span>
+<span class="sd">    maximum-entropy weighting problem, ``log(sum_i exp(Z_i @ lambda))``, via</span>
+<span class="sd">    scipy&#39;s trust-region-Newton-CG solver using an analytic gradient and</span>
+<span class="sd">    Hessian. At the optimum, ``sum_i w_i * Z_i == 0`` for every column of</span>
+<span class="sd">    ``Z``, i.e. every (centered) moment constraint is exactly balanced in the</span>
+<span class="sd">    weighted pool. This is the method-of-moments weighting scheme underlying</span>
+<span class="sd">    MAIC (Signorovitch et al., 2010) and entropy balancing (Hainmueller,</span>
+<span class="sd">    2012).</span>
+
+<span class="sd">    The softmax parametrization (rather than the more commonly-quoted raw</span>
+<span class="sd">    ``w_i = exp(z_i . lambda)``) is important for numerical robustness: the</span>
+<span class="sd">    raw form leaves an unconstrained degree of freedom along which ``sum(w)``</span>
+<span class="sd">    can be driven towards 0 (or diverge) while the *raw* gradient ``Z.T @ w``</span>
+<span class="sd">    shrinks in lockstep, which can fool a naive convergence check into</span>
+<span class="sd">    declaring success at a degenerate, non-solution point. Because the</span>
+<span class="sd">    softmax always sums to 1, this failure mode is eliminated and the</span>
+<span class="sd">    gradient (a genuine weighted mean) is a directly interpretable, scale-free</span>
+<span class="sd">    convergence criterion. A trust-region solver (rather than plain damped</span>
+<span class="sd">    Newton) is used because the Hessian -- a weighted covariance matrix of</span>
+<span class="sd">    ``Z`` -- can be near-singular along directions with little effective</span>
+<span class="sd">    curvature (e.g. highly imbalanced categoric rates), which otherwise</span>
+<span class="sd">    produces enormous, unstable Newton steps.</span>
+
+<span class="sd">    :param Z: (n_pool, n_constraints) matrix of centered, column-scaled moment</span>
+<span class="sd">        constraints: ``Z[i, j]`` is patient ``i``&#39;s (scaled) deviation from</span>
+<span class="sd">        the target moment for constraint ``j``.</span>
+<span class="sd">    :param max_iter: Maximum number of solver iterations.</span>
+<span class="sd">    :param tol: Convergence tolerance on the max-norm of the constraint</span>
+<span class="sd">        violation (weighted-mean residual).</span>
+<span class="sd">    :param ridge: Ridge term added to the Hessian for numerical stability;</span>
+<span class="sd">        important when constraints are collinear or near-collinear.</span>
+<span class="sd">    :param penalty: Optional per-constraint soft-constraint strength. A</span>
+<span class="sd">        positive entry adds ``penalty_j * lambda_j**2 / 2`` to the dual, which</span>
+<span class="sd">        relaxes constraint ``j`` to a quadratic penalty on its residual</span>
+<span class="sd">        instead of an exact equality. Needed for constraints sitting on the</span>
+<span class="sd">        boundary of what positive weights can reach (e.g. &quot;no patient above a</span>
+<span class="sd">        max&quot;), for which exact balance has no finite solution.</span>
+<span class="sd">    :return: Tuple ``(weights, diagnostics)`` where diagnostics has keys</span>
+<span class="sd">        &#39;converged&#39;, &#39;n_iter&#39;, &#39;max_constraint_violation&#39; (over the exact</span>
+<span class="sd">        constraints) and, if ``penalty`` is used, &#39;max_soft_violation&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">Z</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s2">&quot;converged&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;n_iter&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;max_constraint_violation&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="n">penalty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">if</span> <span class="n">penalty</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">penalty</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_objective</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="n">linpred</span> <span class="o">=</span> <span class="n">Z</span> <span class="o">@</span> <span class="n">lam</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">linpred</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">m</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">linpred</span> <span class="o">-</span> <span class="n">m</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">penalty</span> <span class="o">*</span> <span class="n">lam</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_grad</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Z</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">_softmax_weights</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">lam</span><span class="p">)</span> <span class="o">+</span> <span class="n">penalty</span> <span class="o">*</span> <span class="n">lam</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_hess</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">_softmax_weights</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">lam</span><span class="p">)</span>
+        <span class="n">zc</span> <span class="o">=</span> <span class="n">Z</span> <span class="o">-</span> <span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">w</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">zc</span> <span class="o">*</span> <span class="n">w</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">zc</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">penalty</span><span class="p">)</span> <span class="o">+</span> <span class="n">ridge</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+        <span class="n">_objective</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">k</span><span class="p">),</span>
+        <span class="n">jac</span><span class="o">=</span><span class="n">_grad</span><span class="p">,</span>
+        <span class="n">hess</span><span class="o">=</span><span class="n">_hess</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trust-ncg&quot;</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="n">max_iter</span><span class="p">,</span> <span class="s2">&quot;gtol&quot;</span><span class="p">:</span> <span class="n">tol</span><span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">w_final</span> <span class="o">=</span> <span class="n">_softmax_weights</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">w_final</span><span class="p">)</span>
+    <span class="n">exact</span> <span class="o">=</span> <span class="n">penalty</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="n">max_violation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">residual</span><span class="p">[</span><span class="n">exact</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="k">if</span> <span class="n">exact</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="n">converged</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">)</span> <span class="ow">or</span> <span class="n">max_violation</span> <span class="o">&lt;</span> <span class="n">tol</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="n">diagnostics</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;converged&quot;</span><span class="p">:</span> <span class="n">converged</span><span class="p">,</span>
+        <span class="s2">&quot;n_iter&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">nit</span><span class="p">),</span>
+        <span class="s2">&quot;max_constraint_violation&quot;</span><span class="p">:</span> <span class="n">max_violation</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">exact</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s2">&quot;max_soft_violation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">residual</span><span class="p">[</span><span class="o">~</span><span class="n">exact</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">w_final</span><span class="p">,</span> <span class="n">diagnostics</span>
+
+
+<div class="viewcode-block" id="BaseWeighter"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.BaseWeighter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BaseWeighter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Common interface for weighting methods. Unlike the Matcher classes</span>
+<span class="sd">    (genetic/lp/propensity), a Weighter never drops pool patients; instead it</span>
+<span class="sd">    assigns every pool patient a non-negative weight so that the *weighted*</span>
+<span class="sd">    pool resembles the target on the moments of interest. This is the</span>
+<span class="sd">    standard approach for indirect/external comparisons when excluding</span>
+<span class="sd">    patients is undesirable or infeasible -- e.g. small pools, or a target</span>
+<span class="sd">    known only through published aggregate statistics.</span>
+
+<span class="sd">    :param matching_data: MatchingData whose pool is to be weighted. The</span>
+<span class="sd">        target can be either patient-level or an ``AggregateTarget`` (e.g. a</span>
+<span class="sd">        published Table 1).</span>
+<span class="sd">    :param weight_col: Name of the column used to store weights on the</span>
+<span class="sd">        MatchingData returned by match(). Must not collide with an existing</span>
+<span class="sd">        matching feature.</span>
+<span class="sd">    :param verbose: Whether to log fitting diagnostics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+        <span class="n">weight_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sample_weight&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">weight_col</span> <span class="ow">in</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;weight_col=</span><span class="si">{</span><span class="n">weight_col</span><span class="si">!r}</span><span class="s2"> collides with an existing matching &quot;</span>
+                <span class="s2">&quot;feature. Pass a different weight_col.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight_col</span> <span class="o">=</span> <span class="n">weight_col</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseWeighter&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute self.weights/self.diagnostics. Subclasses implement this;</span>
+<span class="sd">        end users should call match() instead (see below), which calls this</span>
+<span class="sd">        internally and wraps the result in a MatchingData, matching the</span>
+<span class="sd">        public interface of the other matchers in pybalance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="BaseWeighter.get_weights"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.BaseWeighter.get_weights">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the fitted per-patient pool weights (in pool row order).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span></div>
+
+<div class="viewcode-block" id="BaseWeighter.effective_sample_size"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.BaseWeighter.effective_sample_size">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">effective_sample_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Kish&#39;s effective sample size of the fitted weights. See</span>
+<span class="sd">        ``effective_sample_size()``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">effective_sample_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseWeighter.match"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.BaseWeighter.match">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit (if not already fit) and return a MatchingData instance in which</span>
+<span class="sd">        every pool patient is retained and carries a new column (see</span>
+<span class="sd">        weight_col) holding their fitted weight. The target population</span>
+<span class="sd">        (patient-level or aggregate) is passed through unchanged, with weight</span>
+<span class="sd">        1.0 assigned to any patient-level target rows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">()</span>
+
+        <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">pool_name</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">pool</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span>
+
+        <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">has_aggregate_target</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span>
+                <span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">,</span>
+                <span class="n">target</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">aggregate_target</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">population_col</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">population_col</span><span class="p">,</span>
+                <span class="n">pool_name</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">pool_name</span><span class="p">,</span>
+                <span class="n">target_name</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">target_name</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">target</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">target_name</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_col</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span>
+            <span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">,</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">population_col</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">population_col</span><span class="p">,</span>
+            <span class="n">pool_name</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">pool_name</span><span class="p">,</span>
+            <span class="n">target_name</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">target_name</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="EntropyBalanceWeighter"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.EntropyBalanceWeighter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">EntropyBalanceWeighter</span><span class="p">(</span><span class="n">BaseWeighter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General maximum-entropy (&quot;method of moments&quot;) weighting: solves for</span>
+<span class="sd">    pool weights of the form ``w_i = exp(z_i . alpha)`` such that the weighted</span>
+<span class="sd">    pool matches the target. For an ``AggregateTarget`` every disclosed</span>
+<span class="sd">    statistic is its own constraint and nothing else is constrained: a</span>
+<span class="sd">    numeric mean, the rate of each disclosed categoric level, and the rate</span>
+<span class="sd">    above each disclosed median / quantile (the feature is dichotomized at the</span>
+<span class="sd">    disclosed value). A feature or categoric level the target says nothing</span>
+<span class="sd">    about is simply left free. Optionally also balances variance for numeric</span>
+<span class="sd">    features whose target discloses (or, for a patient-level target, has) a</span>
+<span class="sd">    standard deviation; for an ``AggregateTarget`` that needs the mean too,</span>
+<span class="sd">    since the variance is taken around it.</span>
+
+<span class="sd">    A disclosed ``min`` / ``max`` is a *soft* constraint, as in</span>
+<span class="sd">    ``AggregateConstraintSatisfactionMatcher``: exactly zero weight on</span>
+<span class="sd">    patients above a max cannot be reached by positive weights, so the</span>
+<span class="sd">    fraction of weight there is only penalized (see ``limit_penalty``).</span>
+
+<span class="sd">    This is the general form of Matching-Adjusted Indirect Comparison (MAIC;</span>
+<span class="sd">    Signorovitch et al., 2010); see ``MAICWeighter`` for the classic</span>
+<span class="sd">    mean-only formulation.</span>
+
+<span class="sd">    :param matching_data: MatchingData whose pool is to be weighted.</span>
+<span class="sd">    :param match_variance: If True, additionally constrain the weighted</span>
+<span class="sd">        variance of numeric features. For an ``AggregateTarget``, only</span>
+<span class="sd">        features that actually disclose a &quot;std&quot; are constrained (mirroring</span>
+<span class="sd">        ``AggregateConstraintSatisfactionMatcher``); for a patient-level</span>
+<span class="sd">        target, every numeric feature&#39;s variance is constrained. Categoric</span>
+<span class="sd">        features are never variance-constrained: their variance is already</span>
+<span class="sd">        determined by their (matched) rate.</span>
+<span class="sd">    :param normalize: How to rescale the fitted weights for reporting: &quot;target&quot;</span>
+<span class="sd">        (default) rescales so weights sum to the target population size,</span>
+<span class="sd">        &quot;pool&quot; rescales so weights sum to the pool size, &quot;none&quot; leaves the raw</span>
+<span class="sd">        dual-optimizer weights unscaled. This choice has no effect on balance</span>
+<span class="sd">        (the moment constraints are scale-invariant) or on</span>
+<span class="sd">        effective_sample_size(); it only affects the units the weights are</span>
+<span class="sd">        reported in.</span>
+<span class="sd">    :param max_iter: Maximum number of Newton iterations.</span>
+<span class="sd">    :param tol: Convergence tolerance on the (max-norm) constraint violation.</span>
+<span class="sd">    :param ridge: Ridge regularization added to the Newton step for numerical</span>
+<span class="sd">        stability; increase this if fitting fails to converge due to</span>
+<span class="sd">        collinear/near-collinear features.</span>
+<span class="sd">    :param weight_col: Name of the column used to store weights on the</span>
+<span class="sd">        MatchingData returned by match().</span>
+<span class="sd">    :param verbose: Whether to log fitting diagnostics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+        <span class="n">match_variance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;target&quot;</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
+        <span class="n">ridge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
+        <span class="n">weight_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sample_weight&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">limit_penalty</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">weight_col</span><span class="o">=</span><span class="n">weight_col</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">normalize</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="s2">&quot;pool&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;normalize must be one of &#39;target&#39;, &#39;pool&#39;, &#39;none&#39;; got </span><span class="si">{</span><span class="n">normalize</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">match_variance</span> <span class="o">=</span> <span class="n">match_variance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span> <span class="o">=</span> <span class="n">normalize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">max_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ridge</span> <span class="o">=</span> <span class="n">ridge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit_penalty</span> <span class="o">=</span> <span class="n">limit_penalty</span>
+
+        <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span>
+        <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">has_aggregate_target</span> <span class="ow">and</span> <span class="n">match_variance</span><span class="p">:</span>
+            <span class="n">no_mean</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">f</span>
+                <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">stats</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">numeric</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="s2">&quot;std&quot;</span> <span class="ow">in</span> <span class="n">stats</span> <span class="ow">and</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stats</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">no_mean</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot balance the variance of </span><span class="si">{</span><span class="n">no_mean</span><span class="si">}</span><span class="s2">: the target discloses &quot;</span>
+                    <span class="s2">&quot;a std but no mean, so the variance is taken around the weighted &quot;</span>
+                    <span class="s2">&quot;mean, which is not a moment constraint reweighting can solve. &quot;</span>
+                    <span class="s2">&quot;Disclose the mean too, or use AggregateConstraintSatisfactionMatcher.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Fitted preprocessor plus pool features and target mean/std in a single</span>
+        <span class="c1"># consistent output feature space. An AggregateTarget needs the</span>
+        <span class="c1"># calculator that dichotomizes quantile-disclosed features and says</span>
+        <span class="c1"># which output columns the target actually discloses.</span>
+        <span class="n">objective</span> <span class="o">=</span> <span class="s2">&quot;aggregate_beta&quot;</span> <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">has_aggregate_target</span> <span class="k">else</span> <span class="s2">&quot;beta&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BalanceCalculator</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">objective</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;match_variance&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_variance</span><span class="p">,</span>
+            <span class="s2">&quot;normalize&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+            <span class="s2">&quot;max_iter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">,</span>
+            <span class="s2">&quot;tol&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span>
+            <span class="s2">&quot;ridge&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ridge</span><span class="p">,</span>
+            <span class="s2">&quot;limit_penalty&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit_penalty</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_limit_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Output columns holding the indicator of a disclosed min / max.&quot;&quot;&quot;</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">md</span><span class="o">.</span><span class="n">has_aggregate_target</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">out_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">stats</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">numeric</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="k">if</span> <span class="n">q</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">):</span>
+                    <span class="n">prefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2">_q</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">columns</span> <span class="o">|=</span> <span class="p">{</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">out_features</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="n">columns</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_numeric_features_with_disclosed_std</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span>
+        <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">has_aggregate_target</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">f</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">numeric</span>
+                <span class="k">if</span> <span class="s2">&quot;std&quot;</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">numeric</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">numeric</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+            <span class="p">]</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">numeric</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build the (n_pool, n_constraints) centered-and-scaled constraint</span>
+<span class="sd">        matrix used to solve for weights, a human-readable label per</span>
+<span class="sd">        constraint column (for diagnostics/reporting) and the per-constraint</span>
+<span class="sd">        soft-constraint penalty (0 for an exact constraint).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">target_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target_mean</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">target_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target_std</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">pool_std</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">out_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>
+        <span class="n">n_pool</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">constrained</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">constrained</span>
+        <span class="n">limit_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit_columns</span><span class="p">()</span>
+
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_features</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">constrained</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="n">penalty</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">limit_penalty</span> <span class="k">if</span> <span class="n">out_features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">in</span> <span class="n">limit_columns</span> <span class="k">else</span> <span class="mf">0.0</span>
+            <span class="p">)</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">target_std</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">target_std</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="k">else</span> <span class="p">(</span><span class="n">pool_std</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">if</span> <span class="n">pool_std</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="n">scale</span><span class="p">)</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">out_features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2"> (mean)&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_variance</span><span class="p">:</span>
+            <span class="n">variance_features</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_numeric_features_with_disclosed_std</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">out_features</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">variance_features</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">dev</span> <span class="o">=</span> <span class="p">(</span><span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="n">target_var</span> <span class="o">=</span> <span class="n">target_std</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="c1"># Give the variance term its own scale so it neither dominates</span>
+                <span class="c1"># nor is swamped by the mean terms purely due to units (same</span>
+                <span class="c1"># concern handled in</span>
+                <span class="c1"># AggregateConstraintSatisfactionMatcher._get_target_variance_targets).</span>
+                <span class="n">scale2</span> <span class="o">=</span> <span class="n">target_var</span> <span class="k">if</span> <span class="n">target_var</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">dev</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dev</span> <span class="o">-</span> <span class="n">target_var</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale2</span><span class="p">)</span>
+                <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2"> (variance)&quot;</span><span class="p">)</span>
+                <span class="n">penalty</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="n">columns</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_pool</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Z</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">penalty</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;EntropyBalanceWeighter&quot;</span><span class="p">:</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span>
+        <span class="n">n_pool</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">pool_name</span><span class="p">))</span>
+        <span class="n">n_target</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">aggregate_target</span><span class="o">.</span><span class="n">n</span>
+            <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">has_aggregate_target</span>
+            <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">target_name</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="n">Z</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">penalty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_constraints</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraint_labels</span> <span class="o">=</span> <span class="n">labels</span>
+
+        <span class="n">weights</span><span class="p">,</span> <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">_solve_entropy_weights</span><span class="p">(</span>
+            <span class="n">Z</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span> <span class="n">ridge</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ridge</span><span class="p">,</span> <span class="n">penalty</span><span class="o">=</span><span class="n">penalty</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span> <span class="o">==</span> <span class="s2">&quot;target&quot;</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_target</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span> <span class="o">==</span> <span class="s2">&quot;pool&quot;</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_pool</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagnostics</span> <span class="o">=</span> <span class="n">diagnostics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="s2">&quot;effective_sample_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">effective_sample_size</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">diagnostics</span><span class="p">[</span><span class="s2">&quot;converged&quot;</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> did not converge within &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="si">}</span><span class="s2"> iterations (max constraint violation = &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;max_constraint_violation&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">). Weights may &quot;</span>
+                <span class="s2">&quot;not exactly balance the requested moments; consider &quot;</span>
+                <span class="s2">&quot;increasing max_iter/ridge, or check for unmatchable (e.g. &quot;</span>
+                <span class="s2">&quot;near-extreme or non-overlapping) covariates.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> converged in </span><span class="si">{</span><span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;n_iter&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="s2">&quot;iterations. Effective sample size: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;effective_sample_size&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">n_pool</span><span class="si">}</span><span class="s2"> pool patients.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="MAICWeighter"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.MAICWeighter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MAICWeighter</span><span class="p">(</span><span class="n">EntropyBalanceWeighter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Matching-Adjusted Indirect Comparison (MAIC; Signorovitch et al., 2010,</span>
+<span class="sd">    &quot;Comparative effectiveness without head-to-head trials: a method for</span>
+<span class="sd">    matching-adjusted indirect comparisons applied to psoriasis clinical</span>
+<span class="sd">    trials&quot;). Reweights patient-level (&quot;IPD&quot;) pool data so that its weighted</span>
+<span class="sd">    means match a target&#39;s aggregate statistics -- typically a comparator</span>
+<span class="sd">    trial&#39;s published Table 1 -- using the method-of-moments / maximum-entropy</span>
+<span class="sd">    weighting scheme of ``EntropyBalanceWeighter``, restricted to first</span>
+<span class="sd">    moments only. This is the standard MAIC formulation and is appropriate</span>
+<span class="sd">    whenever the comparator discloses only means (and category rates), not</span>
+<span class="sd">    variances.</span>
+
+<span class="sd">    Use ``EntropyBalanceWeighter(matching_data, match_variance=True)`` directly</span>
+<span class="sd">    if the comparator additionally discloses standard deviations you also want</span>
+<span class="sd">    to match.</span>
+
+<span class="sd">    :param matching_data: MatchingData whose pool (IPD) is to be weighted to</span>
+<span class="sd">        match the target&#39;s (typically aggregate, e.g. ``AggregateTarget``)</span>
+<span class="sd">        moments.</span>
+<span class="sd">    :param normalize: See ``EntropyBalanceWeighter``. Defaults to &quot;target&quot;,</span>
+<span class="sd">        i.e. weights sum to the target&#39;s sample size, matching common MAIC</span>
+<span class="sd">        reporting conventions.</span>
+<span class="sd">    :param max_iter: Maximum number of Newton iterations.</span>
+<span class="sd">    :param tol: Convergence tolerance on the (max-norm) constraint violation.</span>
+<span class="sd">    :param ridge: Ridge regularization added to the Newton step for numerical</span>
+<span class="sd">        stability.</span>
+<span class="sd">    :param weight_col: Name of the column used to store weights on the</span>
+<span class="sd">        MatchingData returned by match().</span>
+<span class="sd">    :param verbose: Whether to log fitting diagnostics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;target&quot;</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
+        <span class="n">ridge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">,</span>
+        <span class="n">weight_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sample_weight&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">limit_penalty</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">matching_data</span><span class="p">,</span>
+            <span class="n">match_variance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">ridge</span><span class="o">=</span><span class="n">ridge</span><span class="p">,</span>
+            <span class="n">weight_col</span><span class="o">=</span><span class="n">weight_col</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="n">limit_penalty</span><span class="o">=</span><span class="n">limit_penalty</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;match_variance&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="IPTWWeighter"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.IPTWWeighter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">IPTWWeighter</span><span class="p">(</span><span class="n">BaseWeighter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inverse Probability of Treatment Weighting (IPTW; Rosenbaum &amp; Rubin,</span>
+<span class="sd">    1983; see Austin, 2011, &quot;An Introduction to Propensity Score Methods for</span>
+<span class="sd">    Reducing the Effects of Confounding in Observational Studies&quot;, for the</span>
+<span class="sd">    ATT construction used here). Fits a propensity model ``p(X) = P(target |</span>
+<span class="sd">    X)`` that classifies pool vs. target patients on their covariates, then</span>
+<span class="sd">    reweights each pool patient by the odds ``p / (1 - p)``. The target</span>
+<span class="sd">    population keeps weight 1, so the weighted pool is reweighted onto the</span>
+<span class="sd">    target&#39;s covariate distribution -- i.e. this is the ATT estimand with the</span>
+<span class="sd">    target playing the role of the fixed/reference (&quot;treated&quot;) group, which</span>
+<span class="sd">    matches the convention used by ``MAICWeighter``/``EntropyBalanceWeighter``</span>
+<span class="sd">    and the package&#39;s typical use case of building an external comparator</span>
+<span class="sd">    arm that represents a trial population.</span>
+
+<span class="sd">    Unlike ``EntropyBalanceWeighter``, IPTW does not guarantee exact balance</span>
+<span class="sd">    on any particular moment: it only guarantees balance asymptotically, and</span>
+<span class="sd">    only if the propensity model is correctly specified. It also requires a</span>
+<span class="sd">    patient-level target (there is no pool-vs-target classification problem</span>
+<span class="sd">    to fit against a published aggregate Table 1). Its main practical</span>
+<span class="sd">    advantages over entropy balancing are that it scales to many covariates</span>
+<span class="sd">    without requiring the target&#39;s moments to be inside the pool&#39;s convex</span>
+<span class="sd">    hull, and that it is the most widely recognized/reported method in the</span>
+<span class="sd">    observational literature.</span>
+
+<span class="sd">    :param matching_data: MatchingData whose pool is to be weighted. The</span>
+<span class="sd">        target must be patient-level (not an ``AggregateTarget``).</span>
+<span class="sd">    :param classifier: A fitted-or-unfitted sklearn-compatible classifier</span>
+<span class="sd">        exposing ``predict_proba``, used to estimate ``P(target | X)``. It is</span>
+<span class="sd">        cloned before fitting, so passing a pre-fitted instance does not</span>
+<span class="sd">        reuse its fit. Defaults to ``LogisticRegression(max_iter=1000)``, the</span>
+<span class="sd">        standard choice for propensity score estimation.</span>
+<span class="sd">    :param trim_quantiles: Optional ``(low, high)`` quantiles (e.g. ``(0.01,</span>
+<span class="sd">        0.99)``) at which to clip the fitted weights. Extreme weights (driven</span>
+<span class="sd">        by pool patients whose covariates make them look almost certainly</span>
+<span class="sd">        pool or almost certainly target) are the main practical failure mode</span>
+<span class="sd">        of IPTW; trimming trades a little bias for a large reduction in</span>
+<span class="sd">        variance. Left unset (``None``) by default so the raw weights are</span>
+<span class="sd">        returned untouched.</span>
+<span class="sd">    :param weight_col: Name of the column used to store weights on the</span>
+<span class="sd">        MatchingData returned by match().</span>
+<span class="sd">    :param verbose: Whether to log fitting diagnostics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+        <span class="n">classifier</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BaseEstimator</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">trim_quantiles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sample_weight&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">weight_col</span><span class="o">=</span><span class="n">weight_col</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="o">.</span><span class="n">has_aggregate_target</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;IPTWWeighter requires a patient-level target (it fits a &quot;</span>
+                <span class="s2">&quot;pool-vs-target propensity model), so it cannot be used with &quot;</span>
+                <span class="s2">&quot;an AggregateTarget. Use EntropyBalanceWeighter/MAICWeighter &quot;</span>
+                <span class="s2">&quot;for aggregate (e.g. published Table 1) targets.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">trim_quantiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">trim_quantiles</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">lo</span> <span class="o">&lt;</span> <span class="n">hi</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;trim_quantiles must satisfy 0 &lt;= low &lt; high &lt;= 1; got </span><span class="si">{</span><span class="n">trim_quantiles</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span> <span class="o">=</span> <span class="n">classifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trim_quantiles</span> <span class="o">=</span> <span class="n">trim_quantiles</span>
+
+        <span class="c1"># Reuse BetaBalance purely to get a fitted preprocessor plus pool and</span>
+        <span class="c1"># target feature tensors in a single consistent (one-hot categoric +</span>
+        <span class="c1"># numeric passthrough) output space, as EntropyBalanceWeighter does.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BalanceCalculator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="p">,</span> <span class="s2">&quot;beta&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;classifier&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">,</span>
+            <span class="s2">&quot;trim_quantiles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trim_quantiles</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IPTWWeighter&quot;</span><span class="p">:</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">n_pool</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_pool</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">))])</span>
+
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">clf</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">clone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">propensity_score</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[:</span><span class="n">n_pool</span><span class="p">])[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Clip away from 0/1 to avoid infinite weights from a</span>
+        <span class="c1"># (near-)perfectly separable model.</span>
+        <span class="n">propensity_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">propensity_score</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">1e-4</span><span class="p">)</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">propensity_score</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">propensity_score</span><span class="p">)</span>
+        <span class="c1"># Also kept (unclipped) so plot_iptw_propensity_distributions() can show</span>
+        <span class="c1"># where the target itself sits on the fitted model.</span>
+        <span class="n">target_propensity_score</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">n_pool</span><span class="p">:])[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">n_trimmed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trim_quantiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trim_quantiles</span><span class="p">)</span>
+            <span class="n">n_trimmed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">weights</span> <span class="o">&lt;</span> <span class="n">lo</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">weights</span> <span class="o">&gt;</span> <span class="n">hi</span><span class="p">)))</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">propensity_model</span> <span class="o">=</span> <span class="n">clf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">propensity_score</span> <span class="o">=</span> <span class="n">propensity_score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_propensity_score</span> <span class="o">=</span> <span class="n">target_propensity_score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagnostics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;effective_sample_size&quot;</span><span class="p">:</span> <span class="n">effective_sample_size</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span>
+            <span class="s2">&quot;n_trimmed&quot;</span><span class="p">:</span> <span class="n">n_trimmed</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> fit </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">clf</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Effective sample size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;effective_sample_size&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;/ </span><span class="si">{</span><span class="n">n_pool</span><span class="si">}</span><span class="s2"> pool patients.&quot;</span>
+                <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot; Trimmed </span><span class="si">{</span><span class="n">n_trimmed</span><span class="si">}</span><span class="s2"> extreme weights.&quot;</span> <span class="k">if</span> <span class="n">n_trimmed</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="weighted_balance_table"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.weighted_balance_table">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">weighted_balance_table</span><span class="p">(</span><span class="n">weighter</span><span class="p">:</span> <span class="n">BaseWeighter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a table comparing each balanced feature&#39;s weighted (and, for</span>
+<span class="sd">    reference, unweighted) pool moment to the target moment -- a quick</span>
+<span class="sd">    post-hoc check of how well match() balanced the pool. For</span>
+<span class="sd">    EntropyBalanceWeighter/MAICWeighter, residuals should be ~0 for every</span>
+<span class="sd">    constrained row; for IPTWWeighter, which does not solve for exact</span>
+<span class="sd">    balance, this is instead a diagnostic of how much balance improved</span>
+<span class="sd">    relative to the unweighted pool.</span>
+
+<span class="sd">    :param weighter: A fitted EntropyBalanceWeighter/MAICWeighter/IPTWWeighter,</span>
+<span class="sd">        i.e. one on which match() has already been called.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_fitted</span><span class="p">(</span><span class="n">weighter</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">target_mean</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target_mean</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">target_std</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target_std</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">out_features</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">weights</span>
+
+    <span class="n">variance_features</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">set</span><span class="p">(</span><span class="n">weighter</span><span class="o">.</span><span class="n">_numeric_features_with_disclosed_std</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">weighter</span><span class="p">,</span> <span class="s2">&quot;match_variance&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="n">constrained</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">constrained</span>
+    <span class="n">disclosed</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">disclosed</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">out_features</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">disclosed</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">constrained</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+            <span class="k">continue</span>  <span class="c1"># a level implied by the others</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+                <span class="s2">&quot;moment&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+                <span class="c1"># undisclosed: nothing to compare to, but still worth seeing move</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">target_mean</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">if</span> <span class="n">disclosed</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                <span class="s2">&quot;unweighted_pool&quot;</span><span class="p">:</span> <span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;weighted_pool&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">variance_features</span><span class="p">:</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+                    <span class="s2">&quot;moment&quot;</span><span class="p">:</span> <span class="s2">&quot;variance&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">target_std</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="s2">&quot;unweighted_pool&quot;</span><span class="p">:</span> <span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">(),</span>
+                    <span class="s2">&quot;weighted_pool&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_is_iptw</span><span class="p">(</span><span class="n">weighter</span><span class="p">:</span> <span class="n">BaseWeighter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">weighter</span><span class="p">,</span> <span class="s2">&quot;propensity_score&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;plot_iptw_propensity_distributions() requires an IPTWWeighter &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">weighter</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">), since only IPTWWeighter fits a &quot;</span>
+            <span class="s2">&quot;propensity model -- MAICWeighter/EntropyBalanceWeighter solve &quot;</span>
+            <span class="s2">&quot;directly for balancing weights without one.&quot;</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="plot_iptw_propensity_distributions"><a class="viewcode-back" href="../../../03_api.html#pybalance.weighting.plot_iptw_propensity_distributions">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">plot_iptw_propensity_distributions</span><span class="p">(</span><span class="n">weighter</span><span class="p">:</span> <span class="s2">&quot;IPTWWeighter&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot histograms of the estimated propensity score for the pool and target</span>
+<span class="sd">    populations, before vs. after IPTW weighting -- the weighting analogue of</span>
+<span class="sd">    ``pybalance.propensity.plot_propensity_score_match_distributions``.</span>
+
+<span class="sd">    Unlike a Matcher, a Weighter never drops patients, so there is no matched</span>
+<span class="sd">    subset to compare against; instead, the &quot;before&quot; panel shows every pool</span>
+<span class="sd">    patient counted equally and the &quot;after&quot; panel shows the same propensity</span>
+<span class="sd">    scores counted by their fitted IPTW weight (the target always keeps</span>
+<span class="sd">    weight 1). A successful fit should show the &quot;after&quot; pool histogram move</span>
+<span class="sd">    towards the target&#39;s.</span>
+
+<span class="sd">    :param weighter: A fitted ``IPTWWeighter``, i.e. one on which match() has</span>
+<span class="sd">        already been called.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_fitted</span><span class="p">(</span><span class="n">weighter</span><span class="p">)</span>
+    <span class="n">_check_is_iptw</span><span class="p">(</span><span class="n">weighter</span><span class="p">)</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">matching_data</span>
+    <span class="n">pool_name</span><span class="p">,</span> <span class="n">target_name</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">pool_name</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">target_name</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;propensity&quot;</span><span class="p">:</span> <span class="n">weighter</span><span class="o">.</span><span class="n">propensity_score</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">weighter</span><span class="o">.</span><span class="n">propensity_score</span><span class="p">),</span>
+                    <span class="s2">&quot;weighted&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="n">pool_name</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;propensity&quot;</span><span class="p">:</span> <span class="n">weighter</span><span class="o">.</span><span class="n">target_propensity_score</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">weighter</span><span class="o">.</span><span class="n">target_propensity_score</span><span class="p">),</span>
+                    <span class="s2">&quot;weighted&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="n">target_name</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;propensity&quot;</span><span class="p">:</span> <span class="n">weighter</span><span class="o">.</span><span class="n">propensity_score</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">weighter</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span>
+                    <span class="s2">&quot;weighted&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="n">pool_name</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;propensity&quot;</span><span class="p">:</span> <span class="n">weighter</span><span class="o">.</span><span class="n">target_propensity_score</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">weighter</span><span class="o">.</span><span class="n">target_propensity_score</span><span class="p">),</span>
+                    <span class="s2">&quot;weighted&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="n">target_name</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="s2">&quot;weighted&quot;</span><span class="p">,</span> <span class="n">col_order</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="n">height</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">map_dataframe</span><span class="p">(</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">,</span>
+        <span class="n">bins</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
+        <span class="n">binrange</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;propensity&quot;</span><span class="p">,</span>
+        <span class="n">weights</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span><span class="p">,</span>
+        <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;population&quot;</span><span class="p">,</span>
+        <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="n">pool_name</span><span class="p">,</span> <span class="n">target_name</span><span class="p">],</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">common_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">stat</span><span class="o">=</span><span class="s2">&quot;probability&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">axes</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">axes</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">]</span>
+
+    <span class="n">legend_patches</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Patch</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">pool_name</span><span class="p">),</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Patch</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">target_name</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="o">=</span><span class="n">legend_patches</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">g</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
