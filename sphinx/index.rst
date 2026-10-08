@@ -40,6 +40,7 @@ through the :doc:`02_demos`. Questions or issues are welcome on
 
 	00_introduction
 	01_installation
+	02_demos
 
 ..	toctree::
    :maxdepth: 2
@@ -69,7 +70,11 @@ through the :doc:`02_demos`. Questions or issues are welcome on
     :maxdepth: 2
     :caption: API
 
-    03_api
+    api/core
+    api/matchers
+    api/weighters
+    api/visualization
+    api/simulation
 
 ..	toctree::
 	:maxdepth: 2
