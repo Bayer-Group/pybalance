@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview: module code &mdash; PyBalance</title>
+  <title>Simulation &mdash; PyBalance</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
@@ -18,7 +19,9 @@
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="License" href="../04_license.html" />
+    <link rel="prev" title="Visualization" href="visualization.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -65,12 +68,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../api/core.html">Core Utilities</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/matchers.html">Matchers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/weighters.html">Weighters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/visualization.html">Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/simulation.html">Simulation</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matchers.html">Matchers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighters.html">Weighters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Simulation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pybalance.sim.generate_toy_dataset"><code class="docutils literal notranslate"><span class="pre">generate_toy_dataset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pybalance.sim.load_paper_dataset"><code class="docutils literal notranslate"><span class="pre">load_paper_dataset()</span></code></a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
 <ul>
@@ -92,8 +99,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Overview: module code</li>
+      <li class="breadcrumb-item active">Simulation</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/simulation.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -101,21 +109,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="pybalance/genetic/matcher.html">pybalance.genetic.matcher</a></li>
-<li><a href="pybalance/lp/matcher.html">pybalance.lp.matcher</a></li>
-<li><a href="pybalance/propensity/matcher.html">pybalance.propensity.matcher</a></li>
-<li><a href="pybalance/sim/rng.html">pybalance.sim.rng</a></li>
-<li><a href="pybalance/utils/balance_calculators.html">pybalance.utils.balance_calculators</a></li>
-<li><a href="pybalance/utils/matching_data.html">pybalance.utils.matching_data</a></li>
-<li><a href="pybalance/utils/preprocess.html">pybalance.utils.preprocess</a></li>
-<li><a href="pybalance/visualization/distributions.html">pybalance.visualization.distributions</a></li>
-<li><a href="pybalance/weighting/matcher.html">pybalance.weighting.matcher</a></li>
-</ul>
+  <section id="simulation">
+<h1>Simulation<a class="headerlink" href="#simulation" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.sim.generate_toy_dataset">
+<span class="sig-prename descclassname"><span class="pre">pybalance.sim.</span></span><span class="sig-name descname"><span class="pre">generate_toy_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">45</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/sim/rng.html#generate_toy_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.sim.generate_toy_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a toy matching dataset with n_pool patients in the pool and
+n_target patients in the target population. For finer control, see
+generate_random_feature_data_rwd and generate_random_feature_data_rct.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.sim.load_paper_dataset">
+<span class="sig-prename descclassname"><span class="pre">pybalance.sim.</span></span><span class="sig-name descname"><span class="pre">load_paper_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/sim/rng.html#load_paper_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.sim.load_paper_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>Load the simulated matching dataset presented in the pybalance paper
+(<a class="reference external" href="https://onlinelibrary.wiley.com/doi/10.1002/pst.2352">https://onlinelibrary.wiley.com/doi/10.1002/pst.2352</a>).</p>
+</dd></dl>
+
+</section>
+
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="visualization.html" class="btn btn-neutral float-left" title="Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../04_license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

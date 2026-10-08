@@ -44,6 +44,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../02_demos.html">Demos</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
 <ul>
@@ -65,7 +66,11 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../03_api.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/core.html">Core Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/matchers.html">Matchers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/weighters.html">Weighters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/simulation.html">Simulation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
 <ul>
@@ -176,7 +181,7 @@
     <span class="k">return</span> <span class="n">_f</span>
 
 
-<div class="viewcode-block" id="BaseBalanceCalculator"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseBalanceCalculator">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BaseBalanceCalculator</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseBalanceCalculator"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseBalanceCalculator">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BaseBalanceCalculator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BaseBalanceCalculator is the low-level interface to calculating balance.</span>
 <span class="sd">    BaseBalanceCalculator can be used with any preprocessor defined as a</span>
@@ -414,7 +419,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BaseBalanceCalculator.per_feature_loss"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseBalanceCalculator.per_feature_loss">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">per_feature_loss</span><span class="p">(</span>
+<div class="viewcode-block" id="BaseBalanceCalculator.per_feature_loss"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseBalanceCalculator.per_feature_loss">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">per_feature_loss</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
         <span class="n">target_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -452,7 +457,7 @@
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">((</span><span class="n">pool</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="BetaBalance"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BetaBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BetaBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
+<div class="viewcode-block" id="BetaBalance"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BetaBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BetaBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BetaBalance computes the balance between two populations as the mean</span>
 <span class="sd">    absolute standardized mean difference across all features. Uses</span>
@@ -560,7 +565,7 @@
         <span class="k">return</span> <span class="n">thresholds</span><span class="p">,</span> <span class="n">keep_raw</span>
 
 
-<div class="viewcode-block" id="BetaSquaredBalance"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BetaSquaredBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BetaSquaredBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
+<div class="viewcode-block" id="BetaSquaredBalance"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BetaSquaredBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BetaSquaredBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BetaSquaredBalance computes the balance between two populatiosn as the mean</span>
 <span class="sd">    square standardized mean difference across all features. Uses</span>
@@ -652,7 +657,7 @@
         <span class="p">)</span>
 
 
-<div class="viewcode-block" id="BetaMaxBalance"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BetaMaxBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BetaMaxBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
+<div class="viewcode-block" id="BetaMaxBalance"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BetaMaxBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BetaMaxBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Same as BetaBalance, except the worst-matched feature determines the loss.</span>
 <span class="sd">    This class is provided as a convenience, since this balance metric is often</span>
@@ -696,7 +701,7 @@
         <span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
 
-<div class="viewcode-block" id="GammaBalance"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.GammaBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GammaBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
+<div class="viewcode-block" id="GammaBalance"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.GammaBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GammaBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convenience interface to BaseBalanceCalculator to compute the balance</span>
 <span class="sd">    between two populations by computing the mean area between their</span>
@@ -730,7 +735,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="GammaSquaredBalance"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.GammaSquaredBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GammaSquaredBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
+<div class="viewcode-block" id="GammaSquaredBalance"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.GammaSquaredBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GammaSquaredBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Same as GammaBalance, except that per-feature balances are averages in a</span>
 <span class="sd">    mean square fashion.</span>
@@ -800,7 +805,7 @@
         <span class="p">)</span>
 
 
-<div class="viewcode-block" id="GammaXTreeBalance"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.GammaXTreeBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GammaXTreeBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
+<div class="viewcode-block" id="GammaXTreeBalance"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.GammaXTreeBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GammaXTreeBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;gamma_x_tree&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -848,7 +853,7 @@
     <span class="k">return</span> <span class="n">batch_size</span>
 
 
-<div class="viewcode-block" id="BatchedBalanceCaclulator"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BatchedBalanceCaclulator">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BatchedBalanceCaclulator</span><span class="p">:</span>
+<div class="viewcode-block" id="BatchedBalanceCaclulator"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BatchedBalanceCaclulator">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BatchedBalanceCaclulator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Batch balance calculations to avoid large peak memory usage.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -942,7 +947,7 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="BalanceCalculator"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BalanceCalculator">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">BalanceCalculator</span><span class="p">(</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="s2">&quot;gamma&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="BalanceCalculator"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BalanceCalculator">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">BalanceCalculator</span><span class="p">(</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="s2">&quot;gamma&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BalanceCalculator provides a convenience interface to balance calculators,</span>
 <span class="sd">    allowing the user to initialize a balance calculator by name. The</span>

@@ -1,0 +1,714 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core Utilities &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=860ec0ee"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Matchers" href="matchers.html" />
+    <link rel="prev" title="Weighting with MAIC / entropy balancing" href="../demos/weighting_02_maic.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../demos/core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/core_02_balance_calculators.html">Balance Calculators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Matching</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#matching-data">Matching Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.MatchingHeaders"><code class="docutils literal notranslate"><span class="pre">MatchingHeaders</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.MatchingData"><code class="docutils literal notranslate"><span class="pre">MatchingData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.append"><code class="docutils literal notranslate"><span class="pre">MatchingData.append()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.copy"><code class="docutils literal notranslate"><span class="pre">MatchingData.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.data"><code class="docutils literal notranslate"><span class="pre">MatchingData.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.describe"><code class="docutils literal notranslate"><span class="pre">MatchingData.describe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.describe_categoric"><code class="docutils literal notranslate"><span class="pre">MatchingData.describe_categoric()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.describe_numeric"><code class="docutils literal notranslate"><span class="pre">MatchingData.describe_numeric()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.get_population"><code class="docutils literal notranslate"><span class="pre">MatchingData.get_population()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.head"><code class="docutils literal notranslate"><span class="pre">MatchingData.head()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.populations"><code class="docutils literal notranslate"><span class="pre">MatchingData.populations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.sample"><code class="docutils literal notranslate"><span class="pre">MatchingData.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.tail"><code class="docutils literal notranslate"><span class="pre">MatchingData.tail()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.to_csv"><code class="docutils literal notranslate"><span class="pre">MatchingData.to_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.MatchingData.to_parquet"><code class="docutils literal notranslate"><span class="pre">MatchingData.to_parquet()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.infer_matching_headers"><code class="docutils literal notranslate"><span class="pre">infer_matching_headers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.split_target_pool"><code class="docutils literal notranslate"><span class="pre">split_target_pool()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#preprocessing">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.BaseMatchingPreprocessor"><code class="docutils literal notranslate"><span class="pre">BaseMatchingPreprocessor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.BaseMatchingPreprocessor._fit"><code class="docutils literal notranslate"><span class="pre">BaseMatchingPreprocessor._fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.BaseMatchingPreprocessor._get_feature_names_out"><code class="docutils literal notranslate"><span class="pre">BaseMatchingPreprocessor._get_feature_names_out()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.BaseMatchingPreprocessor._get_output_headers"><code class="docutils literal notranslate"><span class="pre">BaseMatchingPreprocessor._get_output_headers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.BaseMatchingPreprocessor._transform"><code class="docutils literal notranslate"><span class="pre">BaseMatchingPreprocessor._transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.BaseMatchingPreprocessor.fit"><code class="docutils literal notranslate"><span class="pre">BaseMatchingPreprocessor.fit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.CategoricOneHotEncoder"><code class="docutils literal notranslate"><span class="pre">CategoricOneHotEncoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.NumericBinsEncoder"><code class="docutils literal notranslate"><span class="pre">NumericBinsEncoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.DecisionTreeEncoder"><code class="docutils literal notranslate"><span class="pre">DecisionTreeEncoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.ChainPreprocessor"><code class="docutils literal notranslate"><span class="pre">ChainPreprocessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#balance-calculators">Balance Calculators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.BaseBalanceCalculator"><code class="docutils literal notranslate"><span class="pre">BaseBalanceCalculator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.utils.BaseBalanceCalculator.per_feature_loss"><code class="docutils literal notranslate"><span class="pre">BaseBalanceCalculator.per_feature_loss()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.BetaBalance"><code class="docutils literal notranslate"><span class="pre">BetaBalance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.BetaSquaredBalance"><code class="docutils literal notranslate"><span class="pre">BetaSquaredBalance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.BetaMaxBalance"><code class="docutils literal notranslate"><span class="pre">BetaMaxBalance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.GammaBalance"><code class="docutils literal notranslate"><span class="pre">GammaBalance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.GammaSquaredBalance"><code class="docutils literal notranslate"><span class="pre">GammaSquaredBalance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.GammaXTreeBalance"><code class="docutils literal notranslate"><span class="pre">GammaXTreeBalance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.BalanceCalculator"><code class="docutils literal notranslate"><span class="pre">BalanceCalculator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.utils.BatchedBalanceCaclulator"><code class="docutils literal notranslate"><span class="pre">BatchedBalanceCaclulator</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="matchers.html">Matchers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighters.html">Weighters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Core Utilities</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/core.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="core-utilities">
+<h1>Core Utilities<a class="headerlink" href="#core-utilities" title="Permalink to this heading"></a></h1>
+<section id="matching-data">
+<h2>Matching Data<a class="headerlink" href="#matching-data" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingHeaders">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">MatchingHeaders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">categoric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numeric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingHeaders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingHeaders" title="Permalink to this definition"></a></dt>
+<dd><p>MatchingHeaders is a simple data structure to store information about which
+features to be used for matching and separating these features into
+categoric (e.g. country, gender) and numeric (e.g. age, weight) types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>categoric</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List of features to be treated as categoric variables.</p></li>
+<li><p><strong>numeric</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List of features to be treated as numeric variables.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">MatchingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'population'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pool'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'target'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData" title="Permalink to this definition"></a></dt>
+<dd><p>It is common in matching problems to require basic metadata about the data
+in order to perform matching. For instance, the data may contain columns
+such as “patient_id”, “population” and “index_date”, which are not intended
+to be used for matching but which must “go along for the ride” and follow
+the main data everywhere. MatchingData is a wrapper around pandas.DataFrame
+that includes this additional required logic about the columns. Features
+required for matching are described by a “headers” field, while other
+columns exist alongside. See MatchingHeaders.</p>
+<p>Construction patterns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Combined patient-level table with a population column</span>
+<span class="n">MatchingData</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="n">MatchingData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">population_col</span><span class="o">=</span><span class="s2">&quot;population&quot;</span><span class="p">)</span>
+
+<span class="c1"># Explicit patient-level pool and target</span>
+<span class="n">MatchingData</span><span class="p">(</span><span class="n">pool</span><span class="o">=</span><span class="n">pool_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target_df</span><span class="p">)</span>
+
+<span class="c1"># Patient-level pool and aggregate-only target</span>
+<span class="n">MatchingData</span><span class="p">(</span><span class="n">pool</span><span class="o">=</span><span class="n">pool_df</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">AggregateTarget</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>str</em><em>]</em><em>]</em>) – Data frame containing both matching feature data for all
+populations as well as at least one additional column specifying to
+which population each row belongs. If a string is passed, it is assumed
+to be a path to the data frame. Mutually exclusive with <code class="docutils literal notranslate"><span class="pre">pool</span></code> /
+<code class="docutils literal notranslate"><span class="pre">target</span></code>.</p></li>
+<li><p><strong>headers</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#pybalance.utils.MatchingHeaders" title="pybalance.utils.MatchingHeaders"><em>MatchingHeaders</em></a><em>]</em>) – A MatchingHeaders object with keys “numeric” and “categoric”
+and whoses values are names of columns to be used for matching. If None
+is passed, headers will be inferred based on how many unique values each
+column has (or from <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> when the target is aggregate).
+As guessing the headers can lead to errors, it is recommended to supply
+them explicitly.</p></li>
+<li><p><strong>population_col</strong> (<em>str</em>) – Name of the column used to split data into
+subpopulations.</p></li>
+<li><p><strong>pool</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>str</em><em>]</em><em>]</em>) – Patient-level pool population. Used with <code class="docutils literal notranslate"><span class="pre">target</span></code>.</p></li>
+<li><p><strong>target</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>str</em><em>, </em><em>AggregateTarget</em><em>]</em><em>]</em>) – Either a patient-level target DataFrame or an
+<code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> summary. Used with <code class="docutils literal notranslate"><span class="pre">pool</span></code>.</p></li>
+<li><p><strong>pool_name</strong> (<em>str</em>) – Population label for <code class="docutils literal notranslate"><span class="pre">pool</span></code> when using the explicit
+split constructor.</p></li>
+<li><p><strong>target_name</strong> (<em>str</em>) – Population label for <code class="docutils literal notranslate"><span class="pre">target</span></code> when using the explicit
+split constructor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.append" title="Permalink to this definition"></a></dt>
+<dd><p>Append a population to an existing MatchingData instance. This operation
+is inplace.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.copy" title="Permalink to this definition"></a></dt>
+<dd><p>Create a new MatchingData instance with exact same data and metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#pybalance.utils.MatchingData.data" title="Permalink to this definition"></a></dt>
+<dd><p>Pointer to underlying pandas DataFrame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.describe">
+<span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['mean',</span> <span class="pre">'std']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0.25,</span> <span class="pre">0.5,</span> <span class="pre">0.75,</span> <span class="pre">1]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.describe" title="Permalink to this definition"></a></dt>
+<dd><p>Calls describe_categoric() and describe_numeric() and returns the
+results in a single dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.describe_categoric">
+<span class="sig-name descname"><span class="pre">describe_categoric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.describe_categoric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.describe_categoric" title="Permalink to this definition"></a></dt>
+<dd><p>Create a summary statistics table split by population for categoric variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.describe_numeric">
+<span class="sig-name descname"><span class="pre">describe_numeric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['mean',</span> <span class="pre">'std']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0.25,</span> <span class="pre">0.5,</span> <span class="pre">0.75,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.describe_numeric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.describe_numeric" title="Permalink to this definition"></a></dt>
+<dd><p>Create a summary statistics table split by population for numeric variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.get_population">
+<span class="sig-name descname"><span class="pre">get_population</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.get_population"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.get_population" title="Permalink to this definition"></a></dt>
+<dd><p>Get the matching data for a population by its name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.head">
+<span class="sig-name descname"><span class="pre">head</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.head"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.head" title="Permalink to this definition"></a></dt>
+<dd><p>Return first n rows from underlying pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.populations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">populations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pybalance.utils.MatchingData.populations" title="Permalink to this definition"></a></dt>
+<dd><p>List of all populations present in the MatchingData object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Sample underlying pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.tail">
+<span class="sig-name descname"><span class="pre">tail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.tail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.tail" title="Permalink to this definition"></a></dt>
+<dd><p>Return last n rows from underlying pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.to_csv">
+<span class="sig-name descname"><span class="pre">to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.to_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.to_csv" title="Permalink to this definition"></a></dt>
+<dd><p>Write underlying pandas DataFrame to csv. Call signature is identical to
+pandas method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.MatchingData.to_parquet">
+<span class="sig-name descname"><span class="pre">to_parquet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#MatchingData.to_parquet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.MatchingData.to_parquet" title="Permalink to this definition"></a></dt>
+<dd><p>Write underlying pandas DataFrame to parquet. Call signature is
+identical to pandas method.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.utils.infer_matching_headers">
+<span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">infer_matching_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_categories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['patient_id',</span> <span class="pre">'patientid',</span> <span class="pre">'population',</span> <span class="pre">'index_date']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#infer_matching_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.infer_matching_headers" title="Permalink to this definition"></a></dt>
+<dd><p>This utility function guesses which columns are numeric and which columns
+are categoric from input data. The data can be passed either as separate
+data frames target and pool or combined in one and passed with keyword
+argument data. The function returns a dictionary with keys ‘numeric’,
+‘categoric’ and ‘all’ with values equal to the list of column names of the
+given type. By default, the function ignores patient_id and population
+columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pybalance.utils.MatchingHeaders" title="pybalance.utils.matching_data.MatchingHeaders"><em>MatchingHeaders</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.utils.split_target_pool">
+<span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">split_target_pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/matching_data.html#split_target_pool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.split_target_pool" title="Permalink to this definition"></a></dt>
+<dd><p>Split matching_data into target and pool populations based. If
+the names of the target and pool populations are not
+explicitly provided, the routine will attempt to infer their names,
+assuming that the target population is the smaller population.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="preprocessing">
+<h2>Preprocessing<a class="headerlink" href="#preprocessing" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.BaseMatchingPreprocessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">BaseMatchingPreprocessor</span></span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#BaseMatchingPreprocessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BaseMatchingPreprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>BaseMatchingPreprocessor is an abstract preprocessor class for organizing
+data transformations on matching data, keeping track of all preprocessing
+steps so that data are always transformed transformed in the same way.</p>
+<p>The inherited class must implement:</p>
+<blockquote>
+<div><p>_fit(), _transform(), _get_output_headers()</p>
+</div></blockquote>
+<p>and should implement, if possible,</p>
+<blockquote>
+<div><p>_get_feature_names_out()</p>
+</div></blockquote>
+<p>The class extends the preprocessing classes defined in sklearn. In addition
+to handling transformations of the data, this class also handles logic of
+MatchingHeaders. Preprocessors which conform to the BaseMatchingPreprocessor
+standard are chainable, allowing one to easily combine preprocessing tasks;
+see ChainPreprocessor.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.BaseMatchingPreprocessor._fit">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#BaseMatchingPreprocessor._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BaseMatchingPreprocessor._fit" title="Permalink to this definition"></a></dt>
+<dd><p>This method performs all calculations needed in order to perform the
+transformation tasks of the preprocessor (e.g. computing means and
+standard deviations). Should accept a MatchingData instance as input and
+return None. This method must be overridden by the subclass.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.BaseMatchingPreprocessor._get_feature_names_out">
+<span class="sig-name descname"><span class="pre">_get_feature_names_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#BaseMatchingPreprocessor._get_feature_names_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BaseMatchingPreprocessor._get_feature_names_out" title="Permalink to this definition"></a></dt>
+<dd><p>Same as get_feature_names_out but on a single feature level. This method
+should be overridden by the subclass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.BaseMatchingPreprocessor._get_output_headers">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_output_headers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#BaseMatchingPreprocessor._get_output_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BaseMatchingPreprocessor._get_output_headers" title="Permalink to this definition"></a></dt>
+<dd><p>Return headers on the output matching data. This method must be
+overridden by the subclass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.BaseMatchingPreprocessor._transform">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#BaseMatchingPreprocessor._transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BaseMatchingPreprocessor._transform" title="Permalink to this definition"></a></dt>
+<dd><p>Transform matching_data. Should accept a MatchingData instance as input
+and return a transformed MatchingData instance, including in particular
+transformed metadata. This method must be overridden by the subclass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.BaseMatchingPreprocessor.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#BaseMatchingPreprocessor.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BaseMatchingPreprocessor.fit" title="Permalink to this definition"></a></dt>
+<dd><p>A simple wrapper around the workhorse method _fit() to mark the
+preprocessor as fitted after a call to fit() and prevent fitting twice.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.CategoricOneHotEncoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">CategoricOneHotEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#CategoricOneHotEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.CategoricOneHotEncoder" title="Permalink to this definition"></a></dt>
+<dd><p>CategoricOneHotEncoder converts categoric covariates into one-hot encoded
+variables. Numeric columns are unaffected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>drop</strong> (<em>str</em><em> | </em><em>None</em>) – Which, if any, columns to drop in the transformation. Choices
+are: {‘first’, ‘if_binary’, None}. See
+sklearn.preprocessing.OneHotEncoder for more details.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.NumericBinsEncoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">NumericBinsEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'uniform'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'onehot-dense'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumulative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#NumericBinsEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.NumericBinsEncoder" title="Permalink to this definition"></a></dt>
+<dd><p>NumericBinsEncoder discretizes numeric covariates according to specified
+binning strategy. Categoric columns are unaffected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_bins</strong> (<em>int</em>) – Number of bins to split numeric variable into. Note in the
+case of cumulative = True, the last bin would be always one. To avoid
+this, internally we use n_bins + 1 bins and drop the last bin.</p></li>
+<li><p><strong>strategy</strong> (<em>str</em>) – Strategy to use for binnings. Choices are: {‘uniform’,
+‘quantile’, ‘kmeans’}. See sklearn.preprocessing.KBinsDiscretizer for
+more details.</p></li>
+<li><p><strong>encode</strong> (<em>str</em>) – Method to use for encoding numeric variable. Choices are:
+{‘onehot’, ‘onehot-dense’, ‘ordinal’}. See
+sklearn.preprocessing.KBinsDiscretizer for more details.</p></li>
+<li><p><strong>cumulative</strong> (<em>bool</em>) – Whether to transform numeric variables to discretized
+cumulative distribution. E.g. if x is in the 3rd bin and n_bins = 4,
+then x will map to [0, 0, 1, 0] if cumulative = False or [0, 0, 1, 1]
+otherwise.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.DecisionTreeEncoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">DecisionTreeEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_original_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">decision_tree_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#DecisionTreeEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.DecisionTreeEncoder" title="Permalink to this definition"></a></dt>
+<dd><p>DecisionTreeEncoder transforms all covariates into binary coviates corresponding
+to their terminal (leaf) position on a decision tree.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.ChainPreprocessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">ChainPreprocessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preprocessors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/preprocess.html#ChainPreprocessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.ChainPreprocessor" title="Permalink to this definition"></a></dt>
+<dd><p>ChainPreprocessor applies a sequences of Preprocessors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>preprocessors</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pybalance.utils.BaseMatchingPreprocessor" title="pybalance.utils.preprocess.BaseMatchingPreprocessor"><em>BaseMatchingPreprocessor</em></a><em>]</em>) – A list of preprocessors to be applied in sequence to
+the input data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="balance-calculators">
+<h2>Balance Calculators<a class="headerlink" href="#balance-calculators" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.BaseBalanceCalculator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">BaseBalanceCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preprocessor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#BaseBalanceCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BaseBalanceCalculator" title="Permalink to this definition"></a></dt>
+<dd><p>BaseBalanceCalculator is the low-level interface to calculating balance.
+BaseBalanceCalculator can be used with any preprocessor defined as a
+subclass of BaseMatchingPreprocessor. BaseBalanceCalculator implements
+matrix calculations in pytorch to allow for GPU acceleration.</p>
+<p>BaseBalanceCalculator performs two main tasks:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Computes a per-feature-loss based on the output features of the given
+preprocessor and</p></li>
+<li><p>Aggregates the per-feature-loss into a single value for the loss.</p></li>
+</ol>
+</div></blockquote>
+<p>Furthermore, the calculator can compute the loss for many populations at a
+time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Matching_data<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Input matching data to be used for distance calculations.
+Must contain exactly two populations. The smaller population is used as
+a reference population. Calls to distance() compute the distance to this
+reference population.</p>
+</dd>
+<dt class="field-even">Preprocessor<span class="colon">:</span></dt>
+<dd class="field-even"><p>Preprocessor to use for per-feature-loss calculation. The
+per-feature-loss is, up to some normalizations, the mean difference in
+the features at the output of the preprocessor.</p>
+</dd>
+<dt class="field-odd">Feature_weights<span class="colon">:</span></dt>
+<dd class="field-odd"><p>How to weight features in aggregation of per-feature-loss.</p>
+</dd>
+<dt class="field-even">Order<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exponent to use in combining per-feature-loss into an aggregate
+loss. Total loss is sum(feature_weight * feature_loss**order)**(1/order).</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>standardize_difference</strong> (<em>bool</em>) – Whether to use the absolute standardized mean
+difference for the per-feature loss (otherwise uses absolute mean
+difference).</p>
+</dd>
+<dt class="field-even">Device<span class="colon">:</span></dt>
+<dd class="field-even"><p>Name of device to use for matrix computations. By default, will use
+GPU if a GPU is found on the system.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.utils.BaseBalanceCalculator.per_feature_loss">
+<span class="sig-name descname"><span class="pre">per_feature_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool_subsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_subsets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#BaseBalanceCalculator.per_feature_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BaseBalanceCalculator.per_feature_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Compute mismatch (aka “distance”, aka “loss”) on a per-feature basis for
+a set of candidate populations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.BetaBalance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">BetaBalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#BetaBalance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BetaBalance" title="Permalink to this definition"></a></dt>
+<dd><p>BetaBalance computes the balance between two populations as the mean
+absolute standardized mean difference across all features. Uses
+StandardMatchingPreprocessor as the preprocessor. In this preprocessor,
+numeric variables are left unchanged, while categorical variables are
+one-hot encoded. See StandardMatchingPreprocessor for more details.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.BetaSquaredBalance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">BetaSquaredBalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#BetaSquaredBalance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BetaSquaredBalance" title="Permalink to this definition"></a></dt>
+<dd><p>BetaSquaredBalance computes the balance between two populatiosn as the mean
+square standardized mean difference across all features. Uses
+StandardMatchingPreprocessor as the preprocessor. In this preprocessor,
+numeric variables are left unchanged, while categorical variables are
+one-hot encoded. See StandardMatchingPreprocessor for more details.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.BetaMaxBalance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">BetaMaxBalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#BetaMaxBalance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BetaMaxBalance" title="Permalink to this definition"></a></dt>
+<dd><p>Same as BetaBalance, except the worst-matched feature determines the loss.
+This class is provided as a convenience, since this balance metric is often
+a criterion used to determine if matching is “sufficiently good”. However,
+be aware that using this balance metric as an optimization objective with
+the various matchers can lead unwanted behavior, since if improvements in
+the worst-matched feature are not possible, there is no signal from the
+balance function to improve any other the other features.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.GammaBalance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">GammaBalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'onehot-dense'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumulative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#GammaBalance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.GammaBalance" title="Permalink to this definition"></a></dt>
+<dd><p>Convenience interface to BaseBalanceCalculator to compute the balance
+between two populations by computing the mean area between their
+one-dimensional marginal distributions. See GammaPreprocessor for
+description of preprocessing options.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.GammaSquaredBalance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">GammaSquaredBalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'onehot-dense'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumulative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#GammaSquaredBalance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.GammaSquaredBalance" title="Permalink to this definition"></a></dt>
+<dd><p>Same as GammaBalance, except that per-feature balances are averages in a
+mean square fashion.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.GammaXTreeBalance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">GammaXTreeBalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_original_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">decision_tree_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#GammaXTreeBalance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.GammaXTreeBalance" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.utils.BalanceCalculator">
+<span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">BalanceCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gamma'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#BalanceCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BalanceCalculator" title="Permalink to this definition"></a></dt>
+<dd><p>BalanceCalculator provides a convenience interface to balance calculators,
+allowing the user to initialize a balance calculator by name. The
+calculators are initialized with default parameters, but these can be
+overridden by passing the appropriate kwargs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matching_data</strong> – MatchingData instance containing reference to the data
+against which matching metrics will be computed</p></li>
+<li><p><strong>objective</strong> – Name of objective function to be used for computing
+balance. Balance calculators must be implemented in
+utils.balance_calculators.py and registered in the BALANCE_CALCULATORS
+dictionary therein in order to be accessible from this interface.</p></li>
+<li><p><strong>kwargs</strong> – Any additional arguments required to configure the specific
+objective function (e.g. n_bins = 10 for “gamma”).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybalance.utils.BatchedBalanceCaclulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.utils.</span></span><span class="sig-name descname"><span class="pre">BatchedBalanceCaclulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">balance_calculator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size_gb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/utils/balance_calculators.html#BatchedBalanceCaclulator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.utils.BatchedBalanceCaclulator" title="Permalink to this definition"></a></dt>
+<dd><p>Batch balance calculations to avoid large peak memory usage.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../demos/weighting_02_maic.html" class="btn btn-neutral float-left" title="Weighting with MAIC / entropy balancing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="matchers.html" class="btn btn-neutral float-right" title="Matchers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

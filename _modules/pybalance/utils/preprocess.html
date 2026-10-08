@@ -44,6 +44,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../02_demos.html">Demos</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
 <ul>
@@ -65,7 +66,11 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../03_api.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/core.html">Core Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/matchers.html">Matchers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/weighters.html">Weighters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/simulation.html">Simulation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
 <ul>
@@ -123,7 +128,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="BaseMatchingPreprocessor"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseMatchingPreprocessor">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BaseMatchingPreprocessor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMatchingPreprocessor"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseMatchingPreprocessor">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BaseMatchingPreprocessor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BaseMatchingPreprocessor is an abstract preprocessor class for organizing</span>
 <span class="sd">    data transformations on matching data, keeping track of all preprocessing</span>
@@ -147,7 +152,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="BaseMatchingPreprocessor.fit"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseMatchingPreprocessor.fit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">refit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseMatchingPreprocessor.fit"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseMatchingPreprocessor.fit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span> <span class="n">refit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A simple wrapper around the workhorse method _fit() to mark the</span>
 <span class="sd">        preprocessor as fitted after a call to fit() and prevent fitting twice.</span>
@@ -172,7 +177,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">matching_data</span><span class="p">,</span> <span class="n">refit</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">matching_data</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BaseMatchingPreprocessor._fit"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseMatchingPreprocessor._fit">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="BaseMatchingPreprocessor._fit"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseMatchingPreprocessor._fit">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method performs all calculations needed in order to perform the</span>
@@ -182,7 +187,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
-<div class="viewcode-block" id="BaseMatchingPreprocessor._transform"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseMatchingPreprocessor._transform">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="BaseMatchingPreprocessor._transform"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseMatchingPreprocessor._transform">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transform matching_data. Should accept a MatchingData instance as input</span>
@@ -199,7 +204,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_output_headers</span><span class="p">()</span>
 
-<div class="viewcode-block" id="BaseMatchingPreprocessor._get_output_headers"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseMatchingPreprocessor._get_output_headers">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="BaseMatchingPreprocessor._get_output_headers"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseMatchingPreprocessor._get_output_headers">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_output_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return headers on the output matching data. This method must be</span>
@@ -233,7 +238,7 @@
             <span class="n">feature_name_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature_name_in</span><span class="p">]</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_feature_names_out</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">feature_name_in</span><span class="p">],</span> <span class="p">[])</span>
 
-<div class="viewcode-block" id="BaseMatchingPreprocessor._get_feature_names_out"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.BaseMatchingPreprocessor._get_feature_names_out">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_feature_names_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="BaseMatchingPreprocessor._get_feature_names_out"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseMatchingPreprocessor._get_feature_names_out">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_feature_names_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name_in</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Same as get_feature_names_out but on a single feature level. This method</span>
 <span class="sd">        should be overridden by the subclass.</span>
@@ -301,7 +306,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">feature_name_in</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="CategoricOneHotEncoder"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.CategoricOneHotEncoder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CategoricOneHotEncoder</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
+<div class="viewcode-block" id="CategoricOneHotEncoder"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.CategoricOneHotEncoder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CategoricOneHotEncoder</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    CategoricOneHotEncoder converts categoric covariates into one-hot encoded</span>
 <span class="sd">    variables. Numeric columns are unaffected.</span>
@@ -383,7 +388,7 @@
         <span class="k">return</span> <span class="n">feature_names_out</span></div>
 
 
-<div class="viewcode-block" id="NumericBinsEncoder"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.NumericBinsEncoder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">NumericBinsEncoder</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
+<div class="viewcode-block" id="NumericBinsEncoder"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.NumericBinsEncoder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">NumericBinsEncoder</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    NumericBinsEncoder discretizes numeric covariates according to specified</span>
 <span class="sd">    binning strategy. Categoric columns are unaffected.</span>
@@ -704,7 +709,7 @@
         <span class="k">return</span> <span class="n">matching_data</span>
 
 
-<div class="viewcode-block" id="DecisionTreeEncoder"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.DecisionTreeEncoder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">DecisionTreeEncoder</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
+<div class="viewcode-block" id="DecisionTreeEncoder"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.DecisionTreeEncoder">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">DecisionTreeEncoder</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    DecisionTreeEncoder transforms all covariates into binary coviates corresponding</span>
 <span class="sd">    to their terminal (leaf) position on a decision tree.</span>
@@ -771,7 +776,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ChainPreprocessor"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.ChainPreprocessor">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ChainPreprocessor</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
+<div class="viewcode-block" id="ChainPreprocessor"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.ChainPreprocessor">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ChainPreprocessor</span><span class="p">(</span><span class="n">BaseMatchingPreprocessor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ChainPreprocessor applies a sequences of Preprocessors.</span>
 

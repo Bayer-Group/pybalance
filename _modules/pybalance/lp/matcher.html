@@ -44,6 +44,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../02_demos.html">Demos</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
 <ul>
@@ -65,7 +66,11 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../03_api.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/core.html">Core Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/matchers.html">Matchers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/weighters.html">Weighters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/simulation.html">Simulation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
 <ul>
@@ -362,7 +367,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_match</span>
 
 
-<div class="viewcode-block" id="ConstraintSatisfactionMatcher"><a class="viewcode-back" href="../../../03_api.html#pybalance.lp.ConstraintSatisfactionMatcher">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ConstraintSatisfactionMatcher</span><span class="p">(</span><span class="n">_BaseConstraintSatisfactionMatcher</span><span class="p">):</span>
+<div class="viewcode-block" id="ConstraintSatisfactionMatcher"><a class="viewcode-back" href="../../../api/matchers.html#pybalance.lp.ConstraintSatisfactionMatcher">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ConstraintSatisfactionMatcher</span><span class="p">(</span><span class="n">_BaseConstraintSatisfactionMatcher</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Population matching based on constraint satisfication formulation. This solver</span>
 <span class="sd">    can only handle linear objective functions; see &quot;objective&quot; parameter below.</span>
@@ -570,7 +575,7 @@
         <span class="p">]</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ConstraintSatisfactionMatcher.match"><a class="viewcode-back" href="../../../03_api.html#pybalance.lp.ConstraintSatisfactionMatcher.match">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+<div class="viewcode-block" id="ConstraintSatisfactionMatcher.match"><a class="viewcode-back" href="../../../api/matchers.html#pybalance.lp.ConstraintSatisfactionMatcher.match">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Match populations passed during __init__(). Returns MatchingData</span>
 <span class="sd">        instance containing the matched pool and target populations.</span>
@@ -798,7 +803,7 @@
         <span class="k">return</span> <span class="n">match</span></div></div>
 
 
-<div class="viewcode-block" id="AggregateConstraintSatisfactionMatcher"><a class="viewcode-back" href="../../../03_api.html#pybalance.lp.AggregateConstraintSatisfactionMatcher">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">AggregateConstraintSatisfactionMatcher</span><span class="p">(</span><span class="n">_BaseConstraintSatisfactionMatcher</span><span class="p">):</span>
+<div class="viewcode-block" id="AggregateConstraintSatisfactionMatcher"><a class="viewcode-back" href="../../../api/matchers.html#pybalance.lp.AggregateConstraintSatisfactionMatcher">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">AggregateConstraintSatisfactionMatcher</span><span class="p">(</span><span class="n">_BaseConstraintSatisfactionMatcher</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constraint-satisfaction matcher for an *aggregate* target: the pool is</span>
 <span class="sd">    patient-level, but the reference population is known only through summary</span>
@@ -1061,7 +1066,7 @@
         <span class="p">]</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">)</span>
 
-<div class="viewcode-block" id="AggregateConstraintSatisfactionMatcher.match"><a class="viewcode-back" href="../../../03_api.html#pybalance.lp.AggregateConstraintSatisfactionMatcher.match">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+<div class="viewcode-block" id="AggregateConstraintSatisfactionMatcher.match"><a class="viewcode-back" href="../../../api/matchers.html#pybalance.lp.AggregateConstraintSatisfactionMatcher.match">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Match the pool to the aggregate target passed during __init__().</span>
 <span class="sd">        Returns a MatchingData instance containing the matched pool and the</span>

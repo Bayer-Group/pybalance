@@ -44,6 +44,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../02_demos.html">Demos</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
 <ul>
@@ -65,7 +66,11 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../03_api.html">API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/core.html">Core Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/matchers.html">Matchers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/weighters.html">Weighters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/simulation.html">Simulation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
 <ul>
@@ -110,7 +115,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MatchingHeaders"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingHeaders">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="MatchingHeaders"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingHeaders">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MatchingHeaders</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    MatchingHeaders is a simple data structure to store information about which</span>
@@ -644,7 +649,7 @@
         <span class="k">return</span> <span class="n">header</span>
 
 
-<div class="viewcode-block" id="infer_matching_headers"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.infer_matching_headers">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">infer_matching_headers</span><span class="p">(</span>
+<div class="viewcode-block" id="infer_matching_headers"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.infer_matching_headers">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">infer_matching_headers</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">max_categories</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">ignore_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;patient_id&quot;</span><span class="p">,</span> <span class="s2">&quot;patientid&quot;</span><span class="p">,</span> <span class="s2">&quot;population&quot;</span><span class="p">,</span> <span class="s2">&quot;index_date&quot;</span><span class="p">],</span>
@@ -709,7 +714,7 @@
     <span class="k">return</span> <span class="n">data</span>
 
 
-<div class="viewcode-block" id="MatchingData"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MatchingData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="MatchingData"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MatchingData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It is common in matching problems to require basic metadata about the data</span>
 <span class="sd">    in order to perform matching. For instance, the data may contain columns</span>
@@ -889,7 +894,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span>
 
-<div class="viewcode-block" id="MatchingData.get_population"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.get_population">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_population</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MatchingData.get_population"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.get_population">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_population</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the matching data for a population by its name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -926,19 +931,19 @@
         <span class="c1"># the data.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
-<div class="viewcode-block" id="MatchingData.sample"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.sample">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MatchingData.sample"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.sample">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sample underlying pandas DataFrame.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MatchingData.head"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.head">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">head</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MatchingData.head"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.head">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">head</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return first n rows from underlying pandas DataFrame.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MatchingData.tail"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.tail">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">tail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MatchingData.tail"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.tail">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">tail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return last n rows from underlying pandas DataFrame.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -947,7 +952,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MatchingData.copy"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+<div class="viewcode-block" id="MatchingData.copy"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new MatchingData instance with exact same data and metadata.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -969,7 +974,7 @@
             <span class="n">target_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_name</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MatchingData.append"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.append">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="MatchingData.append"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.append">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Append a population to an existing MatchingData instance. This operation</span>
 <span class="sd">        is inplace.</span>
@@ -989,14 +994,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">df</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="MatchingData.to_csv"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.to_csv">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="MatchingData.to_csv"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.to_csv">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write underlying pandas DataFrame to csv. Call signature is identical to</span>
 <span class="sd">        pandas method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MatchingData.to_parquet"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.to_parquet">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_parquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="MatchingData.to_parquet"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.to_parquet">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_parquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write underlying pandas DataFrame to parquet. Call signature is</span>
 <span class="sd">        identical to pandas method.</span>
@@ -1037,7 +1042,7 @@
         <span class="n">counts</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">counts</span>
 
-<div class="viewcode-block" id="MatchingData.describe_numeric"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.describe_numeric">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">describe_numeric</span><span class="p">(</span>
+<div class="viewcode-block" id="MatchingData.describe_numeric"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.describe_numeric">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">describe_numeric</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">aggregations</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">],</span>
         <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
@@ -1066,7 +1071,7 @@
 
         <span class="k">return</span> <span class="n">agg</span></div>
 
-<div class="viewcode-block" id="MatchingData.describe_categoric"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.describe_categoric">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">describe_categoric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MatchingData.describe_categoric"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.describe_categoric">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">describe_categoric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a summary statistics table split by population for categoric variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1134,7 +1139,7 @@
 
         <span class="k">return</span> <span class="n">out</span></div>
 
-<div class="viewcode-block" id="MatchingData.describe"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.MatchingData.describe">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span>
+<div class="viewcode-block" id="MatchingData.describe"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.MatchingData.describe">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">aggregations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">],</span>
@@ -1149,7 +1154,7 @@
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">])</span></div></div>
 
 
-<div class="viewcode-block" id="split_target_pool"><a class="viewcode-back" href="../../../03_api.html#pybalance.utils.split_target_pool">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">split_target_pool</span><span class="p">(</span>
+<div class="viewcode-block" id="split_target_pool"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.split_target_pool">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">split_target_pool</span><span class="p">(</span>
     <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
     <span class="n">pool_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">target_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

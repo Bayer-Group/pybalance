@@ -1,0 +1,284 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visualization &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=860ec0ee"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Simulation" href="simulation.html" />
+    <link rel="prev" title="Weighters" href="weighters.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../demos/core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/core_02_balance_calculators.html">Balance Calculators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Matching</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matchers.html">Matchers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighters.html">Weighters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Visualization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pybalance.visualization.plot_numeric_features"><code class="docutils literal notranslate"><span class="pre">plot_numeric_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pybalance.visualization.plot_categoric_features"><code class="docutils literal notranslate"><span class="pre">plot_categoric_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pybalance.visualization.plot_binary_features"><code class="docutils literal notranslate"><span class="pre">plot_binary_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pybalance.visualization.plot_joint_numeric_distributions"><code class="docutils literal notranslate"><span class="pre">plot_joint_numeric_distributions()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pybalance.visualization.plot_joint_numeric_categoric_distributions"><code class="docutils literal notranslate"><span class="pre">plot_joint_numeric_categoric_distributions()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pybalance.visualization.plot_per_feature_loss"><code class="docutils literal notranslate"><span class="pre">plot_per_feature_loss()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Visualization</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/visualization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="visualization">
+<h1>Visualization<a class="headerlink" href="#visualization" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.visualization.plot_numeric_features">
+<span class="sig-prename descclassname"><span class="pre">pybalance.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_numeric_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_wrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plot_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/visualization/distributions.html#plot_numeric_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.visualization.plot_numeric_features" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the one-dimensional marginal distributions for all numerical features
+and all treatment groups found in matching_data. Extra keyword arguments are
+passed to seaborn.histplot and override defaults.</p>
+<p>If matching_data has an AggregateTarget, it has no patient-level rows to plot a
+distribution for and a warning is logged; use plot_aggregate_target_match()
+instead to compare the pool against its disclosed statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matching_data</strong> (<a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a>) – MatchingData instance containing at least one population.</p></li>
+<li><p><strong>include_only</strong> (<em>List</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – List of features to consider for plotting. Otherwise,
+all numeric features are plotted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Figure</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.visualization.plot_categoric_features">
+<span class="sig-prename descclassname"><span class="pre">pybalance.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_categoric_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_wrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_binary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plot_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/visualization/distributions.html#plot_categoric_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.visualization.plot_categoric_features" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the one-dimensional marginal distributions for all categoric features
+and all treatment groups found in matching_data. Extra keyword arguments are
+passed to seaborn.histplot and override defaults.</p>
+<p>If matching_data has an AggregateTarget, it has no patient-level rows to plot a
+distribution for and a warning is logged; use plot_aggregate_target_match()
+instead to compare the pool against its disclosed statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matching_data</strong> (<a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a>) – MatchingData instance containing at least one population.</p></li>
+<li><p><strong>include_binary</strong> – Whether to include binary features in the plot.</p></li>
+<li><p><strong>include_only</strong> (<em>List</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – List of features to consider for plotting. Otherwise,
+all categoric features are plotted. If include_binary is False, binary
+features are excluded, even if present in include_only.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Figure</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.visualization.plot_binary_features">
+<span class="sig-prename descclassname"><span class="pre">pybalance.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_binary_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orient_horizontal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_population</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plot_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/visualization/distributions.html#plot_binary_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.visualization.plot_binary_features" title="Permalink to this definition"></a></dt>
+<dd><p>Plot all binary features for all treatment groups found in matching_data.
+Additional keyword arguments are passed to sns.barplot and override default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matching_data</strong> (<a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a>) – MatchingData instance containing at least a pool and
+target population.</p></li>
+<li><p><strong>max_features</strong> (<em>int</em>) – Max number of features to show in plot, in case there
+are a lot of binary features. Features are sorted in descending order by
+the initial mismatch between pool and target. The top max_features will
+be shown.</p></li>
+<li><p><strong>include_only</strong> (<em>List</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – List of features to consider for plotting. Otherwise,
+all binary features are plotted.</p></li>
+<li><p><strong>orient_horizontal</strong> (<em>bool</em>) – If True, orient features along the x-axis.
+Otherwise, features will be along the y-axis.</p></li>
+<li><p><strong>standardize_difference</strong> (<em>bool</em>) – Whether to use the absolute standardized mean
+difference for the differences plot (otherwise plots absolute mean
+difference).</p></li>
+<li><p><strong>reference_population</strong> (<em>str</em><em> | </em><em>None</em>) – Name of population in matching_data against
+which other populations should be compared. If not supplied, will use
+the smaller population as the reference population.</p></li>
+<li><p><strong>plot_params</strong> – Parameters passed on to seaborn routines.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Figure</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.visualization.plot_joint_numeric_distributions">
+<span class="sig-prename descclassname"><span class="pre">pybalance.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_joint_numeric_distributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'kde'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plot_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/visualization/distributions.html#plot_joint_numeric_distributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.visualization.plot_joint_numeric_distributions" title="Permalink to this definition"></a></dt>
+<dd><p>Plot 2D distributions of pairs of numeric features from matching_data.
+joint_kind can be either kde or scatter. scatter is usually a bad choice
+for large datasets.  Choose subsets of features using include_only. Additional keyword arguments are passed to sns.JointGrid
+and override default.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.visualization.plot_joint_numeric_categoric_distributions">
+<span class="sig-prename descclassname"><span class="pre">pybalance.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_joint_numeric_categoric_distributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_only_numeric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_only_categoric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plot_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/visualization/distributions.html#plot_joint_numeric_categoric_distributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.visualization.plot_joint_numeric_categoric_distributions" title="Permalink to this definition"></a></dt>
+<dd><p>Plot 2D distributions of pairs of numeric and categoric features from
+matching_data. Choose subsets of features using include_only. Additional
+keyword arguments are passed to sns.JointGrid and override default.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybalance.visualization.plot_per_feature_loss">
+<span class="sig-prename descclassname"><span class="pre">pybalance.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_per_feature_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">balance_calculator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_population</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plot_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/visualization/distributions.html#plot_per_feature_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.visualization.plot_per_feature_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the mismatch as a function of feature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matching_data</strong> (<a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a>) – Input data to plot.</p></li>
+<li><p><strong>balance_calculator</strong> (<a class="reference internal" href="core.html#pybalance.utils.BaseBalanceCalculator" title="pybalance.utils.balance_calculators.BaseBalanceCalculator"><em>BaseBalanceCalculator</em></a>) – Balance metric to use for calculating the per
+feature loss. Balance calculator must implement a ‘per_feature_loss’
+method.</p></li>
+<li><p><strong>reference_population</strong> (<em>str</em><em> | </em><em>None</em>) – Name of population in matching_data against
+which other populations should be compared. If not supplied, will use
+the smaller population as the reference population.</p></li>
+<li><p><strong>debin</strong> (<em>bool</em>) – If True, attempt to map effective features back into the real
+feature space. This is not always possible, e.g., features like
+age*height can’t be mapped back to a single feature but features like
+country_US, country_Germany can. In the former case, routine will plot
+loss per effective feature; in the latter, loss per input feature.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em>) – If True, divide loss by number of features such that the
+sum is the total loss. Otherwise, the plotted loss contributions must be
+averaged to obtain the total loss.</p></li>
+<li><p><strong>plot_params</strong> – Parameters passed on to seaborn routines.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Figure</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="weighters.html" class="btn btn-neutral float-left" title="Weighters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="simulation.html" class="btn btn-neutral float-right" title="Simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
