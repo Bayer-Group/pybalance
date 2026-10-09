@@ -1,7 +1,7 @@
 from collections import deque
 import numpy as np
 import pandas as pd
-from typing import Union
+from typing import Union, Optional
 import time
 
 import logging
@@ -88,16 +88,59 @@ class GeneticMatcher:
         utils.balance_calculators.BalanceCalculator or an instance of
         BaseBalanceCalculator.
 
-    :param params: Configuration params for the genetic matcher, including
-        time_limit (seconds; None for no limit) and seed. See
-        pybalance.genetic.get_global_defaults for a list of options.
+    :param time_limit: Time limit in seconds for matching. None means no limit.
+        Defaults to 300 seconds.
+
+    :param verbose: Whether to print progress and diagnostic information.
+
+    :param candidate_population_size: Size of candidate population to match 
+        against reference data. If not specified, will use the same size as 
+        the reference population.
+
+    :param n_candidate_populations: Number of candidate populations to 
+        simultaneously evolve. Defaults to 5000.
+
+    :param n_keep_best: Keep top N current best scoring candidate populations.
+        If None, defaults to n_candidate_populations / 4.
+
+    :param n_voting_populations: Form new candidate populations based on 
+        frequency of patient occurrence. If None, defaults to 
+        n_candidate_populations / 4.
+
+    :param n_mutation: Make individual patient swaps for top candidate 
+        populations. If None, defaults to n_candidate_populations / 4.
+
+    :param n_generations: Number of generations to evolve the candidate 
+        populations. Defaults to 1000.
+
+    :param n_iter_no_change: Stop if no improvement after this many iterations.
+        Defaults to 100.
+
+    :param max_batch_size_gb: Maximum batch size in GB for GPU operations.
+        Defaults to 2.0.
+
+    :param seed: Random seed for reproducibility. If None, results will vary 
+        between runs.
+
+    :param log_every: Log progress every N generations. Defaults to 5.
     """
 
     def __init__(
         self,
         matching_data: MatchingData,
         objective: Union[str, BaseBalanceCalculator] = "beta",
-        **params,
+        time_limit: Optional[float] = 300,
+        verbose: bool = True,
+        candidate_population_size: Optional[int] = None,
+        n_candidate_populations: int = 5000,
+        n_keep_best: Optional[int] = None,
+        n_voting_populations: Optional[int] = None,
+        n_mutation: Optional[int] = None,
+        n_generations: int = 1000,
+        n_iter_no_change: int = 100,
+        max_batch_size_gb: float = 2.0,
+        seed: Optional[int] = None,
+        log_every: int = 5,
     ):
         self.matching_data = matching_data
         self.target, self.pool = split_target_pool(matching_data)
@@ -109,6 +152,21 @@ class GeneticMatcher:
             self.balance_calculator = objective
             self.objective = self.balance_calculator.name
 
+        # Build params dict from explicit parameters
+        params = {
+            "candidate_population_size": candidate_population_size,
+            "n_candidate_populations": n_candidate_populations,
+            "n_keep_best": n_keep_best,
+            "n_voting_populations": n_voting_populations,
+            "n_mutation": n_mutation,
+            "n_generations": n_generations,
+            "n_iter_no_change": n_iter_no_change,
+            "time_limit": time_limit,
+            "max_batch_size_gb": max_batch_size_gb,
+            "seed": seed,
+            "verbose": verbose,
+            "log_every": log_every,
+        }
         params = self._check_params(params)
         self.params = {"objective": self.objective}
         self.set_params(**params)
@@ -167,13 +225,13 @@ class GeneticMatcher:
         self.generation = 0
         self.elapsed_time = 0
 
-    def match(self, seed=None):
+    def match(self):
         """
         Match populations passed during __init__(). Returns MatchingData
         instance containing the matched pool and target populations.
         """
         t0 = time.time()
-        self._init_first_generation(seed)
+        self._init_first_generation(self.seed)
         stop = self._check_stopping_conditions()
         while not stop:
             self._log()

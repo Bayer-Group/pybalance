@@ -319,7 +319,7 @@ class ConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher):
 
     :param max_mismatch: Maximum allowable absolute mean difference for any feature.
 
-    :param time_limit: Time limit to stop solving in seconds (def: 180 sec).
+    :param time_limit: Time limit to stop solving in seconds (def: 300 sec).
 
     :param num_workers: Number of workers to use to optimize objective. See
         https://github.com/google/or-tools/blob/stable/ortools/sat/sat_parameters.proto#L556
@@ -339,7 +339,7 @@ class ConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher):
         pool_size: Optional[int] = None,
         target_size: Optional[int] = None,
         max_mismatch: Optional[float] = None,
-        time_limit: float = 180,
+        time_limit: float = 300,
         num_workers: int = 4,
         ps_hinting: bool = False,
         verbose: bool = True,
@@ -742,7 +742,7 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         features with a disclosed target std) is always a soft, minimized
         objective term and is not capped by max_mismatch.
 
-    :param time_limit: Time limit to stop solving in seconds (def: 180 sec).
+    :param time_limit: Time limit to stop solving in seconds (def: 300 sec).
 
     :param num_workers: Number of workers to use to optimize objective.
 
@@ -759,7 +759,7 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         matching_data: MatchingData,
         pool_size: Optional[int] = None,
         max_mismatch: Optional[float] = None,
-        time_limit: float = 180,
+        time_limit: float = 300,
         num_workers: int = 4,
         verbose: bool = True,
     ):
