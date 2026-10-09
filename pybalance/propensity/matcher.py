@@ -100,7 +100,7 @@ class PropensityScoreMatcher:
         objective: Union[str, BaseBalanceCalculator] = "beta",
         caliper: Optional[float] = None,
         max_iter: int = 50,
-        time_limit: float = 60 * 5,
+        time_limit: Optional[float] = 60 * 5,
         method: str = "greedy",
         verbose: bool = True,
         seed: Optional[int] = None,
@@ -162,7 +162,7 @@ class PropensityScoreMatcher:
         if self.verbose:
             self._describe_best_match()
 
-    def get_best_match(self):
+    def get_best_match(self) -> MatchingData:
         _check_fitted(self)
         if self.verbose:
             self._describe_best_match()

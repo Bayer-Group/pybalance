@@ -693,10 +693,12 @@ class MatchingData(object):
             self._data = data
             self._set_headers(headers)
             if population_col not in self._data.columns:
-                raise KeyError(f"""
+                raise KeyError(
+                    f"""
             Cannot split into populations based on {population_col}. Column not
             present in data frame.
-            """)
+            """
+                )
             return
 
         pool_df = _load_matching_data(pool) if isinstance(pool, str) else pool.copy()
@@ -1075,10 +1077,12 @@ def split_target_pool(
         pool = matching_data.get_population(pool_name)
     elif isinstance(target_name, str) or isinstance(pool_name, str):
         if len(matching_data.populations) != 2:
-            raise ValueError(f"""
+            raise ValueError(
+                f"""
             Cannot split into exactly two populations based on {matching_data.population_col}.
             Found populations: {','.join(matching_data.populations)}.
-            """)
+            """
+            )
         if isinstance(target_name, str):
             pool_name = [p for p in matching_data.populations if p != target_name][0]
         if isinstance(pool_name, str):
@@ -1087,10 +1091,12 @@ def split_target_pool(
         pool = matching_data.get_population(pool_name)
     else:
         if len(matching_data.populations) != 2:
-            raise ValueError(f"""
+            raise ValueError(
+                f"""
             Cannot split into exactly two populations based on {matching_data.population_col}.
             Found populations: {','.join(matching_data.populations)}.
-            """)
+            """
+            )
         inferred_pool_name = matching_data.populations[0]
         inferred_target_name = matching_data.populations[1]
         target = matching_data.get_population(inferred_target_name)

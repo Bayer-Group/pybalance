@@ -257,7 +257,7 @@ class _BaseConstraintSatisfactionMatcher(object):
             status = solver.Solve(model)
         return solver, status
 
-    def get_best_match(self):
+    def get_best_match(self) -> MatchingData:
         _check_fitted(self)
         return self.best_match
 
@@ -297,15 +297,6 @@ class ConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher):
         function). The solver will optimize the absolute mean difference on the
         output features of the balance calculator's preprocessing.
 
-    :param match_size: Number of samples to include in the matched population.
-        If match_size < size of target population, then the target is subsetted
-        to be the same size, that is, pool_size = target_size = match_size. If
-        match_size >= size of target population, then the full target is used
-        and only the pool is subsetted, that is, pool_size = match_size and
-        target_size = n_target. This option cannot be used in combination
-        with pool_size or target_size. This option is deprecated and will be
-        removed in a later release.
-
     :param pool_size: Number of samples to include from the pool in the matched
         population. Must be less than the size of the pool. If pool_size is not set,
         then max_mismatch and target_size must be set and pool_size will be optimized
@@ -319,7 +310,7 @@ class ConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher):
 
     :param max_mismatch: Maximum allowable absolute mean difference for any feature.
 
-    :param time_limit: Time limit to stop solving in seconds (def: 300 sec).
+    :param time_limit: Time limit to stop solving in seconds (default 300 sec).
 
     :param num_workers: Number of workers to use to optimize objective. See
         https://github.com/google/or-tools/blob/stable/ortools/sat/sat_parameters.proto#L556
@@ -335,11 +326,10 @@ class ConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher):
         self,
         matching_data: MatchingData,
         objective: Union[str, BaseBalanceCalculator] = "beta",
-        match_size: Optional[int] = None,
         pool_size: Optional[int] = None,
         target_size: Optional[int] = None,
         max_mismatch: Optional[float] = None,
-        time_limit: float = 300,
+        time_limit: Optional[float] = 300,
         num_workers: int = 4,
         ps_hinting: bool = False,
         verbose: bool = True,
@@ -389,7 +379,7 @@ class ConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher):
         ), "Number of patients in treatment arm should be equal or less then control."
 
         self.pool_size, self.target_size = self._get_pool_size_target_size(
-            pool_size, target_size, match_size, max_mismatch
+            pool_size, target_size, max_mismatch
         )
         self.max_mismatch = max_mismatch
         self.time_limit = time_limit
@@ -399,27 +389,10 @@ class ConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher):
 
         self._reset_best_match()
 
-    def _get_pool_size_target_size(
-        self, pool_size, target_size, match_size, max_mismatch
-    ):
+    def _get_pool_size_target_size(self, pool_size, target_size, max_mismatch):
         # Remember whether the caller left target_size unset; the final "did the
         # caller pass neither size?" check needs the original None-ness.
         target_size_was_none = target_size is None
-
-        if match_size is not None:
-            logger.warning(
-                "Option match_size is deprecated and will be removed in a later release. Use pool_size and target_size instead."
-            )
-            if pool_size is not None or not target_size_was_none:
-                raise ValueError(
-                    "Cannot use match_size in combination with pool_size or target_size."
-                )
-            if match_size < self.n_target:
-                target_size = pool_size = match_size
-            else:
-                target_size = self.n_target
-                pool_size = match_size
-            target_size_was_none = False
 
         if max_mismatch is not None:
             if target_size is not None and pool_size is not None:
@@ -759,7 +732,7 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         matching_data: MatchingData,
         pool_size: Optional[int] = None,
         max_mismatch: Optional[float] = None,
-        time_limit: float = 300,
+        time_limit: Optional[float] = 300,
         num_workers: int = 4,
         verbose: bool = True,
     ):

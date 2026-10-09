@@ -27,7 +27,7 @@ class BasicLogger:
         # pathlib.Path(self.history_directory).mkdir(parents=True, exist_ok=True)
 
     def on_generation_end(self, matcher):
-        verbose = matcher.params["verbose"]
+        verbose = matcher.verbose
 
         unique_patients = torch.unique(matcher.candidate_populations)
         if verbose and not (matcher.generation % self.log_every):
