@@ -57,5 +57,5 @@ Balance Calculators
 
 .. autofunction:: pybalance.utils.BalanceCalculator
 
-.. autoclass:: pybalance.utils.BatchedBalanceCaclulator
+.. autoclass:: pybalance.utils.BatchedBalanceCalculator
     :members:

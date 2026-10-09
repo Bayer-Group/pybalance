@@ -163,7 +163,7 @@
 
 <span class="sd">    :param time_limit: Restrict hyperparameter search based on time. No new</span>
 <span class="sd">        model will be trained after time_limit seconds have passed since</span>
-<span class="sd">        matching began.</span>
+<span class="sd">        matching began (def: 300 sec).</span>
 
 <span class="sd">    :param method: Method to use for propensity score matching. Can be either</span>
 <span class="sd">        &#39;greedy&#39; or &#39;linear_sum_assignment&#39;. The former method is locally</span>
@@ -172,6 +172,9 @@
 
 <span class="sd">    :param verbose: Flag to indicate whether to print diagnositic information</span>
 <span class="sd">        during training.</span>
+
+<span class="sd">    :param seed: Seed for the hyperparameter search and the classifiers. Set</span>
+<span class="sd">        it to make matching reproducible; if None, results vary between runs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">DEFAULT_HYPERPARAM_SPACE</span> <span class="o">=</span> <span class="p">{</span>
@@ -202,14 +205,16 @@
         <span class="n">objective</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseBalanceCalculator</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;beta&quot;</span><span class="p">,</span>
         <span class="n">caliper</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
-        <span class="n">time_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">time_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span>
         <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;greedy&quot;</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">caliper</span> <span class="o">=</span> <span class="n">caliper</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">max_iter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">=</span> <span class="n">time_limit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparam_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_HYPERPARAM_SPACE</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
@@ -227,9 +232,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_train_preprocessors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_best_match</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;objective&quot;</span><span class="p">,</span> <span class="s2">&quot;caliper&quot;</span><span class="p">,</span> <span class="s2">&quot;max_iter&quot;</span><span class="p">,</span> <span class="s2">&quot;time_limit&quot;</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">)</span>
+<div class="viewcode-block" id="PropensityScoreMatcher.get_params"><a class="viewcode-back" href="../../../api/matchers.html#pybalance.propensity.PropensityScoreMatcher.get_params">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the matcher&#39;s configuration parameters as a dict.&quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;objective&quot;</span><span class="p">,</span> <span class="s2">&quot;caliper&quot;</span><span class="p">,</span> <span class="s2">&quot;max_iter&quot;</span><span class="p">,</span> <span class="s2">&quot;time_limit&quot;</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">)</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_reset_best_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_match</span> <span class="o">=</span> <span class="kc">None</span>
@@ -246,7 +252,7 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">* </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Score (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Solution time: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solution_time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> min&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Solution time: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solution_time</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> s&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_best_match</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">ps_pool</span><span class="p">,</span> <span class="n">ps_target</span><span class="p">,</span> <span class="n">solution_time</span>
@@ -261,7 +267,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_describe_best_match</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_best_match</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_best_match</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
         <span class="n">_check_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_describe_best_match</span><span class="p">()</span>
@@ -280,9 +286,9 @@
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_data_for_sklearn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="p">)</span>
         <span class="n">hyperparams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_hyperparams</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hyperparams</span><span class="p">):</span>
-            <span class="n">clf</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+            <span class="n">clf</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Training model </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">clf</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> (iter </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1"> min) ...&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Training model </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">clf</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> (iter </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1"> s) ...&#39;</span>
             <span class="p">)</span>
 
             <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -301,7 +307,7 @@
             <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">score</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span><span class="p">:</span>
-                <span class="n">solution_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span>
+                <span class="n">solution_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_update_best_match</span><span class="p">(</span>
                     <span class="n">clf</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">ps_pool</span><span class="p">,</span> <span class="n">ps_target</span><span class="p">,</span> <span class="n">solution_time</span>
                 <span class="p">)</span>
@@ -342,11 +348,14 @@
             <span class="n">hyperparams</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ParameterSampler</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n_iter</span> <span class="o">/</span> <span class="n">n_models</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ParameterSampler</span><span class="p">(</span>
+                        <span class="n">params</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n_iter</span> <span class="o">/</span> <span class="n">n_models</span><span class="p">),</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
+                    <span class="p">)</span>
                 <span class="p">]</span>
             <span class="p">)</span>
 
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">hyperparams</span><span class="p">)</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hyperparams</span><span class="p">))</span>
+        <span class="n">hyperparams</span> <span class="o">=</span> <span class="p">[</span><span class="n">hyperparams</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">order</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">hyperparams</span><span class="p">[:</span><span class="n">n_iter</span><span class="p">]</span>
 

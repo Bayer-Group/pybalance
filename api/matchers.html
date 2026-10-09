@@ -73,6 +73,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Matchers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#propensity-score-matcher">Propensity Score Matcher</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.propensity.PropensityScoreMatcher"><code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.propensity.PropensityScoreMatcher.get_params"><code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher.get_params()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.propensity.PropensityScoreMatcher.match"><code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher.match()</span></code></a></li>
 </ul>
 </li>
@@ -82,6 +83,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#genetic-matcher">Genetic Matcher</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.genetic.GeneticMatcher"><code class="docutils literal notranslate"><span class="pre">GeneticMatcher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.genetic.GeneticMatcher.get_params"><code class="docutils literal notranslate"><span class="pre">GeneticMatcher.get_params()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.genetic.GeneticMatcher.match"><code class="docutils literal notranslate"><span class="pre">GeneticMatcher.match()</span></code></a></li>
 </ul>
 </li>
@@ -90,10 +92,12 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#constraint-satisfaction-matcher">Constraint Satisfaction Matcher</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.lp.ConstraintSatisfactionMatcher"><code class="docutils literal notranslate"><span class="pre">ConstraintSatisfactionMatcher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.lp.ConstraintSatisfactionMatcher.get_params"><code class="docutils literal notranslate"><span class="pre">ConstraintSatisfactionMatcher.get_params()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.lp.ConstraintSatisfactionMatcher.match"><code class="docutils literal notranslate"><span class="pre">ConstraintSatisfactionMatcher.match()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher"><code class="docutils literal notranslate"><span class="pre">AggregateConstraintSatisfactionMatcher</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher.get_params"><code class="docutils literal notranslate"><span class="pre">AggregateConstraintSatisfactionMatcher.get_params()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher.match"><code class="docutils literal notranslate"><span class="pre">AggregateConstraintSatisfactionMatcher.match()</span></code></a></li>
 </ul>
 </li>
@@ -141,7 +145,7 @@
 <h2>Propensity Score Matcher<a class="headerlink" href="#propensity-score-matcher" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pybalance.propensity.PropensityScoreMatcher">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.propensity.</span></span><span class="sig-name descname"><span class="pre">PropensityScoreMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beta'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">caliper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'greedy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/propensity/matcher.html#PropensityScoreMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.propensity.PropensityScoreMatcher" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.propensity.</span></span><span class="sig-name descname"><span class="pre">PropensityScoreMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beta'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">caliper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'greedy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/propensity/matcher.html#PropensityScoreMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.propensity.PropensityScoreMatcher" title="Permalink to this definition"></a></dt>
 <dd><p>Use a propensity score model to match two populations. The Matcher searches
 randomly over hyperparameters for the propensity score model and selects the
 match that performs best according to the given optimization objective.</p>
@@ -161,18 +165,26 @@ patient in the pool exists within the specified caliper. Should be in
 (0, 1].</p></li>
 <li><p><strong>max_iter</strong> (<em>int</em>) – Maximum number of hyperparameters to try before returning
 the best match.</p></li>
-<li><p><strong>time_limit</strong> (<em>float</em>) – Restrict hyperparameter search based on time. No new
+<li><p><strong>time_limit</strong> (<em>float</em><em> | </em><em>None</em>) – Restrict hyperparameter search based on time. No new
 model will be trained after time_limit seconds have passed since
-matching began.</p></li>
+matching began (def: 300 sec).</p></li>
 <li><p><strong>method</strong> (<em>str</em>) – Method to use for propensity score matching. Can be either
 ‘greedy’ or ‘linear_sum_assignment’. The former method is locally
 optimal and globally sub-optimial; the latter globally optimial but far
 more compute intensive. For large problems, use greedy.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em>) – Flag to indicate whether to print diagnositic information
 during training.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em> | </em><em>None</em>) – Seed for the hyperparameter search and the classifiers. Set
+it to make matching reproducible; if None, results vary between runs.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.propensity.PropensityScoreMatcher.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/propensity/matcher.html#PropensityScoreMatcher.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.propensity.PropensityScoreMatcher.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return the matcher’s configuration parameters as a dict.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pybalance.propensity.PropensityScoreMatcher.match">
 <span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/propensity/matcher.html#PropensityScoreMatcher.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.propensity.PropensityScoreMatcher.match" title="Permalink to this definition"></a></dt>
@@ -215,27 +227,60 @@ populations pre- and post-matching.</p>
 <h2>Genetic Matcher<a class="headerlink" href="#genetic-matcher" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pybalance.genetic.GeneticMatcher">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.genetic.</span></span><span class="sig-name descname"><span class="pre">GeneticMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beta'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/genetic/matcher.html#GeneticMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.genetic.GeneticMatcher" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.genetic.</span></span><span class="sig-name descname"><span class="pre">GeneticMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beta'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">candidate_population_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_candidate_populations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_keep_best</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_voting_populations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_mutation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_generations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iter_no_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size_gb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_every</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/genetic/matcher.html#GeneticMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.genetic.GeneticMatcher" title="Permalink to this definition"></a></dt>
 <dd><p>Match two populations using a genetic algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>matching_data</strong> (<a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a>) – MatchingData to be matched. Must contain exactly two
 populations. The larger population will be matched to the smaller.</p></li>
-<li><p><strong>objective</strong> (<em>str</em><em> | </em><a class="reference internal" href="core.html#pybalance.utils.BaseBalanceCalculator" title="pybalance.utils.balance_calculators.BaseBalanceCalculator"><em>BaseBalanceCalculator</em></a>) – Matching objective to optimize in hyperparameter search.
-Can be a string referring to any balance calculator known to
+<li><p><strong>objective</strong> (<em>str</em><em> | </em><a class="reference internal" href="core.html#pybalance.utils.BaseBalanceCalculator" title="pybalance.utils.balance_calculators.BaseBalanceCalculator"><em>BaseBalanceCalculator</em></a>) – Matching objective to optimize. Can be a string
+referring to any balance calculator known to
 utils.balance_calculators.BalanceCalculator or an instance of
 BaseBalanceCalculator.</p></li>
-<li><p><strong>params</strong> – Configuration params for the genetic matcher. See
-pybalance.genetic.get_global_defaults for a list of options.</p></li>
+<li><p><strong>time_limit</strong> (<em>float</em><em> | </em><em>None</em>) – Time limit in seconds for matching. None means no limit.
+Defaults to 300 seconds.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Whether to print progress and diagnostic information.</p></li>
+<li><p><strong>candidate_population_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of candidate population to match
+against reference data. If not specified, will use the same size as
+the reference population.</p></li>
+<li><p><strong>n_candidate_populations</strong> (<em>int</em>) – Number of candidate populations to
+simultaneously evolve. Defaults to 5000.</p></li>
+<li><p><strong>n_keep_best</strong> (<em>int</em><em> | </em><em>None</em>) – Keep top N current best scoring candidate populations.
+If None, defaults to n_candidate_populations / 4.</p></li>
+<li><p><strong>n_voting_populations</strong> (<em>int</em><em> | </em><em>None</em>) – Form new candidate populations based on
+frequency of patient occurrence. If None, defaults to
+n_candidate_populations / 4.</p></li>
+<li><p><strong>n_mutation</strong> (<em>int</em><em> | </em><em>None</em>) – Make individual patient swaps for top candidate
+populations. If None, defaults to n_candidate_populations / 4.</p></li>
+<li><p><strong>n_generations</strong> (<em>int</em>) – Number of generations to evolve the candidate
+populations. Defaults to 1000.</p></li>
+<li><p><strong>n_iter_no_change</strong> (<em>int</em>) – Stop if no improvement after this many iterations.
+Defaults to 100.</p></li>
+<li><p><strong>max_batch_size_gb</strong> (<em>float</em>) – Maximum batch size in GB for GPU operations.
+Defaults to 2.0.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em> | </em><em>None</em>) – Random seed for reproducibility. If None, results will vary
+between runs.</p></li>
+<li><p><strong>log_every</strong> (<em>int</em>) – Log progress every N generations. Defaults to 5.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="pybalance.genetic.GeneticMatcher.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/genetic/matcher.html#GeneticMatcher.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.genetic.GeneticMatcher.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return the matcher’s configuration parameters as a dict.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pybalance.genetic.GeneticMatcher.match">
-<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/genetic/matcher.html#GeneticMatcher.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.genetic.GeneticMatcher.match" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/genetic/matcher.html#GeneticMatcher.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.genetic.GeneticMatcher.match" title="Permalink to this definition"></a></dt>
 <dd><p>Match populations passed during __init__(). Returns MatchingData
 instance containing the matched pool and target populations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -259,7 +304,7 @@ govern the initial set of candidate populations.</p>
 <h2>Constraint Satisfaction Matcher<a class="headerlink" href="#constraint-satisfaction-matcher" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pybalance.lp.ConstraintSatisfactionMatcher">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.lp.</span></span><span class="sig-name descname"><span class="pre">ConstraintSatisfactionMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beta'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ps_hinting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/lp/matcher.html#ConstraintSatisfactionMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.ConstraintSatisfactionMatcher" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.lp.</span></span><span class="sig-name descname"><span class="pre">ConstraintSatisfactionMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beta'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ps_hinting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/lp/matcher.html#ConstraintSatisfactionMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.ConstraintSatisfactionMatcher" title="Permalink to this definition"></a></dt>
 <dd><p>Population matching based on constraint satisfication formulation. This solver
 can only handle linear objective functions; see “objective” parameter below.</p>
 <p>The constraints and optimization target are specified to the solver via the
@@ -287,14 +332,6 @@ used to report the balance of generated matches but not in actually
 finding solutions (since the CS solver needs a discretized objective
 function). The solver will optimize the absolute mean difference on the
 output features of the balance calculator’s preprocessing.</p></li>
-<li><p><strong>match_size</strong> (<em>int</em><em> | </em><em>None</em>) – Number of samples to include in the matched population.
-If match_size &lt; size of target population, then the target is subsetted
-to be the same size, that is, pool_size = target_size = match_size. If
-match_size &gt;= size of target population, then the full target is used
-and only the pool is subsetted, that is, pool_size = match_size and
-target_size = n_target. This option cannot be used in combination
-with pool_size or target_size. This option is deprecated and will be
-removed in a later release.</p></li>
 <li><p><strong>pool_size</strong> (<em>int</em><em> | </em><em>None</em>) – Number of samples to include from the pool in the matched
 population. Must be less than the size of the pool. If pool_size is not set,
 then max_mismatch and target_size must be set and pool_size will be optimized
@@ -305,7 +342,7 @@ If target_size is not set,then max_mismatch and pool_size must be set and
 target_size will be optimized subject to the pool_size and max_mismatch
 constraints.</p></li>
 <li><p><strong>max_mismatch</strong> (<em>float</em><em> | </em><em>None</em>) – Maximum allowable absolute mean difference for any feature.</p></li>
-<li><p><strong>time_limit</strong> (<em>float</em>) – Time limit to stop solving in seconds (def: 180 sec).</p></li>
+<li><p><strong>time_limit</strong> (<em>float</em><em> | </em><em>None</em>) – Time limit to stop solving in seconds (default 300 sec).</p></li>
 <li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers to use to optimize objective. See
 <a class="reference external" href="https://github.com/google/or-tools/blob/stable/ortools/sat/sat_parameters.proto#L556">https://github.com/google/or-tools/blob/stable/ortools/sat/sat_parameters.proto#L556</a>
 for more detail.</p></li>
@@ -315,6 +352,12 @@ hint for the solver</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.lp.ConstraintSatisfactionMatcher.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/lp/matcher.html#ConstraintSatisfactionMatcher.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.ConstraintSatisfactionMatcher.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return the matcher’s configuration parameters as a dict.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pybalance.lp.ConstraintSatisfactionMatcher.match">
 <span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/lp/matcher.html#ConstraintSatisfactionMatcher.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.ConstraintSatisfactionMatcher.match" title="Permalink to this definition"></a></dt>
@@ -343,7 +386,7 @@ up in a later release.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pybalance.lp.AggregateConstraintSatisfactionMatcher">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.lp.</span></span><span class="sig-name descname"><span class="pre">AggregateConstraintSatisfactionMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/lp/matcher.html#AggregateConstraintSatisfactionMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.lp.</span></span><span class="sig-name descname"><span class="pre">AggregateConstraintSatisfactionMatcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/lp/matcher.html#AggregateConstraintSatisfactionMatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher" title="Permalink to this definition"></a></dt>
 <dd><p>Constraint-satisfaction matcher for an <em>aggregate</em> target: the pool is
 patient-level, but the reference population is known only through summary
 statistics (an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>, e.g. a published Table 1). A subset of
@@ -383,12 +426,18 @@ subject to the balance constraint (cardinality matching).</p></li>
 feature. Only applies to mean matching; variance matching (for
 features with a disclosed target std) is always a soft, minimized
 objective term and is not capped by max_mismatch.</p></li>
-<li><p><strong>time_limit</strong> (<em>float</em>) – Time limit to stop solving in seconds (def: 180 sec).</p></li>
+<li><p><strong>time_limit</strong> (<em>float</em><em> | </em><em>None</em>) – Time limit to stop solving in seconds (def: 300 sec).</p></li>
 <li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers to use to optimize objective.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em>) – Verbose solving.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.lp.AggregateConstraintSatisfactionMatcher.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/lp/matcher.html#AggregateConstraintSatisfactionMatcher.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return the matcher’s configuration parameters as a dict.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pybalance.lp.AggregateConstraintSatisfactionMatcher.match">
 <span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/lp/matcher.html#AggregateConstraintSatisfactionMatcher.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.lp.AggregateConstraintSatisfactionMatcher.match" title="Permalink to this definition"></a></dt>

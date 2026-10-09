@@ -75,16 +75,26 @@
 <li class="toctree-l2"><a class="reference internal" href="#entropy-balancing-maic">Entropy Balancing &amp; MAIC</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.BaseWeighter"><code class="docutils literal notranslate"><span class="pre">BaseWeighter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.effective_sample_size"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.effective_sample_size()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.get_params"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.get_params()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.get_weights"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.get_weights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.match"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.match()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.EntropyBalanceWeighter"><code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.MAICWeighter"><code class="docutils literal notranslate"><span class="pre">MAICWeighter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.EntropyBalanceWeighter"><code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.EntropyBalanceWeighter.get_params"><code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.MAICWeighter"><code class="docutils literal notranslate"><span class="pre">MAICWeighter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.MAICWeighter.get_params"><code class="docutils literal notranslate"><span class="pre">MAICWeighter.get_params()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#iptw-weighter">IPTW Weighter</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.IPTWWeighter"><code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.IPTWWeighter"><code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.IPTWWeighter.get_params"><code class="docutils literal notranslate"><span class="pre">IPTWWeighter.get_params()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.plot_iptw_propensity_distributions"><code class="docutils literal notranslate"><span class="pre">plot_iptw_propensity_distributions()</span></code></a></li>
 </ul>
 </li>
@@ -168,6 +178,17 @@ matching feature.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#BaseWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return the weighter’s configuration parameters as a dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Dict</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter.get_weights">
 <span class="sig-name descname"><span class="pre">get_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#BaseWeighter.get_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.get_weights" title="Permalink to this definition"></a></dt>
 <dd><p>Return the fitted per-patient pool weights (in pool row order).</p>
@@ -242,9 +263,23 @@ collinear/near-collinear features.</p></li>
 <li><p><strong>weight_col</strong> (<em>str</em>) – Name of the column used to store weights on the
 MatchingData returned by match().</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em>) – Whether to log fitting diagnostics.</p></li>
+<li><p><strong>limit_penalty</strong> (<em>float</em>) – Strength of the quadratic penalty on the weight
+placed beyond a disclosed min / max of an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> (a soft
+constraint). Larger values enforce the limit more tightly.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.EntropyBalanceWeighter.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#EntropyBalanceWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.EntropyBalanceWeighter.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return the weighter’s configuration parameters as a dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Dict</em></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -279,9 +314,21 @@ stability.</p></li>
 <li><p><strong>weight_col</strong> (<em>str</em>) – Name of the column used to store weights on the
 MatchingData returned by match().</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em>) – Whether to log fitting diagnostics.</p></li>
+<li><p><strong>limit_penalty</strong> (<em>float</em>) – See <code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.MAICWeighter.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#MAICWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.MAICWeighter.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return the weighter’s configuration parameters as a dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Dict</em></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -334,6 +381,17 @@ MatchingData returned by match().</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.IPTWWeighter.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#IPTWWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.IPTWWeighter.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return the weighter’s configuration parameters as a dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Dict</em></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">

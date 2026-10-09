@@ -284,8 +284,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+<div class="viewcode-block" id="BaseWeighter.get_params"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.BaseWeighter.get_params">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the weighter&#39;s configuration parameters as a dict.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseWeighter&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -394,6 +395,9 @@
 <span class="sd">    :param weight_col: Name of the column used to store weights on the</span>
 <span class="sd">        MatchingData returned by match().</span>
 <span class="sd">    :param verbose: Whether to log fitting diagnostics.</span>
+<span class="sd">    :param limit_penalty: Strength of the quadratic penalty on the weight</span>
+<span class="sd">        placed beyond a disclosed min / max of an ``AggregateTarget`` (a soft</span>
+<span class="sd">        constraint). Larger values enforce the limit more tightly.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -445,7 +449,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BalanceCalculator</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">objective</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="EntropyBalanceWeighter.get_params"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.EntropyBalanceWeighter.get_params">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the weighter&#39;s configuration parameters as a dict.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;match_variance&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_variance</span><span class="p">,</span>
             <span class="s2">&quot;normalize&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
@@ -453,7 +458,7 @@
             <span class="s2">&quot;tol&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span>
             <span class="s2">&quot;ridge&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ridge</span><span class="p">,</span>
             <span class="s2">&quot;limit_penalty&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit_penalty</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="p">}</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_limit_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Output columns holding the indicator of a disclosed min / max.&quot;&quot;&quot;</span>
@@ -608,6 +613,7 @@
 <span class="sd">    :param weight_col: Name of the column used to store weights on the</span>
 <span class="sd">        MatchingData returned by match().</span>
 <span class="sd">    :param verbose: Whether to log fitting diagnostics.</span>
+<span class="sd">    :param limit_penalty: See ``EntropyBalanceWeighter``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -633,10 +639,11 @@
             <span class="n">limit_penalty</span><span class="o">=</span><span class="n">limit_penalty</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="MAICWeighter.get_params"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.MAICWeighter.get_params">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the weighter&#39;s configuration parameters as a dict.&quot;&quot;&quot;</span>
         <span class="n">params</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
         <span class="k">del</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;match_variance&quot;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">params</span></div>
+        <span class="k">return</span> <span class="n">params</span></div></div>
 
 
 <div class="viewcode-block" id="IPTWWeighter"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.IPTWWeighter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">IPTWWeighter</span><span class="p">(</span><span class="n">BaseWeighter</span><span class="p">):</span>
@@ -717,11 +724,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span> <span class="o">=</span> <span class="n">BalanceCalculator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span><span class="p">,</span> <span class="s2">&quot;beta&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">preprocessor</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="IPTWWeighter.get_params"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.IPTWWeighter.get_params">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the weighter&#39;s configuration parameters as a dict.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;classifier&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">,</span>
             <span class="s2">&quot;trim_quantiles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trim_quantiles</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="p">}</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IPTWWeighter&quot;</span><span class="p">:</span>
         <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
