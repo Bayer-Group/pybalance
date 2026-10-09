@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 from pybalance.utils.balance_calculators import (
     BalanceCalculator,
-    BatchedBalanceCaclulator,
+    BatchedBalanceCalculator,
 )
 from pybalance.utils import (
     MatchingData,
@@ -171,7 +171,7 @@ class GeneticMatcher:
         self.params = {"objective": self.objective}
         self.set_params(**params)
 
-        self.balance_calculator = BatchedBalanceCaclulator(
+        self.balance_calculator = BatchedBalanceCalculator(
             self.balance_calculator, self.max_batch_size_gb
         )
 

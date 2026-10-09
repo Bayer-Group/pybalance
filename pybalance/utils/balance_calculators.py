@@ -748,7 +748,7 @@ def _get_batch_size(target_population_size, n_features, max_batch_size_gb=8):
     return batch_size
 
 
-class BatchedBalanceCaclulator:
+class BatchedBalanceCalculator:
     """
     Batch balance calculations to avoid large peak memory usage.
     """

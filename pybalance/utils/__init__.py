@@ -24,7 +24,7 @@ from .balance_calculators import (
     BalanceCalculator,
     BaseBalanceCalculator,
     AggregateTargetBalanceCalculator,
-    BatchedBalanceCaclulator,
+    BatchedBalanceCalculator,
     BetaBalance,
     BetaSquaredBalance,
     BetaMaxBalance,
