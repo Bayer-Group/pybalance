@@ -290,6 +290,9 @@ class EntropyBalanceWeighter(BaseWeighter):
     :param weight_col: Name of the column used to store weights on the
         MatchingData returned by match().
     :param verbose: Whether to log fitting diagnostics.
+    :param limit_penalty: Strength of the quadratic penalty on the weight
+        placed beyond a disclosed min / max of an ``AggregateTarget`` (a soft
+        constraint). Larger values enforce the limit more tightly.
     """
 
     def __init__(
@@ -505,6 +508,7 @@ class MAICWeighter(EntropyBalanceWeighter):
     :param weight_col: Name of the column used to store weights on the
         MatchingData returned by match().
     :param verbose: Whether to log fitting diagnostics.
+    :param limit_penalty: See ``EntropyBalanceWeighter``.
     """
 
     def __init__(

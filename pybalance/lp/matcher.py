@@ -96,8 +96,8 @@ class SolutionPrinter(cp_model.CpSolverSolutionCallback):
         current_time = time.time()
         logger.info("=========================================")
         logger.info(
-            "Solution %i, time = %0.2f m"
-            % (self.__solution_count + 1, (current_time - self.__start_time) / 60)
+            "Solution %i, time = %0.1f s"
+            % (self.__solution_count + 1, current_time - self.__start_time)
         )
         logger.info(f"Objective:\t{self.ObjectiveValue()}")
 

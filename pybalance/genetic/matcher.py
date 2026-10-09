@@ -83,12 +83,13 @@ class GeneticMatcher:
     :param matching_data: MatchingData to be matched. Must contain exactly two
         populations. The larger population will be matched to the smaller.
 
-    :param objective: Matching objective to optimize in hyperparameter search.
-        Can be a string referring to any balance calculator known to
+    :param objective: Matching objective to optimize. Can be a string
+        referring to any balance calculator known to
         utils.balance_calculators.BalanceCalculator or an instance of
         BaseBalanceCalculator.
 
-    :param params: Configuration params for the genetic matcher. See
+    :param params: Configuration params for the genetic matcher, including
+        time_limit (seconds; None for no limit) and seed. See
         pybalance.genetic.get_global_defaults for a list of options.
     """
 

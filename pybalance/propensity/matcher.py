@@ -58,7 +58,7 @@ class PropensityScoreMatcher:
 
     :param time_limit: Restrict hyperparameter search based on time. No new
         model will be trained after time_limit seconds have passed since
-        matching began.
+        matching began (def: 300 sec).
 
     :param method: Method to use for propensity score matching. Can be either
         'greedy' or 'linear_sum_assignment'. The former method is locally
@@ -67,6 +67,9 @@ class PropensityScoreMatcher:
 
     :param verbose: Flag to indicate whether to print diagnositic information
         during training.
+
+    :param seed: Seed for the hyperparameter search and the classifiers. Set
+        it to make matching reproducible; if None, results vary between runs.
     """
 
     DEFAULT_HYPERPARAM_SPACE = {
@@ -100,11 +103,13 @@ class PropensityScoreMatcher:
         time_limit: float = 60 * 5,
         method: str = "greedy",
         verbose: bool = True,
+        seed: Optional[int] = None,
     ):
         self.caliper = caliper
         self.max_iter = max_iter
         self.time_limit = time_limit
         self.method = method
+        self.seed = seed
         self.hyperparam_space = self.DEFAULT_HYPERPARAM_SPACE
         self.verbose = verbose
 
@@ -124,7 +129,7 @@ class PropensityScoreMatcher:
 
     def get_params(self):
         """Return the matcher's configuration parameters as a dict."""
-        params = ["objective", "caliper", "max_iter", "time_limit", "method"]
+        params = ["objective", "caliper", "max_iter", "time_limit", "method", "seed"]
         return dict((p, getattr(self, p)) for p in params)
 
     def _reset_best_match(self):
@@ -142,7 +147,7 @@ class PropensityScoreMatcher:
         for key, val in self.best_params.items():
             logger.info(f"\t* {key}: {val}")
         logger.info(f"\tScore ({self.balance_calculator.name}): {self.best_score:.4f}")
-        logger.info(f"\tSolution time: {self.solution_time:.3f} min")
+        logger.info(f"\tSolution time: {self.solution_time:.1f} s")
 
     def _update_best_match(
         self, clf, params, match, score, ps_pool, ps_target, solution_time
@@ -176,9 +181,9 @@ class PropensityScoreMatcher:
         X, y = self._preprocess_data_for_sklearn(self.matching_data)
         hyperparams = self._get_hyperparams(self.max_iter)
         for i, (model, params) in enumerate(hyperparams):
-            clf = model(**params)
+            clf = model(**params, random_state=self.seed)
             logger.info(
-                f'Training model {str(clf).split("(")[0]} (iter {i + 1}/{self.max_iter}, {(time.time() - t0)/60:.3f} min) ...'
+                f'Training model {str(clf).split("(")[0]} (iter {i + 1}/{self.max_iter}, {time.time() - t0:.1f} s) ...'
             )
 
             clf.fit(X, y)
@@ -197,7 +202,7 @@ class PropensityScoreMatcher:
             score = self.balance_calculator.distance(pool)
 
             if score < self.best_score:
-                solution_time = (time.time() - t0) / 60
+                solution_time = time.time() - t0
                 self._update_best_match(
                     clf, params, match, score, ps_pool, ps_target, solution_time
                 )
@@ -238,11 +243,14 @@ class PropensityScoreMatcher:
             hyperparams.extend(
                 [
                     (model, p)
-                    for p in ParameterSampler(params, n_iter=int(n_iter / n_models))
+                    for p in ParameterSampler(
+                        params, n_iter=int(n_iter / n_models), random_state=self.seed
+                    )
                 ]
             )
 
-        np.random.shuffle(hyperparams)
+        order = np.random.default_rng(self.seed).permutation(len(hyperparams))
+        hyperparams = [hyperparams[i] for i in order]
 
         return hyperparams[:n_iter]
 

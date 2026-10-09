@@ -9,5 +9,4 @@ with one of the developers / maintainers:
 * abhishek.choudhary@bayer.com
 
 If you've found a bug, or have suggestions for changes please open a
-ticket in github: 
-    https://github.com/Bayer-Group/pybalance/issues.
+ticket in github: https://github.com/Bayer-Group/pybalance/issues.
