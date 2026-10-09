@@ -798,12 +798,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_headers</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">population_col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">            Cannot split into populations based on </span><span class="si">{</span><span class="n">population_col</span><span class="si">}</span><span class="s2">. Column not</span>
 <span class="s2">            present in data frame.</span>
-<span class="s2">            &quot;&quot;&quot;</span>
-                <span class="p">)</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">pool_df</span> <span class="o">=</span> <span class="n">_load_matching_data</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">pool</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -1182,12 +1180,10 @@
         <span class="n">pool</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">pool_name</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">            Cannot split into exactly two populations based on </span><span class="si">{</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="si">}</span><span class="s2">.</span>
 <span class="s2">            Found populations: </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span>
-<span class="s2">            &quot;&quot;&quot;</span>
-            <span class="p">)</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">pool_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="n">target_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pool_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -1196,12 +1192,10 @@
         <span class="n">pool</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">pool_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">            Cannot split into exactly two populations based on </span><span class="si">{</span><span class="n">matching_data</span><span class="o">.</span><span class="n">population_col</span><span class="si">}</span><span class="s2">.</span>
 <span class="s2">            Found populations: </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span>
-<span class="s2">            &quot;&quot;&quot;</span>
-            <span class="p">)</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
         <span class="n">inferred_pool_name</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">inferred_target_name</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">populations</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">target</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">inferred_target_name</span><span class="p">)</span>
