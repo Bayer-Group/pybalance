@@ -1,7 +1,7 @@
 from collections import deque
 import numpy as np
 import pandas as pd
-from typing import Union
+from typing import Union, Optional
 import time
 
 import logging
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 from pybalance.utils.balance_calculators import (
     BalanceCalculator,
-    BatchedBalanceCaclulator,
+    BatchedBalanceCalculator,
 )
 from pybalance.utils import (
     MatchingData,
@@ -83,20 +83,64 @@ class GeneticMatcher:
     :param matching_data: MatchingData to be matched. Must contain exactly two
         populations. The larger population will be matched to the smaller.
 
-    :param objective: Matching objective to optimize in hyperparameter search.
-        Can be a string referring to any balance calculator known to
+    :param objective: Matching objective to optimize. Can be a string
+        referring to any balance calculator known to
         utils.balance_calculators.BalanceCalculator or an instance of
         BaseBalanceCalculator.
 
-    :param params: Configuration params for the genetic matcher. See
-        pybalance.genetic.get_global_defaults for a list of options.
+    :param time_limit: Time limit in seconds for matching. None means no limit.
+        Defaults to 300 seconds.
+
+    :param verbose: Whether to print progress and diagnostic information.
+
+    :param candidate_population_size: Size of candidate population to match
+        against reference data. If not specified, will use the same size as
+        the reference population.
+
+    :param n_candidate_populations: Number of candidate populations to
+        simultaneously evolve. Defaults to 5000.
+
+    :param n_keep_best: Keep top N current best scoring candidate populations.
+        If None, defaults to n_candidate_populations / 4.
+
+    :param n_voting_populations: Form new candidate populations based on
+        frequency of patient occurrence. If None, defaults to
+        n_candidate_populations / 4.
+
+    :param n_mutation: Make individual patient swaps for top candidate
+        populations. If None, defaults to n_candidate_populations / 4.
+
+    :param n_generations: Number of generations to evolve the candidate
+        populations. Defaults to 1000.
+
+    :param n_iter_no_change: Stop if no improvement after this many iterations.
+        Defaults to 100.
+
+    :param max_batch_size_gb: Maximum batch size in GB for GPU operations.
+        Defaults to 2.0.
+
+    :param seed: Random seed for reproducibility. If None, results will vary
+        between runs.
+
+    :param log_every: Log progress every N generations. Defaults to 5.
     """
 
     def __init__(
         self,
         matching_data: MatchingData,
         objective: Union[str, BaseBalanceCalculator] = "beta",
-        **params,
+        time_limit: Optional[float] = 300,
+        verbose: bool = True,
+        candidate_population_size: Optional[int] = None,
+        n_candidate_populations: int = 5000,
+        n_keep_best: Optional[int] = None,
+        n_voting_populations: Optional[int] = None,
+        n_mutation: Optional[int] = None,
+        n_generations: int = 1000,
+        n_iter_no_change: int = 100,
+        max_batch_size_gb: float = 2.0,
+        seed: Optional[int] = None,
+        log_every: int = 5,
     ):
         self.matching_data = matching_data
         self.target, self.pool = split_target_pool(matching_data)
@@ -108,11 +152,39 @@ class GeneticMatcher:
             self.balance_calculator = objective
             self.objective = self.balance_calculator.name
 
+        # Build params dict from explicit parameters
+        params = {
+            "candidate_population_size": candidate_population_size,
+            "n_candidate_populations": n_candidate_populations,
+            "n_keep_best": n_keep_best,
+            "n_voting_populations": n_voting_populations,
+            "n_mutation": n_mutation,
+            "n_generations": n_generations,
+            "n_iter_no_change": n_iter_no_change,
+            "time_limit": time_limit,
+            "max_batch_size_gb": max_batch_size_gb,
+            "seed": seed,
+            "verbose": verbose,
+            "log_every": log_every,
+        }
         params = self._check_params(params)
-        self.params = {"objective": self.objective}
-        self.set_params(**params)
 
-        self.balance_calculator = BatchedBalanceCaclulator(
+        # Store all parameters as instance attributes
+        self.candidate_population_size = params["candidate_population_size"]
+        self.n_candidate_populations = params["n_candidate_populations"]
+        self.n_keep_best = params["n_keep_best"]
+        self.n_voting_populations = params["n_voting_populations"]
+        self.n_mutation = params["n_mutation"]
+        self.n_generations = params["n_generations"]
+        self.n_iter_no_change = params["n_iter_no_change"]
+        self.time_limit = params["time_limit"]
+        self.max_batch_size_gb = params["max_batch_size_gb"]
+        self.seed = params["seed"]
+        self.verbose = params["verbose"]
+        self.log_every = params["log_every"]
+        self.initialization = params["initialization"]
+
+        self.balance_calculator = BatchedBalanceCalculator(
             self.balance_calculator, self.max_batch_size_gb
         )
 
@@ -121,7 +193,7 @@ class GeneticMatcher:
         else:
             self.device = torch.device("cpu")
 
-        self.logger = BasicLogger(params.pop("log_every"))
+        self.logger = BasicLogger(self.log_every)
         logger.info(self.device)
 
         self._reset_best_match()
@@ -132,7 +204,11 @@ class GeneticMatcher:
 
         n_candidate_populations = config.setdefault("n_candidate_populations", 1024)
         standard_config = get_global_defaults(n_candidate_populations)
-        standard_config.update(config)
+
+        # Only update with non-None values from config
+        for key, value in config.items():
+            if value is not None:
+                standard_config[key] = value
 
         if standard_config["candidate_population_size"] is None:
             standard_config["candidate_population_size"] = len(self.target)
@@ -143,35 +219,45 @@ class GeneticMatcher:
             )
         if standard_config["n_keep_best"] <= 1:
             raise ValueError("n_keep_best must be > 1")
-        if standard_config["seed"] is not None:
-            np.random.seed(standard_config["seed"])
 
         return standard_config
 
-    def set_params(self, **kwargs):
-        self.params.update(kwargs)
-        for kw, val in kwargs.items():
-            setattr(self, kw, val)
-
     def get_params(self):
-        return self.params
+        """Return the matcher's configuration parameters as a dict."""
+        return {
+            "objective": self.objective,
+            "candidate_population_size": self.candidate_population_size,
+            "n_candidate_populations": self.n_candidate_populations,
+            "n_keep_best": self.n_keep_best,
+            "n_voting_populations": self.n_voting_populations,
+            "n_mutation": self.n_mutation,
+            "n_generations": self.n_generations,
+            "n_iter_no_change": self.n_iter_no_change,
+            "time_limit": self.time_limit,
+            "max_batch_size_gb": self.max_batch_size_gb,
+            "seed": self.seed,
+            "verbose": self.verbose,
+            "log_every": self.log_every,
+        }
 
     def _reset_best_match(self):
         self.best_match = None
         self.best_match_idx = None
         self.best_score = np.inf
         self.balance = None
-        self._recent_balance = deque([], maxlen=self.params["n_iter_no_change"])
+        self._recent_balance = deque([], maxlen=self.n_iter_no_change)
         self.generation = 0
         self.elapsed_time = 0
 
-    def match(self, seed=None):
+    def match(self) -> MatchingData:
         """
         Match populations passed during __init__(). Returns MatchingData
         instance containing the matched pool and target populations.
         """
+        if self.seed is not None:
+            np.random.seed(self.seed)
         t0 = time.time()
-        self._init_first_generation(seed)
+        self._init_first_generation()
         stop = self._check_stopping_conditions()
         while not stop:
             self._log()
@@ -182,11 +268,9 @@ class GeneticMatcher:
         self._log(finalize=True)
         return self.get_best_match()
 
-    def _init_first_generation(self, seed=None):
+    def _init_first_generation(self):
         initializer = GeneticMatcherInitializer(self)
-        candidate_populations = initializer.initialize(
-            self.n_candidate_populations, seed=seed
-        )
+        candidate_populations = initializer.initialize(self.n_candidate_populations)
         self.candidate_populations = torch.from_numpy(
             np.array(candidate_populations)
         ).to(self.device)
@@ -364,7 +448,9 @@ class GeneticMatcher:
         # populations
         self._calculate_balance()
 
-    def get_best_match_idxs(self, balance_calculator=None):
+    def get_best_match_idxs(
+        self, balance_calculator: Optional[BaseBalanceCalculator] = None
+    ):
         if balance_calculator is not None:
             balance = balance_calculator.balance(self.candidate_populations)
         else:
@@ -372,7 +458,12 @@ class GeneticMatcher:
         idx_best_match = balance.argmax()
         return self.candidate_populations[idx_best_match, :]
 
-    def get_best_match(self, balance_calculator=None):
+    def get_best_match(
+        self, balance_calculator: Optional[BaseBalanceCalculator] = None
+    ) -> MatchingData:
+        # TODO: Consider removing the balance_calculator parameter for consistency with
+        # other matchers, or add it to all matchers for flexibility. Currently only
+        # GeneticMatcher supports re-evaluating with a different balance calculator.
         best_match_patient_idxs = (
             self.get_best_match_idxs(balance_calculator).cpu().numpy()
         )

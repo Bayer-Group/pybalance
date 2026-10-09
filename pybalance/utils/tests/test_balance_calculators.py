@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pybalance.utils import (
     BalanceCalculator,
-    BatchedBalanceCaclulator,
+    BatchedBalanceCalculator,
     BetaBalance,
     GammaBalance,
     MatchingData,
@@ -27,7 +27,7 @@ def test_batcher():
 
     # With batching
     max_batch_size_gb = 0.01
-    fc2 = BatchedBalanceCaclulator(fc1, max_batch_size_gb=max_batch_size_gb)
+    fc2 = BatchedBalanceCalculator(fc1, max_batch_size_gb=max_batch_size_gb)
 
     # Make sure n_candidate_populations is > batch size and non-integral
     # multiple.

@@ -14,18 +14,21 @@ from pybalance.utils import split_target_pool
 class GeneticMatcherInitializer:
     def __init__(self, matcher):
         self.matcher = matcher
-        self.verbose = matcher.params["verbose"]
-        self.params = matcher.params["initialization"]
-        self.matcher_params = matcher.params
+        self.verbose = matcher.verbose
+        self.params = matcher.initialization
         self.balance_calculator = matcher.balance_calculator
         self._propensity = None
 
-    def initialize(self, n_candidate_populations, seed=None):
+    def initialize(self, n_candidate_populations, initial_populations=None):
         """
         Initialize genetic algorithm. In the genetic algorithm, we take a large
         number of candidate patient groups and evolve them under selection
         pressure from a balance function. The initial population is constructed
         here.
+
+        :param n_candidate_populations: Number of candidate populations to generate
+        :param initial_populations: Optional list of pre-existing candidate populations
+            to include in the initial set
         """
         if self.verbose:
             logging.info("Optimizing balance with genetic algorithm ...")
@@ -38,10 +41,10 @@ class GeneticMatcherInitializer:
             logging.info("Initializing candidate populations ...")
 
         # initialize candidate populations
-        if not seed:
+        if initial_populations is None:
             candidate_populations = []
         else:
-            candidate_populations = seed
+            candidate_populations = initial_populations
 
         # computing reference benchmarks and add to initial populations if requested by user
         benchmarks = self.compute_benchmark_populations()
@@ -136,7 +139,7 @@ class GeneticMatcherInitializer:
         for _ in range(N):
             candidate_population = np.random.choice(
                 idx,
-                size=self.matcher_params["candidate_population_size"],
+                size=self.matcher.candidate_population_size,
                 p=p,
                 replace=False,
             )

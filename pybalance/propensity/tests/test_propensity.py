@@ -37,3 +37,17 @@ def test_ps_greedy_w_calliper():
     rw, rct = matcher.propensity_score_match_greedy(rw_ptt, rct_ptt, caliper=0.1)
     assert all(rw == np.array([1, 2]))
     assert all(rct == np.array([0, 1]))
+
+
+def test_seed_makes_hyperparam_search_reproducible():
+    from pybalance.sim import generate_toy_dataset
+
+    md = generate_toy_dataset()
+
+    def search(seed):
+        m = matcher.PropensityScoreMatcher(md, max_iter=6, seed=seed, verbose=False)
+        return [(c.__name__, p) for c, p in m._get_hyperparams(6)]
+
+    assert search(0) == search(0)
+    assert search(0) != search(1)
+    assert matcher.PropensityScoreMatcher(md, seed=3).get_params()["seed"] == 3
