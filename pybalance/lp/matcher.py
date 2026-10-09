@@ -458,6 +458,7 @@ class ConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher):
         return pool_size, target_size
 
     def get_params(self):
+        """Return the matcher's configuration parameters as a dict."""
         params = [
             "objective",
             "pool_size",
@@ -952,6 +953,7 @@ class AggregateConstraintSatisfactionMatcher(_BaseConstraintSatisfactionMatcher)
         return pool_size
 
     def get_params(self):
+        """Return the matcher's configuration parameters as a dict."""
         params = [
             "pool_size",
             "max_mismatch",

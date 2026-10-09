@@ -123,6 +123,7 @@ class PropensityScoreMatcher:
         self._reset_best_match()
 
     def get_params(self):
+        """Return the matcher's configuration parameters as a dict."""
         params = ["objective", "caliper", "max_iter", "time_limit", "method"]
         return dict((p, getattr(self, p)) for p in params)
 

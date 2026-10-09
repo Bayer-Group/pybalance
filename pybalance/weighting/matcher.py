@@ -180,6 +180,7 @@ class BaseWeighter:
         self.diagnostics: Dict = {}
 
     def get_params(self) -> Dict:
+        """Return the weighter's configuration parameters as a dict."""
         raise NotImplementedError
 
     def _fit(self) -> "BaseWeighter":
@@ -341,6 +342,7 @@ class EntropyBalanceWeighter(BaseWeighter):
         self.preprocessor = self.balance_calculator.preprocessor
 
     def get_params(self) -> Dict:
+        """Return the weighter's configuration parameters as a dict."""
         return {
             "match_variance": self.match_variance,
             "normalize": self.normalize,
@@ -529,6 +531,7 @@ class MAICWeighter(EntropyBalanceWeighter):
         )
 
     def get_params(self) -> Dict:
+        """Return the weighter's configuration parameters as a dict."""
         params = super().get_params()
         del params["match_variance"]
         return params
@@ -613,6 +616,7 @@ class IPTWWeighter(BaseWeighter):
         self.preprocessor = self.balance_calculator.preprocessor
 
     def get_params(self) -> Dict:
+        """Return the weighter's configuration parameters as a dict."""
         return {
             "classifier": self.classifier,
             "trim_quantiles": self.trim_quantiles,

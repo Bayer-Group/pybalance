@@ -154,6 +154,7 @@ class GeneticMatcher:
             setattr(self, kw, val)
 
     def get_params(self):
+        """Return the matcher's configuration parameters as a dict."""
         return self.params
 
     def _reset_best_match(self):
