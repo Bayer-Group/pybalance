@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.linear_model import LogisticRegression
 
 from pybalance.sim import generate_toy_dataset
 from pybalance.utils import (
@@ -12,10 +13,10 @@ from pybalance.utils import (
 from pybalance.weighting import (
     EntropyBalanceWeighter,
     MAICWeighter,
-    IPTWWeighter,
+    PropensityScoreWeighter,
+    propensity_score_weights,
     effective_sample_size,
     weighted_balance_table,
-    plot_iptw_propensity_distributions,
 )
 
 
@@ -181,85 +182,6 @@ def test_hard_covariate_shift_reports_diagnostics_without_crashing():
     assert weighter.effective_sample_size() <= len(pool)
 
 
-def test_iptw_improves_balance_over_unweighted_pool():
-    matching_data = generate_toy_dataset(n_pool=3000, n_target=300, seed=7)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
-        drop=True
-    )
-    target_df = _biased_pool_subsample(pool_df, n=300, seed=7)
-
-    md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
-    weighter = IPTWWeighter(md, verbose=False)
-    weighter.match()
-
-    table = weighted_balance_table(weighter)
-    unweighted_residual = (table["unweighted_pool"] - table["target"]).abs()
-    weighted_residual = (table["weighted_pool"] - table["target"]).abs()
-
-    # IPTW doesn't solve for exact balance (unlike entropy balancing), but a
-    # correctly-fit propensity model should substantially reduce imbalance.
-    assert weighted_residual.sum() < unweighted_residual.sum()
-    assert weighter.effective_sample_size() <= len(pool_df)
-
-
-def test_iptw_rejects_aggregate_target():
-    matching_data = generate_toy_dataset(n_pool=500, n_target=100, seed=8)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
-        drop=True
-    )
-    target_df = matching_data.get_population(matching_data.target_name).reset_index(
-        drop=True
-    )
-    aggregate_target = _aggregate_target_from_frame(target_df, matching_data.headers)
-    md = MatchingData(
-        pool=pool_df, target=aggregate_target, headers=matching_data.headers
-    )
-
-    with pytest.raises(ValueError):
-        IPTWWeighter(md, verbose=False)
-
-
-def test_iptw_trim_quantiles_caps_extreme_weights():
-    matching_data = generate_toy_dataset(n_pool=2000, n_target=200, seed=9)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
-        drop=True
-    )
-    target_df = _biased_pool_subsample(pool_df, n=200, seed=9)
-    md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
-
-    untrimmed = IPTWWeighter(md, verbose=False)
-    untrimmed.match()
-
-    trimmed = IPTWWeighter(md, trim_quantiles=(0.05, 0.95), verbose=False)
-    trimmed.match()
-
-    assert trimmed.weights.max() <= untrimmed.weights.max()
-    assert trimmed.diagnostics["n_trimmed"] > 0
-
-    with pytest.raises(ValueError):
-        IPTWWeighter(md, trim_quantiles=(0.9, 0.1), verbose=False)
-
-
-def test_plot_iptw_propensity_distributions():
-    matching_data = generate_toy_dataset(n_pool=1000, n_target=150, seed=10)
-    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
-        drop=True
-    )
-    target_df = _biased_pool_subsample(pool_df, n=150, seed=10)
-    md = MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
-
-    weighter = IPTWWeighter(md, verbose=False)
-    weighter.match()
-    g = plot_iptw_propensity_distributions(weighter)
-    assert len(g.axes.flat) == 2
-
-    # only IPTWWeighter fits a propensity model; others have nothing to plot
-    maic_weighter = MAICWeighter(md, verbose=False)
-    maic_weighter.match()
-    with pytest.raises(TypeError):
-        plot_iptw_propensity_distributions(maic_weighter)
-
-
 def _toy_pool(n=1000, seed=7):
     m = generate_toy_dataset(n_pool=n, n_target=0, seed=seed)
     return m.get_population("pool").reset_index(drop=True)
@@ -326,3 +248,188 @@ def test_weighter_rejects_variance_without_a_mean():
     )
     with pytest.raises(ValueError, match="no mean"):
         EntropyBalanceWeighter(data, match_variance=True)
+
+
+def _shifted_md(n_pool=1500, n_target=200, seed=0):
+    matching_data = generate_toy_dataset(n_pool=n_pool, n_target=n_target, seed=seed)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
+    target_df = _biased_pool_subsample(pool_df, n=n_target, seed=seed)
+    return MatchingData(pool=pool_df, target=target_df, headers=matching_data.headers)
+
+
+def _weighter(md, **kwargs):
+    kwargs = {"max_iter": 6, "seed": 0, "verbose": False, **kwargs}
+    return PropensityScoreWeighter(md, **kwargs)
+
+
+@pytest.mark.parametrize("method", ["att", "atc", "ate", "overlap", "matching"])
+def test_propensity_score_weights_are_positive_and_shaped(method):
+    ps_pool = np.array([0.1, 0.3, 0.5, 0.9])
+    ps_target = np.array([0.2, 0.6, 0.8])
+    w_pool, w_target = propensity_score_weights(ps_pool, ps_target, method)
+    assert w_pool.shape == ps_pool.shape and w_target.shape == ps_target.shape
+    assert np.all(w_pool > 0) and np.all(w_target > 0)
+
+
+def test_propensity_score_weights_overlap_and_att_definitions():
+    ps_pool, ps_target = np.array([0.2, 0.5]), np.array([0.4, 0.9])
+    w_pool, w_target = propensity_score_weights(ps_pool, ps_target, "overlap")
+    assert np.allclose(w_pool, ps_pool) and np.allclose(w_target, 1 - ps_target)
+
+    w_pool, w_target = propensity_score_weights(ps_pool, ps_target, "att")
+    assert np.allclose(w_pool, ps_pool / (1 - ps_pool))
+    assert np.allclose(w_target, 1)
+
+    with pytest.raises(ValueError):
+        propensity_score_weights(ps_pool, ps_target, "nope")
+
+
+def test_propensity_score_weighter_improves_balance_over_unweighted_pool():
+    md = _shifted_md(seed=7)
+    weighter = _weighter(md)
+    matched = weighter.match()
+
+    table = weighted_balance_table(weighter)
+    unweighted_residual = (table["unweighted_pool"] - table["target"]).abs()
+    weighted_residual = (table["weighted_pool"] - table["target"]).abs()
+    assert weighted_residual.sum() < unweighted_residual.sum()
+    assert weighter.effective_sample_size() <= len(md.get_population("pool"))
+
+    # The reported score is the balance objective evaluated on the weights.
+    assert weighter.best_score == pytest.approx(
+        float(
+            weighter.balance_calculator.distance(
+                pool_weights=weighter.weights, target_weights=weighter.target_weights
+            )
+        )
+    )
+    assert weighter.weight_col in matched.get_population(matched.pool_name)
+
+
+def test_propensity_score_weighter_search_improves_on_unweighted_pool_score():
+    md = _shifted_md(seed=8)
+    weighter = _weighter(md, method="overlap")
+    weighter.match()
+
+    unweighted = float(weighter.balance_calculator.distance())
+    assert weighter.best_score < unweighted
+
+
+def test_overlap_weights_are_bounded_and_target_is_weighted():
+    md = _shifted_md(seed=12)
+    weighter = _weighter(md, method="overlap")
+    matched = weighter.match()
+
+    assert 0 < weighter.weights.min() and weighter.weights.max() < 1
+    assert 0 < weighter.target_weights.min() and weighter.target_weights.max() < 1
+    assert np.allclose(
+        matched.get_population(matched.target_name)[weighter.weight_col],
+        weighter.target_weights,
+    )
+
+
+def test_propensity_score_weighter_rejects_bad_arguments():
+    md = _shifted_md(n_pool=300, n_target=50, seed=13)
+    with pytest.raises(ValueError):
+        _weighter(md, method="nope")
+    with pytest.raises(ValueError):
+        _weighter(md, trim_quantiles=(0.9, 0.1))
+    with pytest.raises(ValueError):
+        _weighter(md, min_ess_fraction=2.0)
+
+    matching_data = generate_toy_dataset(n_pool=500, n_target=100, seed=8)
+    pool_df = matching_data.get_population(matching_data.pool_name).reset_index(
+        drop=True
+    )
+    target_df = matching_data.get_population(matching_data.target_name).reset_index(
+        drop=True
+    )
+    aggregate_target = _aggregate_target_from_frame(target_df, matching_data.headers)
+    agg_md = MatchingData(
+        pool=pool_df, target=aggregate_target, headers=matching_data.headers
+    )
+    with pytest.raises(ValueError):
+        _weighter(agg_md)
+
+
+def test_propensity_score_weighter_trim_quantiles_caps_extreme_weights():
+    md = _shifted_md(seed=9)
+    untrimmed = _weighter(md, trim_quantiles=None)
+    untrimmed.match()
+    trimmed = _weighter(md, trim_quantiles=(0.05, 0.95))
+    trimmed.match()
+
+    assert trimmed.weights.max() <= untrimmed.weights.max()
+    assert trimmed.diagnostics["n_trimmed"] > 0
+
+
+def test_min_ess_fraction_rejects_spiky_candidates():
+    md = _shifted_md(seed=14)
+    # Only perfectly uniform weights have ESS equal to the population size, and
+    # a weakly regularized model is not uniform.
+    strict = _weighter(md, min_ess_fraction=1.0)
+    strict.hyperparam_space = {
+        LogisticRegression: {
+            "C": [100.0],
+            "penalty": ["l2"],
+            "solver": ["saga"],
+            "fit_intercept": [True],
+            "max_iter": [500],
+        }
+    }
+    with pytest.raises(ValueError, match="min_ess_fraction"):
+        strict.match()
+
+    weighter = _weighter(md, min_ess_fraction=0.3)
+    weighter.match()
+    n_pool, n_target = len(weighter.weights), len(weighter.target_weights)
+    assert weighter.effective_sample_size() >= 0.3 * n_pool
+    assert weighter.diagnostics["target_effective_sample_size"] >= 0.3 * n_target
+
+
+def test_transform_applies_another_method_without_changing_the_fit():
+    md = _shifted_md(seed=15)
+    weighter = _weighter(md, method="att").fit()
+    model, att_weights = weighter.best_model, weighter.get_weights().copy()
+
+    matched = weighter.transform(method="overlap")
+    overlap_weights = matched.get_population("pool")[weighter.weight_col].values
+    assert overlap_weights.max() < 1
+    assert not np.allclose(att_weights, overlap_weights)
+    assert np.allclose(overlap_weights, weighter.get_weights("overlap"))
+    assert weighter.score("overlap") < weighter.score("att")
+
+    # transform() is pure: the fitted state is still that of the att fit.
+    assert weighter.method == "att" and weighter.best_model is model
+    assert np.allclose(weighter.get_weights(), att_weights)
+    default = weighter.transform().get_population("pool")[weighter.weight_col].values
+    assert np.allclose(default, att_weights)
+
+    with pytest.raises(ValueError):
+        weighter.transform(method="nope")
+
+
+def test_transform_before_fit_raises():
+    weighter = _weighter(_shifted_md(n_pool=300, n_target=50, seed=16))
+    with pytest.raises(ValueError):
+        weighter.transform()
+
+
+def test_plot_methods():
+    md = _shifted_md(n_pool=800, n_target=120, seed=10)
+    weighter = _weighter(md, method="overlap").fit()
+
+    g = weighter.plot_propensity_score_distributions()
+    assert len(g.axes.flat) == 2
+    g = weighter.plot_propensity_score_distributions(method="att")
+    assert len(g.axes.flat) == 2
+
+    g = weighter.plot_weight_distributions()
+    assert len(g.axes.flat) == 2
+    g = weighter.plot_weight_distributions(method="att")
+    assert len(g.axes.flat) == 2
+
+    with pytest.raises(ValueError):
+        _weighter(md).plot_weight_distributions()

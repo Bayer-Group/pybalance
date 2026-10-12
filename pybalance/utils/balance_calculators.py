@@ -76,6 +76,23 @@ def reshape_output(f):
     return _f
 
 
+def _weighted_moments(x: torch.Tensor, w: torch.Tensor):
+    """
+    Weighted mean and standard deviation over the patient axis. x has shape
+    n_candidates x n_patients x n_features and w broadcasts against
+    n_candidates x n_patients. The variance uses the reliability-weights
+    correction, which reduces to the unbiased (ddof=1) estimate for equal
+    weights, and moments are invariant to the overall scale of w.
+    """
+    w = w.unsqueeze(-1)
+    sum_w = w.sum(dim=1)
+    mean = (w * x).sum(dim=1) / sum_w
+    var = (w * (x - mean.unsqueeze(1)) ** 2).sum(dim=1) / (
+        sum_w - (w**2).sum(dim=1) / sum_w
+    )
+    return mean, torch.sqrt(var)
+
+
 class BaseBalanceCalculator:
     """
     BaseBalanceCalculator is the low-level interface to calculating balance.
@@ -249,7 +266,9 @@ class BaseBalanceCalculator:
         return data
 
     def _fetch_features(self, subset_populations, full_population_data):
-        if isinstance(subset_populations, pd.DataFrame):
+        if subset_populations is None:
+            features = full_population_data
+        elif isinstance(subset_populations, pd.DataFrame):
             features = self._preprocess(subset_populations)
         else:
             if not isinstance(subset_populations, torch.Tensor):
@@ -286,8 +305,10 @@ class BaseBalanceCalculator:
     @reshape_output
     def distance(
         self,
-        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
+        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
         target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
+        pool_weights: Optional[Union[torch.Tensor, np.ndarray]] = None,
+        target_weights: Optional[Union[torch.Tensor, np.ndarray]] = None,
     ) -> torch.tensor:
         """
         Compute overall distance (aka "mismatch", aka "loss") between input
@@ -301,34 +322,73 @@ class BaseBalanceCalculator:
             array should be an array of shape n_candidate_populations x
             candidate_population_size that indexes the patient pool (passed
             during __init__()). The first dimension may be omitted if only one
-            subset population is present.
+            subset population is present. If None, the full pool is used.
         :target_subsets: Subsets of the target population. If an index array, must
             have same last dimension as pool_subsets.
+        :pool_weights: Optional non-negative patient weights, one per patient of
+            the (sub)population in pool_subsets (or of the full pool if
+            pool_subsets is None), with shape n_patients or
+            n_candidate_populations x n_patients. Feature means and standard
+            deviations are then weighted, which allows scoring reweighted
+            (rather than subsetted) populations. Invariant to weight scale.
+        :target_weights: Same as pool_weights, for the target. Not supported for
+            an AggregateTarget, whose moments are fixed.
         """
-        per_feature_loss = self.per_feature_loss(pool_subsets, target_subsets)
+        per_feature_loss = self.per_feature_loss(
+            pool_subsets, target_subsets, pool_weights, target_weights
+        )
         # Since feature_weights sum to 1, sum is actually a weighted mean
         return torch.sum(
             self.feature_weights * torch.abs(per_feature_loss) ** self.order, dim=1
         ) ** (1.0 / self.order)
 
-    def balance(self, pool_subsets, target_subsets=None):
-        return -self.distance(pool_subsets, target_subsets)
+    def balance(
+        self,
+        pool_subsets=None,
+        target_subsets=None,
+        pool_weights=None,
+        target_weights=None,
+    ):
+        return -self.distance(
+            pool_subsets, target_subsets, pool_weights, target_weights
+        )
+
+    def _moments(self, features, weights):
+        if weights is None:
+            return features.mean(axis=1), features.std(axis=1)
+        weights = torch.as_tensor(weights, dtype=torch.float32, device=self.device)
+        if weights.ndim == 1:
+            weights = weights.unsqueeze(0)
+        if weights.shape[-1] != features.shape[1]:
+            raise ValueError(
+                f"Got {weights.shape[-1]} weights for {features.shape[1]} patients!"
+            )
+        return _weighted_moments(features, weights)
 
     def per_feature_loss(
         self,
-        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
+        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
         target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
+        pool_weights: Optional[Union[torch.Tensor, np.ndarray]] = None,
+        target_weights: Optional[Union[torch.Tensor, np.ndarray]] = None,
     ) -> torch.tensor:
         """
         Compute mismatch (aka "distance", aka "loss") on a per-feature basis for
         a set of candidate populations.
         """
         pool = self._fetch_features(pool_subsets, self.pool)
-        if target_subsets is not None:
+        pool_mean, pool_std = self._moments(pool, pool_weights)
+        weighted = pool_weights is not None or target_weights is not None
+        if target_subsets is not None or target_weights is not None:
+            if self.target is None:
+                raise ValueError(
+                    "The target is an AggregateTarget with fixed moments, so "
+                    "target subsets/weights are not supported."
+                )
             target = self._fetch_features(target_subsets, self.target)
-            target_std = target.std(axis=1)
-            target_mean = target.mean(axis=1)
-            if not pool.shape[0] == target.shape[0]:
+            target_mean, target_std = self._moments(target, target_weights)
+            n_pool, n_target = pool_mean.shape[0], target_mean.shape[0]
+            if n_pool != n_target and not (weighted and 1 in (n_pool, n_target)):
                 raise ValueError(
                     "Number of subset populations must be same for pool and target!"
                 )
@@ -347,9 +407,9 @@ class BaseBalanceCalculator:
         # __init__() of the possibility of this arising.
         norm = 1
         if self.standardize_difference:
-            norm *= torch.sqrt(pool.std(axis=1) ** 2 + target_std**2) + 1e-6
+            norm *= torch.sqrt(pool_std**2 + target_std**2) + 1e-6
 
-        return torch.nan_to_num((pool.mean(axis=1) - target_mean) / norm)
+        return torch.nan_to_num((pool_mean - target_mean) / norm)
 
 
 class BetaBalance(BaseBalanceCalculator):
@@ -586,10 +646,14 @@ class BetaMaxBalance(BaseBalanceCalculator):
     @reshape_output
     def distance(
         self,
-        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray],
+        pool_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
         target_subsets: Union[pd.DataFrame, torch.Tensor, np.ndarray] = None,
+        pool_weights: Optional[Union[torch.Tensor, np.ndarray]] = None,
+        target_weights: Optional[Union[torch.Tensor, np.ndarray]] = None,
     ) -> torch.tensor:
-        per_feature_loss = self.per_feature_loss(pool_subsets, target_subsets)
+        per_feature_loss = self.per_feature_loss(
+            pool_subsets, target_subsets, pool_weights, target_weights
+        )
 
         return torch.max(
             self.feature_weights * torch.abs(per_feature_loss), dim=1
@@ -768,7 +832,24 @@ class BatchedBalanceCalculator:
     def _to_list(self, candidate_populations):
         return self.balance_calculator._to_list(candidate_populations)
 
-    def distance(self, pool_subsets, target_subsets=None):
+    def distance(
+        self,
+        pool_subsets=None,
+        target_subsets=None,
+        pool_weights=None,
+        target_weights=None,
+    ):
+        # Weighted populations are a single reweighting of the full pool/target
+        # (or of one subset), so there is nothing to batch.
+        if (
+            pool_subsets is None
+            or pool_weights is not None
+            or target_weights is not None
+        ):
+            return self.balance_calculator.distance(
+                pool_subsets, target_subsets, pool_weights, target_weights
+            )
+
         # If the user passes a pandas DataFrame, the DataFrame is assumed to
         # represent feature data for only one population and no need for
         # batching; just pass on to the base class. Otherwise, assume
@@ -820,8 +901,16 @@ class BatchedBalanceCalculator:
         assert len(distances) == len(pool_subsets)
         return distances
 
-    def balance(self, pool_subsets, target_subsets=None):
-        return -self.distance(pool_subsets, target_subsets)
+    def balance(
+        self,
+        pool_subsets=None,
+        target_subsets=None,
+        pool_weights=None,
+        target_weights=None,
+    ):
+        return -self.distance(
+            pool_subsets, target_subsets, pool_weights, target_weights
+        )
 
 
 #

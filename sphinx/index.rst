@@ -24,7 +24,7 @@ Features
   propensity score matching, plus matching against an aggregate (published
   Table 1) target.
 - Weighting: Matching-Adjusted Indirect Comparison (MAIC), general entropy
-  balancing, and propensity-score (IPTW) weighting.
+  balancing, and propensity-score (IPTW and overlap) weighting.
 - A variety of balance calculators for defining and measuring balance.
 - Visualization tools for inspecting covariate balance before/after.
 - Dataset simulation utilities for testing and demos.
@@ -63,7 +63,7 @@ through the :doc:`02_demos`. Questions or issues are welcome on
    :maxdepth: 2
    :caption: Demos - Weighting
 
-   demos/weighting_01_iptw.ipynb
+   demos/weighting_01_propensity.ipynb
    demos/weighting_02_maic.ipynb
 
 ..	toctree::

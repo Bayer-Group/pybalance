@@ -13,7 +13,7 @@ from pybalance.genetic import GeneticMatcher, get_global_defaults
 from pybalance.lp.matcher import ConstraintSatisfactionMatcher
 from pybalance.propensity import (
     PropensityScoreMatcher,
-    plot_propensity_score_match_distributions,
+    plot_propensity_score_distributions,
     plot_propensity_score_match_pairs,
 )
 from pybalance.utils import (
@@ -175,7 +175,7 @@ def ps_train(matching_data, bc, args):
     matcher = PropensityScoreMatcher(matching_data, **params)
     match = matcher.match()
 
-    fig = plot_propensity_score_match_distributions(matcher)
+    fig = plot_propensity_score_distributions(matcher)
     save_mpl_fig(
         fig,
         args.output.replace(".csv", "").replace(".parquet", "")

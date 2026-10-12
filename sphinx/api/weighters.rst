@@ -12,12 +12,13 @@ Entropy Balancing & MAIC
 .. autoclass:: pybalance.weighting.MAICWeighter
     :members:
 
-IPTW Weighter
+Propensity Score Weighter
 --------------------------------------
-.. autoclass:: pybalance.weighting.IPTWWeighter
+.. autoclass:: pybalance.weighting.PropensityScoreWeighter
     :members:
 
-.. autofunction:: pybalance.weighting.plot_iptw_propensity_distributions
+.. autofunction:: pybalance.weighting.propensity_score_weights
+
 
 Shared Utilities
 --------------------------------------

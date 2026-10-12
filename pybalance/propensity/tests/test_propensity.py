@@ -51,3 +51,25 @@ def test_seed_makes_hyperparam_search_reproducible():
     assert search(0) == search(0)
     assert search(0) != search(1)
     assert matcher.PropensityScoreMatcher(md, seed=3).get_params()["seed"] == 3
+
+
+def test_plot_propensity_score_match_distributions_is_deprecated():
+    import pytest
+    from pybalance.propensity import (
+        PropensityScoreMatcher,
+        plot_propensity_score_distributions,
+        plot_propensity_score_match_distributions,
+    )
+    from pybalance.sim import generate_toy_dataset
+
+    matcher = PropensityScoreMatcher(
+        generate_toy_dataset(n_pool=300, n_target=50, seed=1),
+        max_iter=3,
+        seed=0,
+        verbose=False,
+    )
+    matcher.match()
+    assert len(plot_propensity_score_distributions(matcher).axes.flat) == 2
+    with pytest.warns(DeprecationWarning, match="plot_propensity_score_distributions"):
+        g = plot_propensity_score_match_distributions(matcher)
+    assert len(g.axes.flat) == 2
