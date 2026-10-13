@@ -286,3 +286,36 @@ def test_target_subsets():
     )
     with pytest.raises(ValueError):
         distances = gamma.distance(pool_subsets, target_subsets)
+
+
+def test_weighted_distance_matches_unweighted_for_equal_and_indicator_weights():
+    matching_data = generate_toy_dataset(n_pool=400, n_target=80, seed=3)
+    calc = BalanceCalculator(matching_data, "beta")
+    n_pool = calc.pool.shape[0]
+
+    # Equal weights (of any scale) reproduce the full-pool distance.
+    full = calc.distance(np.arange(n_pool))
+    assert np.isclose(calc.distance(), full, rtol=1e-4)
+    assert np.isclose(calc.distance(pool_weights=np.full(n_pool, 3.0)), full, rtol=1e-4)
+
+    # 0/1 weights reproduce the distance to the corresponding subset.
+    rng = np.random.default_rng(0)
+    idx = rng.choice(n_pool, size=60, replace=False)
+    indicator = np.zeros(n_pool)
+    indicator[idx] = 1
+    assert np.isclose(
+        calc.distance(pool_weights=indicator), calc.distance(idx), rtol=1e-4
+    )
+
+    # Weighted target moments are supported for patient-level targets.
+    n_target = calc.target.shape[0]
+    assert np.isclose(
+        calc.distance(target_weights=np.ones(n_target)), calc.distance(), rtol=1e-4
+    )
+
+
+def test_weighted_distance_validates_inputs():
+    matching_data = generate_toy_dataset(n_pool=200, n_target=40, seed=4)
+    calc = BalanceCalculator(matching_data, "beta")
+    with pytest.raises(ValueError):
+        calc.distance(pool_weights=np.ones(5))

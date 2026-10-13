@@ -1,9 +1,11 @@
-from .matcher import (
+from .base import (
     BaseWeighter,
-    EntropyBalanceWeighter,
-    MAICWeighter,
-    IPTWWeighter,
     effective_sample_size,
     weighted_balance_table,
-    plot_iptw_propensity_distributions,
+)
+from .entropy import EntropyBalanceWeighter
+from .maic import MAICWeighter
+from .propensity import (
+    PropensityScoreWeighter,
+    propensity_score_weights,
 )

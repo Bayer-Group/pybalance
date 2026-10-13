@@ -3,7 +3,8 @@ PyYAML
 matplotlib
 numpy<2
 pandas
-pyarrow
+# pyarrow>=25 requires numpy>=2, but we pin numpy<2
+pyarrow<25
 pytest
 scikit-learn
 scipy

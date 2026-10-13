@@ -1,5 +1,6 @@
 import time
 import copy
+import warnings
 from typing import Optional, Union
 
 import numpy as np
@@ -33,7 +34,102 @@ def _check_fitted(matcher):
         raise ValueError("Matcher has not been fitted!")
 
 
-class PropensityScoreMatcher:
+class PropensityModelSearch:
+    """
+    Shared machinery for estimating propensity scores of pool vs. target
+    membership and searching randomly over the hyperparameters of the model.
+    Subclasses must set matching_data, balance_calculator, seed,
+    hyperparam_space and best_model (None until fitted).
+    """
+
+    DEFAULT_HYPERPARAM_SPACE = {
+        LogisticRegression: {
+            "C": loguniform(a=0.01, b=100),
+            "penalty": ["l1", "l2"],
+            "solver": ["saga"],
+            "fit_intercept": [True, False],
+            "max_iter": [500],
+        },
+        SGDClassifier: {
+            "penalty": ["l1", "l2", "elasticnet"],
+            "alpha": loguniform(a=0.02, b=20),
+            "fit_intercept": [True, False],
+            "early_stopping": [True, False],
+            "loss": ["log_loss", "modified_huber"],
+            "max_iter": [1500],
+            "class_weight": [None, "balanced"],
+        },
+    }
+
+    POOL = 0
+    TARGET = 1
+
+    def _train_preprocessors(self, matching_data):
+        self.standard_scaler = preprocessing.StandardScaler()
+        X = self.balance_calculator.preprocessor.transform(matching_data)
+        self.standard_scaler.fit(X.data[X.headers["all"]])
+
+    def _preprocess_data_for_sklearn(self, matching_data):
+        """
+        Preprocess matching data to prepare it for estimating a propensity score.
+        """
+        matching_data = self.balance_calculator.preprocessor.transform(matching_data)
+        target, pool = split_target_pool(matching_data)
+
+        # construct feature data in a single array
+        X = pd.concat([pool, target])[matching_data.headers["all"]]
+        X = self.standard_scaler.transform(X)
+
+        # construct target variable
+        y = np.array([self.POOL] * len(pool) + [self.TARGET] * len(target))
+
+        return X, y
+
+    def _get_hyperparams(self, n_iter):
+        hyperparams = []
+        n_iter += 1
+        n_models = len(self.hyperparam_space)
+        for model, params in self.hyperparam_space.items():
+            hyperparams.extend(
+                [
+                    (model, p)
+                    for p in ParameterSampler(
+                        params, n_iter=int(n_iter / n_models), random_state=self.seed
+                    )
+                ]
+            )
+
+        order = np.random.default_rng(self.seed).permutation(len(hyperparams))
+        hyperparams = [hyperparams[i] for i in order]
+
+        return hyperparams[:n_iter]
+
+    def get_propensity_score(
+        self, clf: BaseEstimator = None, matching_data: MatchingData = None
+    ) -> tuple:
+        """
+        Returns the estimated propensity scores for the pool and target
+        populations in a MatchingData object as predicted by a given
+        propensity score model. If no model is passed, the method uses the
+        best_model computed during matching. If no data are passed, the
+        method uses the MatchingData passed during matching.
+        """
+        if clf is None:
+            if self.best_model is None:
+                raise ValueError("No propensity model has been fitted!")
+            clf = self.best_model
+
+        if matching_data is None:
+            matching_data = self.matching_data
+
+        X, y = self._preprocess_data_for_sklearn(matching_data)
+        propensity_pool = clf.predict_proba(X[y == self.POOL, :])[:, 1]
+        propensity_target = clf.predict_proba(X[y == self.TARGET, :])[:, 1]
+
+        return propensity_pool, propensity_target
+
+
+class PropensityScoreMatcher(PropensityModelSearch):
     """
     Use a propensity score model to match two populations. The Matcher searches
     randomly over hyperparameters for the propensity score model and selects the
@@ -71,28 +167,6 @@ class PropensityScoreMatcher:
     :param seed: Seed for the hyperparameter search and the classifiers. Set
         it to make matching reproducible; if None, results vary between runs.
     """
-
-    DEFAULT_HYPERPARAM_SPACE = {
-        LogisticRegression: {
-            "C": loguniform(a=0.01, b=100),
-            "penalty": ["l1", "l2"],
-            "solver": ["saga"],
-            "fit_intercept": [True, False],
-            "max_iter": [500],
-        },
-        SGDClassifier: {
-            "penalty": ["l1", "l2", "elasticnet"],
-            "alpha": loguniform(a=0.02, b=20),
-            "fit_intercept": [True, False],
-            "early_stopping": [True, False],
-            "loss": ["log_loss", "modified_huber"],
-            "max_iter": [1500],
-            "class_weight": [None, "balanced"],
-        },
-    }
-
-    POOL = 0
-    TARGET = 1
 
     def __init__(
         self,
@@ -169,6 +243,14 @@ class PropensityScoreMatcher:
 
         return self.best_match
 
+    def plot_propensity_score_distributions(self):
+        """
+        Plot histograms of the estimated propensity score for pool and target
+        populations pre- and post-matching. Requires match() to have been
+        called.
+        """
+        return plot_propensity_score_distributions(self)
+
     def match(self) -> MatchingData:
         """
         Match populations passed during __init__(). Returns MatchingData
@@ -213,69 +295,6 @@ class PropensityScoreMatcher:
                 break
 
         return self.get_best_match()
-
-    def _train_preprocessors(self, matching_data):
-        self.standard_scaler = preprocessing.StandardScaler()
-        X = self.balance_calculator.preprocessor.transform(matching_data)
-        self.standard_scaler.fit(X.data[X.headers["all"]])
-
-    def _preprocess_data_for_sklearn(self, matching_data):
-        """
-        Preprocess matching data to prepare it for estimating a propensity score.
-        """
-        matching_data = self.balance_calculator.preprocessor.transform(matching_data)
-        target, pool = split_target_pool(matching_data)
-
-        # construct feature data in a single array
-        X = pd.concat([pool, target])[matching_data.headers["all"]]
-        X = self.standard_scaler.transform(X)
-
-        # construct target variable
-        y = np.array([self.POOL] * len(pool) + [self.TARGET] * len(target))
-
-        return X, y
-
-    def _get_hyperparams(self, n_iter):
-        hyperparams = []
-        n_iter += 1
-        n_models = len(self.hyperparam_space)
-        for model, params in self.hyperparam_space.items():
-            hyperparams.extend(
-                [
-                    (model, p)
-                    for p in ParameterSampler(
-                        params, n_iter=int(n_iter / n_models), random_state=self.seed
-                    )
-                ]
-            )
-
-        order = np.random.default_rng(self.seed).permutation(len(hyperparams))
-        hyperparams = [hyperparams[i] for i in order]
-
-        return hyperparams[:n_iter]
-
-    def get_propensity_score(
-        self, clf: BaseEstimator = None, matching_data: MatchingData = None
-    ) -> tuple:
-        """
-        Returns the estimated propensity scores for the pool and target
-        populations in a MatchingData object as predicted by a given
-        propensity score model. If no model is passed, the method uses the
-        best_model computed during matching. If no data are passed, the
-        method uses the MatchingData passed during matching.
-        """
-        if clf is None:
-            _check_fitted(self)
-            clf = self.best_model
-
-        if matching_data is None:
-            matching_data = self.matching_data
-
-        X, y = self._preprocess_data_for_sklearn(matching_data)
-        propensity_pool = clf.predict_proba(X[y == self.POOL, :])[:, 1]
-        propensity_target = clf.predict_proba(X[y == self.TARGET, :])[:, 1]
-
-        return propensity_pool, propensity_target
 
 
 def propensity_score_match_greedy(ps_pool, ps_target, caliper=None, clip=True):
@@ -374,7 +393,48 @@ def propensity_score_match(ps_pool, ps_target, method="greedy", caliper=None):
     return pool_matches, target_matches
 
 
-def plot_propensity_score_match_distributions(matcher: PropensityScoreMatcher):
+def _facet_population_histograms(
+    data,
+    x,
+    col,
+    pool_name,
+    target_name,
+    col_order=None,
+    bins=24,
+    binrange=None,
+    xlim=None,
+    weights=None,
+):
+    """
+    Histograms of ``x`` by population (column "population" of ``data``),
+    one panel per value of ``col``. Shared by the propensity score and weight
+    plots of matchers and weighters.
+    """
+    g = sns.FacetGrid(data=data, col=col, col_order=col_order, height=4, xlim=xlim)
+    g.map_dataframe(
+        sns.histplot,
+        bins=bins,
+        binrange=binrange,
+        x=x,
+        hue="population",
+        hue_order=[pool_name, target_name],
+        alpha=0.5,
+        common_norm=False,
+        stat="probability",
+        **({} if weights is None else {"weights": weights}),
+    )
+    [ax.grid(True) for axes in g.axes for ax in axes]
+
+    legend_patches = [
+        matplotlib.patches.Patch(color=sns.color_palette()[0], label=pool_name),
+        matplotlib.patches.Patch(color=sns.color_palette()[1], label=target_name),
+    ]
+    matplotlib.pyplot.legend(handles=legend_patches)
+
+    return g
+
+
+def plot_propensity_score_distributions(matcher: PropensityScoreMatcher):
     """
     Plot histograms of the estimated propensity score for pool and target
     populations pre- and post-matching.
@@ -418,26 +478,28 @@ def plot_propensity_score_match_distributions(matcher: PropensityScoreMatcher):
         ]
     )
 
-    g = sns.FacetGrid(data=data, col="matched", height=4, xlim=[0, 1])
-    g.map_dataframe(
-        sns.histplot,
-        bins=np.linspace(0, 1, 25),
+    return _facet_population_histograms(
+        data,
         x="propensity",
-        hue="population",
-        hue_order=[pool_name, target_name],
-        alpha=0.5,
-        common_norm=False,
-        stat="probability",
+        col="matched",
+        pool_name=pool_name,
+        target_name=target_name,
+        binrange=(0, 1),
+        xlim=[0, 1],
     )
-    [ax.grid(True) for axes in g.axes for ax in axes]
 
-    legend_patches = [
-        matplotlib.patches.Patch(color=sns.color_palette()[0], label=pool_name),
-        matplotlib.patches.Patch(color=sns.color_palette()[1], label=target_name),
-    ]
-    matplotlib.pyplot.legend(handles=legend_patches)
 
-    return g
+def plot_propensity_score_match_distributions(matcher: PropensityScoreMatcher):
+    """
+    Deprecated alias of ``plot_propensity_score_distributions()``.
+    """
+    warnings.warn(
+        "plot_propensity_score_match_distributions() is deprecated; use "
+        "plot_propensity_score_distributions() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return plot_propensity_score_distributions(matcher)
 
 
 def plot_propensity_score_match_pairs(matcher: PropensityScoreMatcher):
