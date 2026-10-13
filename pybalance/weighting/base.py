@@ -10,7 +10,7 @@ from pybalance.utils import MatchingData
 
 def _check_fitted(weighter):
     if weighter.weights is None:
-        raise ValueError("Weighter has not been fitted!")
+        raise ValueError("Weighter has no weights yet: call match() first.")
 
 
 def effective_sample_size(weights: np.ndarray) -> float:
@@ -40,7 +40,7 @@ class BaseWeighter:
         target can be either patient-level or an ``AggregateTarget`` (e.g. a
         published Table 1).
     :param weight_col: Name of the column used to store weights on the
-        MatchingData returned by transform(). Must not collide with an existing
+        MatchingData returned by match(). Must not collide with an existing
         matching feature.
     :param verbose: Whether to log fitting diagnostics.
     """
@@ -69,10 +69,10 @@ class BaseWeighter:
         """Return the weighter's configuration parameters as a dict."""
         raise NotImplementedError
 
-    def fit(self) -> "BaseWeighter":
+    def _fit(self) -> None:
         """
         Compute self.weights (and, if the weighter also reweights the target,
-        self.target_weights) and self.diagnostics. Returns self.
+        self.target_weights) and self.diagnostics.
         """
         raise NotImplementedError
 
@@ -99,25 +99,27 @@ class BaseWeighter:
         _check_fitted(self)
         return effective_sample_size(self.weights)
 
-    def transform(self) -> MatchingData:
+    def get_best_match(self) -> MatchingData:
         """
-        Apply the fitted weights: return a MatchingData instance in which every
-        pool patient is retained and carries a new column (see weight_col)
-        holding their weight. The target population (patient-level or
-        aggregate) is passed through unchanged, with weight 1.0 assigned to any
-        patient-level target rows unless the weighter also fits target weights.
+        Return a MatchingData instance in which every pool patient is retained
+        and carries a new column (see weight_col) holding their weight. The
+        target population (patient-level or aggregate) is passed through
+        unchanged, with weight 1.0 assigned to any patient-level target rows
+        unless the weighter also fits target weights. Requires match() to have
+        been called.
         """
         _check_fitted(self)
         return self._with_weights(self.weights, self.target_weights)
 
     def match(self) -> MatchingData:
         """
-        Fit (if not already fit) and transform, matching the public interface
-        of the other matchers in pybalance.
+        Compute the weights (once; later calls reuse them) and return the
+        weighted MatchingData. Named ``match`` for consistency with the other
+        matchers in pybalance, although no patients are dropped.
         """
         if self.weights is None:
-            self.fit()
-        return self.transform()
+            self._fit()
+        return self.get_best_match()
 
     def _with_weights(self, pool_weights, target_weights) -> MatchingData:
         md = self.matching_data
@@ -159,7 +161,7 @@ def weighted_balance_table(
     relative to the unweighted pool.
 
     :param weighter: A fitted EntropyBalanceWeighter/MAICWeighter/PropensityScoreWeighter,
-        i.e. one on which fit() or match() has already been called.
+        i.e. one on which match() has already been called.
     :param method: For a PropensityScoreWeighter, the weighting method to
         tabulate (default: the method the model was selected for).
     """

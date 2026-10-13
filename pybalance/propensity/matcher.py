@@ -243,6 +243,14 @@ class PropensityScoreMatcher(PropensityModelSearch):
 
         return self.best_match
 
+    def plot_propensity_score_distributions(self):
+        """
+        Plot histograms of the estimated propensity score for pool and target
+        populations pre- and post-matching. Requires match() to have been
+        called.
+        """
+        return plot_propensity_score_distributions(self)
+
     def match(self) -> MatchingData:
         """
         Match populations passed during __init__(). Returns MatchingData

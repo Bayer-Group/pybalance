@@ -389,37 +389,39 @@ def test_min_ess_fraction_rejects_spiky_candidates():
     assert weighter.diagnostics["target_effective_sample_size"] >= 0.3 * n_target
 
 
-def test_transform_applies_another_method_without_changing_the_fit():
+def test_match_with_another_method_reuses_the_fit():
     md = _shifted_md(seed=15)
-    weighter = _weighter(md, method="att").fit()
+    weighter = _weighter(md, method="att")
+    weighter.match()
     model, att_weights = weighter.best_model, weighter.get_weights().copy()
 
-    matched = weighter.transform(method="overlap")
+    matched = weighter.match(method="overlap")
     overlap_weights = matched.get_population("pool")[weighter.weight_col].values
     assert overlap_weights.max() < 1
     assert not np.allclose(att_weights, overlap_weights)
     assert np.allclose(overlap_weights, weighter.get_weights("overlap"))
     assert weighter.score("overlap") < weighter.score("att")
 
-    # transform() is pure: the fitted state is still that of the att fit.
+    # The fitted state is still that of the att fit.
     assert weighter.method == "att" and weighter.best_model is model
     assert np.allclose(weighter.get_weights(), att_weights)
-    default = weighter.transform().get_population("pool")[weighter.weight_col].values
+    default = weighter.match().get_population("pool")[weighter.weight_col].values
     assert np.allclose(default, att_weights)
 
     with pytest.raises(ValueError):
-        weighter.transform(method="nope")
+        weighter.match(method="nope")
 
 
-def test_transform_before_fit_raises():
+def test_get_best_match_before_match_raises():
     weighter = _weighter(_shifted_md(n_pool=300, n_target=50, seed=16))
     with pytest.raises(ValueError):
-        weighter.transform()
+        weighter.get_best_match()
 
 
 def test_plot_methods():
     md = _shifted_md(n_pool=800, n_target=120, seed=10)
-    weighter = _weighter(md, method="overlap").fit()
+    weighter = _weighter(md, method="overlap")
+    weighter.match()
 
     g = weighter.plot_propensity_score_distributions()
     assert len(g.axes.flat) == 2

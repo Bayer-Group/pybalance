@@ -34,7 +34,7 @@ class MAICWeighter(EntropyBalanceWeighter):
     :param ridge: Ridge regularization added to the Newton step for numerical
         stability.
     :param weight_col: Name of the column used to store weights on the
-        MatchingData returned by transform().
+        MatchingData returned by match().
     :param verbose: Whether to log fitting diagnostics.
     :param limit_penalty: See ``EntropyBalanceWeighter``.
     """

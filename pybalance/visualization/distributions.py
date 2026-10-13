@@ -271,7 +271,7 @@ def plot_binary_features(
         return None
 
     data = matching_data.copy().data
-    data.loc[:, binary_cols] = data[binary_cols].rank(method="dense") - 1
+    data[binary_cols] = data[binary_cols].rank(method="dense") - 1
 
     # Frequencies
     frequencies = (

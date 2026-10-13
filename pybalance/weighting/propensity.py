@@ -135,7 +135,7 @@ class PropensityScoreWeighter(PropensityModelSearch, BaseWeighter):
         sec).
 
     :param weight_col: Name of the column used to store weights on the
-        MatchingData returned by transform().
+        MatchingData returned by match().
 
     :param verbose: Whether to log diagnostic information during training.
 
@@ -263,11 +263,11 @@ class PropensityScoreWeighter(PropensityModelSearch, BaseWeighter):
         )
         logger.info(f"\tSolution time: {self.solution_time:.1f} s")
 
-    def fit(self) -> "PropensityScoreWeighter":
+    def _fit(self) -> None:
         """
         Search over propensity score model hyperparameters and keep the model
         whose weights, for the ``method`` given at construction, best satisfy
-        the balance objective. Use transform() to apply weights.
+        the balance objective.
         """
         t0 = time.time()
 
@@ -315,8 +315,6 @@ class PropensityScoreWeighter(PropensityModelSearch, BaseWeighter):
                 "with trim_quantiles, or check for non-overlapping populations."
             )
 
-        return self
-
     def _weights_for(self, method: Optional[str]):
         _check_fitted(self)
         if method is None:
@@ -345,24 +343,33 @@ class PropensityScoreWeighter(PropensityModelSearch, BaseWeighter):
         w_pool, w_target, _ = self._weights_for(method)
         return self._score(w_pool, w_target)
 
-    def transform(self, method: Optional[str] = None) -> MatchingData:
+    def get_best_match(self, method: Optional[str] = None) -> MatchingData:
         """
-        Apply the fitted propensity model: return a MatchingData instance in
-        which every pool and target patient is retained and carries a new
-        column (see weight_col) holding their weight under ``method`` (default:
-        the method the model was selected for). Passing another method reuses
-        the model without searching again, but note the model was selected to
-        optimize the balance of the method given at construction. Does not
-        change the fitted state.
+        Return a MatchingData instance in which every pool and target patient
+        is retained and carries a new column (see weight_col) holding their
+        weight under ``method`` (default: the method the model was selected
+        for). Passing another method reuses the fitted model without searching
+        again, but note the model was selected to optimize the balance of the
+        method given at construction. Does not change the fitted state.
+        Requires match() to have been called.
         """
         w_pool, w_target, _ = self._weights_for(method)
         return self._with_weights(w_pool, w_target)
+
+    def match(self, method: Optional[str] = None) -> MatchingData:
+        """
+        Search for the best propensity model (once; later calls reuse it) and
+        return the weighted MatchingData; see get_best_match() for ``method``.
+        """
+        if self.best_model is None:
+            self._fit()
+        return self.get_best_match(method)
 
     def plot_propensity_score_distributions(self, method: Optional[str] = None):
         """
         Plot histograms of the estimated propensity score for the pool and
         target populations, before vs. after weighting -- the weighting
-        analogue of ``plot_propensity_score_distributions()`` for matchers.
+        analogue of ``PropensityScoreMatcher.plot_propensity_score_distributions()``.
 
         Unlike a Matcher, a Weighter never drops patients, so there is no matched
         subset to compare against; instead, the "before" panel shows every

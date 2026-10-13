@@ -4,9 +4,7 @@ Matchers
 Propensity Score Matcher
 --------------------------------------
 .. autoclass:: pybalance.propensity.PropensityScoreMatcher
-    :members: match, get_params
-
-.. autofunction:: pybalance.propensity.plot_propensity_score_distributions
+    :members: match, get_params, plot_propensity_score_distributions
 
 .. autofunction:: pybalance.propensity.plot_propensity_score_match_pairs
 

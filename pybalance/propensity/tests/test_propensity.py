@@ -70,6 +70,7 @@ def test_plot_propensity_score_match_distributions_is_deprecated():
     )
     matcher.match()
     assert len(plot_propensity_score_distributions(matcher).axes.flat) == 2
+    assert len(matcher.plot_propensity_score_distributions().axes.flat) == 2
     with pytest.warns(DeprecationWarning, match="plot_propensity_score_distributions"):
         g = plot_propensity_score_match_distributions(matcher)
     assert len(g.axes.flat) == 2

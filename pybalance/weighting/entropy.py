@@ -161,7 +161,7 @@ class EntropyBalanceWeighter(BaseWeighter):
         stability; increase this if fitting fails to converge due to
         collinear/near-collinear features.
     :param weight_col: Name of the column used to store weights on the
-        MatchingData returned by transform().
+        MatchingData returned by match().
     :param verbose: Whether to log fitting diagnostics.
     :param limit_penalty: Strength of the quadratic penalty on the weight
         placed beyond a disclosed min / max of an ``AggregateTarget`` (a soft
@@ -307,7 +307,7 @@ class EntropyBalanceWeighter(BaseWeighter):
         Z = np.column_stack(columns) if columns else np.zeros((n_pool, 0))
         return Z, labels, np.array(penalty)
 
-    def fit(self) -> "EntropyBalanceWeighter":
+    def _fit(self) -> None:
         md = self.matching_data
         n_pool = len(md.get_population(md.pool_name))
         n_target = (
@@ -347,5 +347,3 @@ class EntropyBalanceWeighter(BaseWeighter):
                 "iterations. Effective sample size: "
                 f"{self.diagnostics['effective_sample_size']:.1f} / {n_pool} pool patients."
             )
-
-        return self
