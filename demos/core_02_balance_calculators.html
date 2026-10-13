@@ -56,11 +56,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="core_01_matching_data.html">Matching Data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Balance Calculators</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Fit-Balance-Calculator">Fit Balance Calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Create-Balance-Calculator">Create Balance Calculator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Balance-between-pool-and-target">Balance between pool and target</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Balance-between-subset-of-pool-and-target">Balance between subset of pool and target</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Balance-between-several-subsets-simultaneously">Balance between several subsets simultaneously</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Basic-Genetic-Optimizer">Basic Genetic Optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Feature-weights">Feature weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Beta-vs.-gamma">Beta vs. gamma</a></li>
 </ul>
 </li>
 </ul>
@@ -74,7 +75,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -117,6 +118,7 @@
              
   <section id="Balance-Calculators">
 <h1>Balance Calculators<a class="headerlink" href="#Balance-Calculators" title="Permalink to this heading"></a></h1>
+<p>A balance calculator scores how well a population matches a target: the lower the distance, the better the balance. In this notebook we use <code class="docutils literal notranslate"><span class="pre">BetaBalance</span></code>, the mean absolute standardized mean difference (SMD) across features, to show the main ways of calling <code class="docutils literal notranslate"><span class="pre">distance()</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -127,6 +129,7 @@
 </pre></div>
 </div>
 </div>
+<p>We use the dataset from the pybalance paper, which contains a <code class="docutils literal notranslate"><span class="pre">pool</span></code> population to match from and a <code class="docutils literal notranslate"><span class="pre">target</span></code> population to match to.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -350,6 +353,7 @@
 <p>275000 rows × 12 columns</p>
 </div></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">counts()</span></code> summarizes the size of each population.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -401,16 +405,16 @@
 </table>
 </div></div>
 </div>
-<section id="Fit-Balance-Calculator">
-<h2>Fit Balance Calculator<a class="headerlink" href="#Fit-Balance-Calculator" title="Permalink to this heading"></a></h2>
+<section id="Create-Balance-Calculator">
+<h2>Create Balance Calculator<a class="headerlink" href="#Create-Balance-Calculator" title="Permalink to this heading"></a></h2>
+<p>A calculator is built from a <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code> and then used to score any number of populations or subsets.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Balance calculators in general are &quot;fit&quot; to the whole population data</span>
-<span class="c1"># Fitting here means fitting preprocessors (e.g. what bins to use when binning</span>
-<span class="c1"># is involved). It&#39;s important to fit once so that all calls to distance()</span>
-<span class="c1"># can be compared meaningfully.</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Constructing a balance calculator fits its preprocessors (e.g. which bins to use</span>
+<span class="c1"># when binning is involved) to the whole population data. This happens once, so</span>
+<span class="c1"># all calls to distance() can be compared meaningfully.</span>
 <span class="n">beta</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 <span class="n">target</span><span class="p">,</span> <span class="n">pool</span> <span class="o">=</span> <span class="n">split_target_pool</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 </pre></div>
@@ -419,6 +423,7 @@
 </section>
 <section id="Balance-between-pool-and-target">
 <h2>Balance between pool and target<a class="headerlink" href="#Balance-between-pool-and-target" title="Permalink to this heading"></a></h2>
+<p>The simplest call scores the whole pool against the target.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -436,6 +441,7 @@
 tensor(0.2353)
 </pre></div></div>
 </div>
+<p>The target defaults to the target population of the <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code> the calculator was built from. It can also be passed explicitly.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -457,6 +463,7 @@ tensor(0.2353)
 </section>
 <section id="Balance-between-subset-of-pool-and-target">
 <h2>Balance between subset of pool and target<a class="headerlink" href="#Balance-between-subset-of-pool-and-target" title="Permalink to this heading"></a></h2>
+<p>We can also score a subset of the pool, e.g. a random sample of 100 patients. This is what a matcher does repeatedly while searching for a good subset.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -471,9 +478,10 @@ tensor(0.2353)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor(0.2448)
+tensor(0.2396)
 </pre></div></div>
 </div>
+<p>Subsets of the target can be scored too.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -489,12 +497,13 @@ tensor(0.2448)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor(0.2384)
+tensor(0.2224)
 </pre></div></div>
 </div>
 </section>
 <section id="Balance-between-several-subsets-simultaneously">
 <h2>Balance between several subsets simultaneously<a class="headerlink" href="#Balance-between-several-subsets-simultaneously" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">distance()</span></code> can score many candidate subsets in a single call and returns one distance per subset, which is much faster than looping. Subsets are given as arrays of row positions in the pool.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
@@ -513,9 +522,10 @@ tensor(0.2384)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor([0.2477, 0.2138])
+tensor([0.2453, 0.2153])
 </pre></div></div>
 </div>
+<p>The same works for pool and target subsets together: the <span class="math notranslate nohighlight">\(i\)</span>-th pool subset is compared to the <span class="math notranslate nohighlight">\(i\)</span>-th target subset.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
@@ -537,7 +547,7 @@ tensor([0.2477, 0.2138])
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/pybalance/utils/balance_calculators.py:256: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_new.cpp:278.)
+pybalance/utils/balance_calculators.py:275: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/utils/tensor_new.cpp:255.)
   subset_populations = torch.tensor(
 </pre></div></div>
 </div>
@@ -547,9 +557,10 @@ tensor([0.2477, 0.2138])
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor([0.2524, 0.2636])
+tensor([0.2153, 0.2442])
 </pre></div></div>
 </div>
+<p>The number of pool subsets and target subsets must match, otherwise <code class="docutils literal notranslate"><span class="pre">distance()</span></code> raises an error.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
@@ -580,43 +591,25 @@ Number of subset populations must be same for pool and target!
 </pre></div></div>
 </div>
 </section>
-<section id="Basic-Genetic-Optimizer">
-<h2>Basic Genetic Optimizer<a class="headerlink" href="#Basic-Genetic-Optimizer" title="Permalink to this heading"></a></h2>
-<p>Here is a very basic, un-optimized implementation of genetic matching! It’s not very smart, because it doesn’t mix the good populations. This is just an illustration of using the balance calculator.</p>
-<div class="nbinput docutils container">
+<section id="Feature-weights">
+<h2>Feature weights<a class="headerlink" href="#Feature-weights" title="Permalink to this heading"></a></h2>
+<p>By default every feature contributes equally to the balance. Pass <code class="docutils literal notranslate"><span class="pre">feature_weights</span></code> to emphasize some features over others. Weights are specified per input feature (e.g. <code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">country</span></code>), and each encoded column of that feature (e.g. the one-hot columns of <code class="docutils literal notranslate"><span class="pre">country</span></code>) inherits its weight. Features that are not listed get a weight of 1, and weights are normalized to sum to 1, so only their relative sizes matter.</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_subsets</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">pool_size</span><span class="p">,</span> <span class="n">target_size</span><span class="p">,</span> <span class="n">n_subsets</span><span class="p">):</span>
-    <span class="n">pool</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-    <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-
-    <span class="n">pool_subsets</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_subsets</span><span class="p">)</span>
-    <span class="p">]</span>
-    <span class="n">target_subsets</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">target_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_subsets</span><span class="p">)</span>
-    <span class="p">]</span>
-    <span class="k">return</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span>
-
-
-<span class="n">pool_size</span> <span class="o">=</span> <span class="mi">1000</span>
-<span class="n">target_size</span> <span class="o">=</span> <span class="mi">1000</span>
-<span class="n">n_subsets</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">best_match</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="n">best_distance</span> <span class="o">=</span> <span class="mi">100000</span>
-<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span> <span class="o">=</span> <span class="n">get_subsets</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">pool_size</span><span class="p">,</span> <span class="n">target_size</span><span class="p">,</span> <span class="n">n_subsets</span><span class="p">)</span>
-    <span class="n">distances</span> <span class="o">=</span> <span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
-    <span class="n">this_best_distance</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">this_best_distance</span> <span class="o">&lt;</span> <span class="n">best_distance</span><span class="p">:</span>
-        <span class="n">best_distance</span> <span class="o">=</span> <span class="n">this_best_distance</span>
-        <span class="n">best_match_idx</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
-        <span class="n">best_match</span> <span class="o">=</span> <span class="n">pool_subsets</span><span class="p">[</span><span class="n">best_match_idx</span><span class="p">],</span> <span class="n">target_subsets</span><span class="p">[</span><span class="n">best_match_idx</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">j</span> <span class="o">%</span> <span class="mi">10</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Generation </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1"> / Best distance found </span><span class="si">{</span><span class="n">best_distance</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Weight age 5x more than every other feature</span>
+<span class="n">beta_age</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">feature_weights</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The same population is scored differently because age now counts for more</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">beta</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool</span><span class="p">),</span> <span class="n">beta_age</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -624,18 +617,188 @@ Number of subset populations must be same for pool and target!
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Generation 0 / Best distance found 0.218
-Generation 10 / Best distance found 0.211
-Generation 20 / Best distance found 0.211
-Generation 30 / Best distance found 0.211
-Generation 40 / Best distance found 0.208
-Generation 50 / Best distance found 0.208
-Generation 60 / Best distance found 0.208
-Generation 70 / Best distance found 0.208
-Generation 80 / Best distance found 0.208
-Generation 90 / Best distance found 0.208
+tensor(0.2353) tensor(0.2606)
 </pre></div></div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Normalized weight on each encoded feature</span>
+<span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">beta_age</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">],</span> <span class="n">beta_age</span><span class="o">.</span><span class="n">feature_weights</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;gender_1.0&#39;: 0.053,
+ &#39;haircolor_1&#39;: 0.053,
+ &#39;haircolor_2&#39;: 0.053,
+ &#39;country_1&#39;: 0.053,
+ &#39;country_2&#39;: 0.053,
+ &#39;country_3&#39;: 0.053,
+ &#39;country_4&#39;: 0.053,
+ &#39;country_5&#39;: 0.053,
+ &#39;binary_0_1&#39;: 0.053,
+ &#39;binary_1_1&#39;: 0.053,
+ &#39;binary_2_1&#39;: 0.053,
+ &#39;binary_3_1&#39;: 0.053,
+ &#39;age&#39;: 0.263,
+ &#39;height&#39;: 0.053,
+ &#39;weight&#39;: 0.053}
+</pre></div></div>
+</div>
+</section>
+<section id="Beta-vs.-gamma">
+<h2>Beta vs. gamma<a class="headerlink" href="#Beta-vs.-gamma" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">BetaBalance</span></code> compares populations feature by feature through their <strong>means</strong>. <code class="docutils literal notranslate"><span class="pre">GammaBalance</span></code> compares their whole <strong>distributions</strong>: it bins numeric features and measures the area between the two cumulative distribution functions. Two populations with the same mean but a very different spread look perfectly balanced to beta, but not to gamma.</p>
+<p>To see this, we look at age only, by giving every other feature a weight of 0 (see the feature weights section above).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">age_only</span> <span class="o">=</span> <span class="p">{</span><span class="n">feature</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">all</span><span class="p">}</span>
+<span class="n">age_only</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">beta_age_only</span> <span class="o">=</span> <span class="n">BetaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">feature_weights</span><span class="o">=</span><span class="n">age_only</span><span class="p">)</span>
+<span class="n">gamma_age_only</span> <span class="o">=</span> <span class="n">GammaBalance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">feature_weights</span><span class="o">=</span><span class="n">age_only</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<p>We compare the full pool, a random sample of the pool, and a deliberately bad subset made of the 1000 pool patients whose age is closest to the target’s mean age.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">narrow</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">pool</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+<span class="n">random_sample</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<p>The narrow subset has essentially the same mean age as the target, but almost no spread.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;mean age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">target</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">narrow</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()],</span>
+        <span class="s1">&#39;std age&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">target</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="n">narrow</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()],</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;narrow subset&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean age</th>
+      <th>std age</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>target</th>
+      <td>48.325155</td>
+      <td>14.387573</td>
+    </tr>
+    <tr>
+      <th>narrow subset</th>
+      <td>48.323495</td>
+      <td>0.056093</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Beta rates the narrow subset as an almost perfect match, far better than the full pool or a random sample. Gamma sees that the distributions are very different and rates it as the worst of the three.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;beta&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">beta_age_only</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">random_sample</span><span class="p">,</span> <span class="n">narrow</span><span class="p">)],</span>
+        <span class="s1">&#39;gamma&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">gamma_age_only</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">random_sample</span><span class="p">,</span> <span class="n">narrow</span><span class="p">)],</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;random sample&#39;</span><span class="p">,</span> <span class="s1">&#39;narrow subset&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>beta</th>
+      <th>gamma</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>pool</th>
+      <td>0.355794</td>
+      <td>0.247645</td>
+    </tr>
+    <tr>
+      <th>random sample</th>
+      <td>0.386569</td>
+      <td>0.260218</td>
+    </tr>
+    <tr>
+      <th>narrow subset</th>
+      <td>0.000115</td>
+      <td>0.578250</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Which to use depends on the goal: beta is enough when matching means is the criterion, while gamma also protects against matching the mean at the expense of the shape of the distribution.</p>
 </section>
 </section>
 

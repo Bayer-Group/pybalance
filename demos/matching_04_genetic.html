@@ -72,7 +72,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -383,7 +383,7 @@
 <span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher_beta</span> <span class="o">=</span> <span class="n">GeneticMatcher</span><span class="p">(</span>
     <span class="n">matching_data</span> <span class="o">=</span> <span class="n">m</span><span class="p">,</span>
     <span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span><span class="p">,</span>
-    <span class="n">log_every</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">log_every</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">n_generations</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
     <span class="n">time_limit</span> <span class="o">=</span> <span class="n">time_limit</span>
 <span class="p">)</span>
@@ -396,7 +396,7 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:125] cpu
+INFO [matcher.py:197] cpu
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -407,19 +407,17 @@ INFO [matcher.py:125] cpu
 <div class="highlight"><pre>
 {&#39;objective&#39;: &#39;beta&#39;,
  &#39;candidate_population_size&#39;: 1000,
- &#39;n_candidate_populations&#39;: 1024,
- &#39;n_keep_best&#39;: 256,
- &#39;n_voting_populations&#39;: 256,
- &#39;n_mutation&#39;: 256,
+ &#39;n_candidate_populations&#39;: 5000,
+ &#39;n_keep_best&#39;: 1250,
+ &#39;n_voting_populations&#39;: 1250,
+ &#39;n_mutation&#39;: 1250,
  &#39;n_generations&#39;: 5000,
  &#39;n_iter_no_change&#39;: 100,
  &#39;time_limit&#39;: 120,
- &#39;max_batch_size_gb&#39;: 2,
+ &#39;max_batch_size_gb&#39;: 2.0,
  &#39;seed&#39;: 1234,
  &#39;verbose&#39;: True,
- &#39;log_every&#39;: 1000,
- &#39;initialization&#39;: {&#39;benchmarks&#39;: {&#39;propensity&#39;: &#39;include&#39;},
-  &#39;sampling&#39;: {&#39;propensity&#39;: 1.0, &#39;uniform&#39;: 1.0}}}
+ &#39;log_every&#39;: 5}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -435,217 +433,286 @@ INFO [matcher.py:125] cpu
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [initialization.py:31] Optimizing balance with genetic algorithm ...
-INFO [initialization.py:32] Initial balance scores:
-INFO [initialization.py:37]     beta:   0.233
-INFO [initialization.py:38] Initializing candidate populations ...
-INFO [initialization.py:86] Computing PROPENSITY 1-1 matching method ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 1/50, 0.000 min) ...
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: SGDClassifier
-INFO [matcher.py:142]   * alpha: 1.5074398973827774
-INFO [matcher.py:142]   * class_weight: None
-INFO [matcher.py:142]   * early_stopping: True
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * loss: log_loss
-INFO [matcher.py:142]   * max_iter: 1500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:143]   Score (beta): 0.0525
-INFO [matcher.py:144]   Solution time: 0.001 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 2/50, 0.001 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [initialization.py:34] Optimizing balance with genetic algorithm ...
+INFO [initialization.py:35] Initial balance scores:
+INFO [initialization.py:40]     beta:   0.233
+INFO [initialization.py:41] Initializing candidate populations ...
+INFO [initialization.py:89] Computing PROPENSITY 1-1 matching method ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 1/50, 0.0 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 13.179630432958701
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta): 0.0336
+INFO [matcher.py:150]   Solution time: 0.4 s
+INFO [matcher.py:185] Training model SGDClassifier (iter 2/50, 0.4 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 3/50, 0.5 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 4/50, 0.5 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 5/50, 0.7 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 6/50, 0.7 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.05835496346821344
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0291
-INFO [matcher.py:144]   Solution time: 0.003 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 3/50, 0.003 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:185] Training model SGDClassifier (iter 7/50, 1.5 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 8/50, 1.6 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:185] Training model SGDClassifier (iter 9/50, 2.3 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 10/50, 2.3 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 11/50, 2.4 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 12/50, 2.5 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 1.028804040524029
+INFO [matcher.py:148]   * fit_intercept: True
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta): 0.0330
+INFO [matcher.py:150]   Solution time: 2.6 s
+INFO [matcher.py:185] Training model LogisticRegression (iter 13/50, 2.6 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:185] Training model LogisticRegression (iter 14/50, 3.4 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 15/50, 3.5 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 16/50, 3.5 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 4/50, 0.016 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 5/50, 0.017 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 54.02072493419677
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta): 0.0286
+INFO [matcher.py:150]   Solution time: 4.1 s
+INFO [matcher.py:185] Training model LogisticRegression (iter 17/50, 4.2 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 18/50, 4.2 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 19/50, 4.3 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 20/50, 4.3 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 21/50, 4.4 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 22/50, 4.5 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 23/50, 4.5 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 0.5868985298319505
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l1
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta): 0.0264
+INFO [matcher.py:150]   Solution time: 5.3 s
+INFO [matcher.py:185] Training model LogisticRegression (iter 24/50, 5.4 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 25/50, 5.5 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 26/50, 5.5 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 27/50, 5.6 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 28/50, 5.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 29/50, 6.7 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 30/50, 7.1 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 31/50, 7.2 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 32/50, 7.2 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 33/50, 7.3 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 34/50, 7.4 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 35/50, 7.7 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 36/50, 7.8 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 37/50, 7.8 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 38/50, 7.9 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 39/50, 8.0 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 6/50, 0.028 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 7/50, 0.029 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 8/50, 0.030 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 9/50, 0.031 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 10/50, 0.039 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 11/50, 0.040 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 12/50, 0.042 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 13/50, 0.043 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 14/50, 0.043 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 15/50, 0.045 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 16/50, 0.045 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 17/50, 0.046 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 18/50, 0.047 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 2.3905570899706423
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0289
-INFO [matcher.py:144]   Solution time: 0.049 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 19/50, 0.049 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 20/50, 0.055 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 21/50, 0.056 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 22/50, 0.057 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 23/50, 0.058 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 24/50, 0.059 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 25/50, 0.060 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 26/50, 0.061 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.2699411413616818
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0288
-INFO [matcher.py:144]   Solution time: 0.062 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 27/50, 0.062 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 28/50, 0.063 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 29/50, 0.073 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 30/50, 0.074 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 31/50, 0.076 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 32/50, 0.077 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 33/50, 0.078 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 34/50, 0.079 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 35/50, 0.080 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 36/50, 0.093 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 37/50, 0.096 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.5868985298319505
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0249
-INFO [matcher.py:144]   Solution time: 0.109 min
-INFO [matcher.py:179] Training model SGDClassifier (iter 38/50, 0.109 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 39/50, 0.110 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 40/50, 0.111 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 41/50, 0.112 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 42/50, 0.114 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 43/50, 0.120 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 44/50, 0.133 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 45/50, 0.134 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 46/50, 0.135 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 47/50, 0.148 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 48/50, 0.161 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 49/50, 0.162 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 50/50, 0.163 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.5868985298319505
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0249
-INFO [matcher.py:144]   Solution time: 0.109 min
-INFO [initialization.py:66]     beta:   0.025
-INFO [initialization.py:71]     Included in initial population.
+INFO [matcher.py:185] Training model LogisticRegression (iter 40/50, 8.7 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 41/50, 8.8 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 42/50, 8.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 43/50, 8.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 44/50, 9.0 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 45/50, 9.0 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 46/50, 9.7 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 47/50, 9.7 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 48/50, 9.8 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 49/50, 9.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 50/50, 10.2 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 0.5868985298319505
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l1
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta): 0.0264
+INFO [matcher.py:150]   Solution time: 5.3 s
+INFO [initialization.py:69]     beta:   0.026
+INFO [initialization.py:74]     Included in initial population.
 
-INFO [initialization.py:132] Sampling 512 candidate populations according to PROPENSITY distribution ...
+INFO [initialization.py:135] Sampling 2500 candidate populations according to PROPENSITY distribution ...
 
-INFO [initialization.py:132] Sampling 511 candidate populations according to UNIFORM distribution ...
+INFO [initialization.py:135] Sampling 2499 candidate populations according to UNIFORM distribution ...
 
 INFO [logger.py:34] Generation 0
 INFO [logger.py:35]     remaining patients: 10000
-INFO [logger.py:36]     elapsed time: 0.18 min
-INFO [logger.py:45]     best beta: 0.02494      worst beta: 0.25118
-INFO [logger.py:34] Generation 1000
-INFO [logger.py:35]     remaining patients: 7482
-INFO [logger.py:36]     elapsed time: 1.63 min
-INFO [logger.py:45]     best beta: 0.01146      worst beta: 0.24292
-INFO [matcher.py:211] Time limit exceeded. Stopping.
+INFO [logger.py:36]     elapsed time: 13.0 s
+INFO [logger.py:45]     best beta: 0.02644      worst beta: 0.25293
+INFO [logger.py:34] Generation 5
+INFO [logger.py:35]     remaining patients: 10000
+INFO [logger.py:36]     elapsed time: 16.0 s
+INFO [logger.py:45]     best beta: 0.02574      worst beta: 0.18137
+INFO [logger.py:34] Generation 10
+INFO [logger.py:35]     remaining patients: 9906
+INFO [logger.py:36]     elapsed time: 18.9 s
+INFO [logger.py:45]     best beta: 0.02500      worst beta: 0.24751
+INFO [logger.py:34] Generation 15
+INFO [logger.py:35]     remaining patients: 8797
+INFO [logger.py:36]     elapsed time: 21.7 s
+INFO [logger.py:45]     best beta: 0.02455      worst beta: 0.18402
+INFO [logger.py:34] Generation 20
+INFO [logger.py:35]     remaining patients: 8899
+INFO [logger.py:36]     elapsed time: 24.4 s
+INFO [logger.py:45]     best beta: 0.02392      worst beta: 0.24054
+INFO [logger.py:34] Generation 25
+INFO [logger.py:35]     remaining patients: 8894
+INFO [logger.py:36]     elapsed time: 27.0 s
+INFO [logger.py:45]     best beta: 0.02352      worst beta: 0.24438
+INFO [logger.py:34] Generation 30
+INFO [logger.py:35]     remaining patients: 8862
+INFO [logger.py:36]     elapsed time: 29.7 s
+INFO [logger.py:45]     best beta: 0.02340      worst beta: 0.24691
+INFO [logger.py:34] Generation 35
+INFO [logger.py:35]     remaining patients: 8900
+INFO [logger.py:36]     elapsed time: 32.4 s
+INFO [logger.py:45]     best beta: 0.02308      worst beta: 0.24341
+INFO [logger.py:34] Generation 40
+INFO [logger.py:35]     remaining patients: 8909
+INFO [logger.py:36]     elapsed time: 35.1 s
+INFO [logger.py:45]     best beta: 0.02283      worst beta: 0.25221
+INFO [logger.py:34] Generation 45
+INFO [logger.py:35]     remaining patients: 8905
+INFO [logger.py:36]     elapsed time: 37.8 s
+INFO [logger.py:45]     best beta: 0.02243      worst beta: 0.24706
+INFO [logger.py:34] Generation 50
+INFO [logger.py:35]     remaining patients: 8831
+INFO [logger.py:36]     elapsed time: 40.5 s
+INFO [logger.py:45]     best beta: 0.02225      worst beta: 0.24339
+INFO [logger.py:34] Generation 55
+INFO [logger.py:35]     remaining patients: 8881
+INFO [logger.py:36]     elapsed time: 43.2 s
+INFO [logger.py:45]     best beta: 0.02212      worst beta: 0.24236
+INFO [logger.py:34] Generation 60
+INFO [logger.py:35]     remaining patients: 8881
+INFO [logger.py:36]     elapsed time: 45.9 s
+INFO [logger.py:45]     best beta: 0.02186      worst beta: 0.24642
+INFO [logger.py:34] Generation 65
+INFO [logger.py:35]     remaining patients: 8889
+INFO [logger.py:36]     elapsed time: 48.6 s
+INFO [logger.py:45]     best beta: 0.02158      worst beta: 0.24368
+INFO [logger.py:34] Generation 70
+INFO [logger.py:35]     remaining patients: 8936
+INFO [logger.py:36]     elapsed time: 51.3 s
+INFO [logger.py:45]     best beta: 0.02134      worst beta: 0.24348
+INFO [logger.py:34] Generation 75
+INFO [logger.py:35]     remaining patients: 8927
+INFO [logger.py:36]     elapsed time: 54.2 s
+INFO [logger.py:45]     best beta: 0.02106      worst beta: 0.24160
+INFO [logger.py:34] Generation 80
+INFO [logger.py:35]     remaining patients: 8904
+INFO [logger.py:36]     elapsed time: 56.9 s
+INFO [logger.py:45]     best beta: 0.02084      worst beta: 0.24574
+INFO [logger.py:34] Generation 85
+INFO [logger.py:35]     remaining patients: 8901
+INFO [logger.py:36]     elapsed time: 59.6 s
+INFO [logger.py:45]     best beta: 0.02075      worst beta: 0.24454
+INFO [logger.py:34] Generation 90
+INFO [logger.py:35]     remaining patients: 8913
+INFO [logger.py:36]     elapsed time: 62.3 s
+INFO [logger.py:45]     best beta: 0.02065      worst beta: 0.24644
+INFO [logger.py:34] Generation 95
+INFO [logger.py:35]     remaining patients: 8834
+INFO [logger.py:36]     elapsed time: 65.0 s
+INFO [logger.py:45]     best beta: 0.02046      worst beta: 0.24844
+INFO [logger.py:34] Generation 100
+INFO [logger.py:35]     remaining patients: 8859
+INFO [logger.py:36]     elapsed time: 67.7 s
+INFO [logger.py:45]     best beta: 0.02003      worst beta: 0.25226
+INFO [logger.py:34] Generation 105
+INFO [logger.py:35]     remaining patients: 8878
+INFO [logger.py:36]     elapsed time: 70.4 s
+INFO [logger.py:45]     best beta: 0.01988      worst beta: 0.24488
+INFO [logger.py:34] Generation 110
+INFO [logger.py:35]     remaining patients: 8883
+INFO [logger.py:36]     elapsed time: 73.2 s
+INFO [logger.py:45]     best beta: 0.01988      worst beta: 0.25199
+INFO [logger.py:34] Generation 115
+INFO [logger.py:35]     remaining patients: 8876
+INFO [logger.py:36]     elapsed time: 76.0 s
+INFO [logger.py:45]     best beta: 0.01976      worst beta: 0.25416
+INFO [logger.py:34] Generation 120
+INFO [logger.py:35]     remaining patients: 8857
+INFO [logger.py:36]     elapsed time: 78.7 s
+INFO [logger.py:45]     best beta: 0.01956      worst beta: 0.24820
+INFO [logger.py:34] Generation 125
+INFO [logger.py:35]     remaining patients: 8853
+INFO [logger.py:36]     elapsed time: 81.5 s
+INFO [logger.py:45]     best beta: 0.01927      worst beta: 0.24613
+INFO [logger.py:34] Generation 130
+INFO [logger.py:35]     remaining patients: 8884
+INFO [logger.py:36]     elapsed time: 84.3 s
+INFO [logger.py:45]     best beta: 0.01910      worst beta: 0.24422
+INFO [logger.py:34] Generation 135
+INFO [logger.py:35]     remaining patients: 8871
+INFO [logger.py:36]     elapsed time: 87.0 s
+INFO [logger.py:45]     best beta: 0.01901      worst beta: 0.24922
+INFO [logger.py:34] Generation 140
+INFO [logger.py:35]     remaining patients: 8894
+INFO [logger.py:36]     elapsed time: 89.7 s
+INFO [logger.py:45]     best beta: 0.01873      worst beta: 0.24468
+INFO [logger.py:34] Generation 145
+INFO [logger.py:35]     remaining patients: 8854
+INFO [logger.py:36]     elapsed time: 92.4 s
+INFO [logger.py:45]     best beta: 0.01856      worst beta: 0.24769
+INFO [logger.py:34] Generation 150
+INFO [logger.py:35]     remaining patients: 8830
+INFO [logger.py:36]     elapsed time: 95.1 s
+INFO [logger.py:45]     best beta: 0.01852      worst beta: 0.24346
+INFO [logger.py:34] Generation 155
+INFO [logger.py:35]     remaining patients: 8843
+INFO [logger.py:36]     elapsed time: 97.8 s
+INFO [logger.py:45]     best beta: 0.01832      worst beta: 0.24236
+INFO [logger.py:34] Generation 160
+INFO [logger.py:35]     remaining patients: 8841
+INFO [logger.py:36]     elapsed time: 100.6 s
+INFO [logger.py:45]     best beta: 0.01803      worst beta: 0.23695
+INFO [logger.py:34] Generation 165
+INFO [logger.py:35]     remaining patients: 8877
+INFO [logger.py:36]     elapsed time: 103.3 s
+INFO [logger.py:45]     best beta: 0.01783      worst beta: 0.24732
+INFO [logger.py:34] Generation 170
+INFO [logger.py:35]     remaining patients: 8886
+INFO [logger.py:36]     elapsed time: 106.0 s
+INFO [logger.py:45]     best beta: 0.01771      worst beta: 0.25123
+INFO [logger.py:34] Generation 175
+INFO [logger.py:35]     remaining patients: 8853
+INFO [logger.py:36]     elapsed time: 108.7 s
+INFO [logger.py:45]     best beta: 0.01753      worst beta: 0.24703
+INFO [logger.py:34] Generation 180
+INFO [logger.py:35]     remaining patients: 8834
+INFO [logger.py:36]     elapsed time: 111.4 s
+INFO [logger.py:45]     best beta: 0.01733      worst beta: 0.24334
+INFO [logger.py:34] Generation 185
+INFO [logger.py:35]     remaining patients: 8799
+INFO [logger.py:36]     elapsed time: 114.1 s
+INFO [logger.py:45]     best beta: 0.01720      worst beta: 0.24423
+INFO [logger.py:34] Generation 190
+INFO [logger.py:35]     remaining patients: 8774
+INFO [logger.py:36]     elapsed time: 116.9 s
+INFO [logger.py:45]     best beta: 0.01698      worst beta: 0.24496
+INFO [logger.py:34] Generation 195
+INFO [logger.py:35]     remaining patients: 8752
+INFO [logger.py:36]     elapsed time: 119.6 s
+INFO [logger.py:45]     best beta: 0.01695      worst beta: 0.24360
+INFO [matcher.py:297] Time limit exceeded. Stopping.
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -783,79 +850,79 @@ INFO [matcher.py:211] Time limit exceeded. Stopping.
       <td>...</td>
     </tr>
     <tr>
-      <th>5044</th>
-      <td>42.548928</td>
-      <td>129.729442</td>
-      <td>94.445375</td>
-      <td>1.0</td>
-      <td>1</td>
-      <td>2</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>5044</td>
-    </tr>
-    <tr>
-      <th>1144</th>
-      <td>29.400226</td>
-      <td>167.737236</td>
-      <td>76.118095</td>
-      <td>1.0</td>
-      <td>0</td>
-      <td>4</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>0</td>
-      <td>1</td>
-      <td>1144</td>
-    </tr>
-    <tr>
-      <th>5314</th>
-      <td>50.104985</td>
-      <td>163.663484</td>
-      <td>85.785445</td>
-      <td>1.0</td>
-      <td>2</td>
-      <td>4</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>5314</td>
-    </tr>
-    <tr>
-      <th>2174</th>
-      <td>54.372402</td>
-      <td>149.801277</td>
-      <td>92.946485</td>
-      <td>0.0</td>
-      <td>1</td>
-      <td>2</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>2174</td>
-    </tr>
-    <tr>
-      <th>8610</th>
-      <td>72.912497</td>
-      <td>185.908237</td>
-      <td>96.553338</td>
+      <th>3061</th>
+      <td>70.387520</td>
+      <td>156.007916</td>
+      <td>62.379199</td>
       <td>0.0</td>
       <td>1</td>
       <td>4</td>
       <td>pool</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>3061</td>
+    </tr>
+    <tr>
+      <th>5536</th>
+      <td>35.483878</td>
+      <td>146.068972</td>
+      <td>81.534664</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>5536</td>
+    </tr>
+    <tr>
+      <th>4306</th>
+      <td>72.057026</td>
+      <td>131.743829</td>
+      <td>52.717956</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>4306</td>
+    </tr>
+    <tr>
+      <th>5617</th>
+      <td>40.714000</td>
+      <td>177.922139</td>
+      <td>69.236472</td>
+      <td>1.0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>pool</td>
       <td>1</td>
       <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>5617</td>
+    </tr>
+    <tr>
+      <th>8099</th>
+      <td>48.644064</td>
+      <td>150.347598</td>
+      <td>66.158324</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>0</td>
       <td>1</td>
       <td>1</td>
-      <td>8610</td>
+      <td>0</td>
+      <td>8099</td>
     </tr>
   </tbody>
 </table>
@@ -910,7 +977,7 @@ INFO [matcher.py:211] Time limit exceeded. Stopping.
 <span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher_beta2</span> <span class="o">=</span> <span class="n">GeneticMatcher</span><span class="p">(</span>
     <span class="n">matching_data</span> <span class="o">=</span> <span class="n">m</span><span class="p">,</span>
     <span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span><span class="p">,</span>
-    <span class="n">log_every</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">log_every</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">n_generations</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
     <span class="n">time_limit</span> <span class="o">=</span> <span class="n">time_limit</span>
 <span class="p">)</span>
@@ -923,7 +990,7 @@ INFO [matcher.py:211] Time limit exceeded. Stopping.
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:125] cpu
+INFO [matcher.py:197] cpu
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -934,19 +1001,17 @@ INFO [matcher.py:125] cpu
 <div class="highlight"><pre>
 {&#39;objective&#39;: &#39;beta_squared&#39;,
  &#39;candidate_population_size&#39;: 1000,
- &#39;n_candidate_populations&#39;: 1024,
- &#39;n_keep_best&#39;: 256,
- &#39;n_voting_populations&#39;: 256,
- &#39;n_mutation&#39;: 256,
+ &#39;n_candidate_populations&#39;: 5000,
+ &#39;n_keep_best&#39;: 1250,
+ &#39;n_voting_populations&#39;: 1250,
+ &#39;n_mutation&#39;: 1250,
  &#39;n_generations&#39;: 5000,
  &#39;n_iter_no_change&#39;: 100,
  &#39;time_limit&#39;: 120,
- &#39;max_batch_size_gb&#39;: 2,
+ &#39;max_batch_size_gb&#39;: 2.0,
  &#39;seed&#39;: 1234,
  &#39;verbose&#39;: True,
- &#39;log_every&#39;: 1000,
- &#39;initialization&#39;: {&#39;benchmarks&#39;: {&#39;propensity&#39;: &#39;include&#39;},
-  &#39;sampling&#39;: {&#39;propensity&#39;: 1.0, &#39;uniform&#39;: 1.0}}}
+ &#39;log_every&#39;: 5}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -962,213 +1027,297 @@ INFO [matcher.py:125] cpu
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [initialization.py:31] Optimizing balance with genetic algorithm ...
-INFO [initialization.py:32] Initial balance scores:
-INFO [initialization.py:37]     beta_squared:   0.263
-INFO [initialization.py:38] Initializing candidate populations ...
-INFO [initialization.py:86] Computing PROPENSITY 1-1 matching method ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 1/50, 0.000 min) ...
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: SGDClassifier
-INFO [matcher.py:142]   * alpha: 1.5074398973827774
-INFO [matcher.py:142]   * class_weight: None
-INFO [matcher.py:142]   * early_stopping: True
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * loss: log_loss
-INFO [matcher.py:142]   * max_iter: 1500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:143]   Score (beta_squared): 0.0603
-INFO [matcher.py:144]   Solution time: 0.001 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 2/50, 0.001 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [initialization.py:34] Optimizing balance with genetic algorithm ...
+INFO [initialization.py:35] Initial balance scores:
+INFO [initialization.py:40]     beta_squared:   0.263
+INFO [initialization.py:41] Initializing candidate populations ...
+INFO [initialization.py:89] Computing PROPENSITY 1-1 matching method ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 1/50, 0.0 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: SGDClassifier
+INFO [matcher.py:148]   * alpha: 3.0988297920987757
+INFO [matcher.py:148]   * class_weight: None
+INFO [matcher.py:148]   * early_stopping: False
+INFO [matcher.py:148]   * fit_intercept: True
+INFO [matcher.py:148]   * loss: log_loss
+INFO [matcher.py:148]   * max_iter: 1500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:149]   Score (beta_squared): 0.0632
+INFO [matcher.py:150]   Solution time: 0.1 s
+INFO [matcher.py:185] Training model SGDClassifier (iter 2/50, 0.1 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 3/50, 0.2 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 0.288100449320714
+INFO [matcher.py:148]   * fit_intercept: True
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta_squared): 0.0382
+INFO [matcher.py:150]   Solution time: 0.2 s
+INFO [matcher.py:185] Training model SGDClassifier (iter 4/50, 0.3 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 5/50, 0.3 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 6/50, 0.8 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 7/50, 0.9 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 8/50, 0.9 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.05835496346821344
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta_squared): 0.0374
-INFO [matcher.py:144]   Solution time: 0.002 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 3/50, 0.002 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 16.16555309446666
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l1
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta_squared): 0.0375
+INFO [matcher.py:150]   Solution time: 1.7 s
+INFO [matcher.py:185] Training model LogisticRegression (iter 9/50, 1.8 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 10/50, 2.0 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 11/50, 2.1 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 12/50, 2.1 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 13/50, 2.2 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 14/50, 2.3 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 15/50, 2.3 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 16/50, 2.4 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 17/50, 2.4 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 18/50, 2.7 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 19/50, 2.8 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 20/50, 2.8 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 21/50, 2.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 22/50, 2.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 23/50, 3.0 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 24/50, 3.0 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 25/50, 3.1 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 26/50, 3.1 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 27/50, 3.2 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 28/50, 3.2 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 54.02072493419677
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta_squared): 0.0353
+INFO [matcher.py:150]   Solution time: 3.7 s
+INFO [matcher.py:185] Training model SGDClassifier (iter 29/50, 3.8 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 30/50, 3.8 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 31/50, 3.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 32/50, 3.9 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 33/50, 4.0 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:185] Training model LogisticRegression (iter 34/50, 4.7 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 35/50, 4.7 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 16.16555309446666
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta_squared): 0.0357
-INFO [matcher.py:144]   Solution time: 0.015 min
-INFO [matcher.py:179] Training model SGDClassifier (iter 4/50, 0.015 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 5/50, 0.016 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:185] Training model LogisticRegression (iter 36/50, 5.4 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 37/50, 5.5 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 38/50, 5.6 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 39/50, 5.6 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:185] Training model SGDClassifier (iter 40/50, 6.4 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 41/50, 6.4 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 0.2699411413616818
+INFO [matcher.py:148]   * fit_intercept: True
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l1
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta_squared): 0.0335
+INFO [matcher.py:150]   Solution time: 6.5 s
+INFO [matcher.py:185] Training model LogisticRegression (iter 42/50, 6.5 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 43/50, 6.6 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 54.02072493419677
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta_squared): 0.0347
-INFO [matcher.py:144]   Solution time: 0.027 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 6/50, 0.027 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 7/50, 0.028 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 8/50, 0.029 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 9/50, 0.030 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 10/50, 0.038 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 11/50, 0.039 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 12/50, 0.041 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 13/50, 0.041 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 14/50, 0.042 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 15/50, 0.043 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 16/50, 0.044 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 17/50, 0.045 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 18/50, 0.046 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 19/50, 0.048 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 20/50, 0.053 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 21/50, 0.054 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 22/50, 0.055 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 23/50, 0.056 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 24/50, 0.057 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 25/50, 0.059 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 26/50, 0.059 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 27/50, 0.061 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 28/50, 0.062 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 29/50, 0.072 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 30/50, 0.073 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 31/50, 0.074 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 32/50, 0.075 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 33/50, 0.076 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 34/50, 0.077 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 35/50, 0.078 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 36/50, 0.091 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 37/50, 0.094 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.5868985298319505
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta_squared): 0.0311
-INFO [matcher.py:144]   Solution time: 0.107 min
-INFO [matcher.py:179] Training model SGDClassifier (iter 38/50, 0.107 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 39/50, 0.108 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 40/50, 0.109 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 41/50, 0.110 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 42/50, 0.111 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 43/50, 0.118 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 44/50, 0.130 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 45/50, 0.131 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 46/50, 0.132 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 47/50, 0.145 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 48/50, 0.158 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 49/50, 0.159 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 50/50, 0.160 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.5868985298319505
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta_squared): 0.0311
-INFO [matcher.py:144]   Solution time: 0.107 min
-INFO [initialization.py:66]     beta_squared:   0.031
-INFO [initialization.py:71]     Included in initial population.
+INFO [matcher.py:185] Training model LogisticRegression (iter 44/50, 7.3 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 45/50, 7.7 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 46/50, 7.7 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 47/50, 8.4 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 48/50, 8.5 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 49/50, 8.6 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 50/50, 8.7 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 0.2699411413616818
+INFO [matcher.py:148]   * fit_intercept: True
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l1
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (beta_squared): 0.0335
+INFO [matcher.py:150]   Solution time: 6.5 s
+INFO [initialization.py:69]     beta_squared:   0.033
+INFO [initialization.py:74]     Included in initial population.
 
-INFO [initialization.py:132] Sampling 512 candidate populations according to PROPENSITY distribution ...
+INFO [initialization.py:135] Sampling 2500 candidate populations according to PROPENSITY distribution ...
 
-INFO [initialization.py:132] Sampling 511 candidate populations according to UNIFORM distribution ...
+INFO [initialization.py:135] Sampling 2499 candidate populations according to UNIFORM distribution ...
 
 INFO [logger.py:34] Generation 0
 INFO [logger.py:35]     remaining patients: 10000
-INFO [logger.py:36]     elapsed time: 0.18 min
-INFO [logger.py:45]     best beta_squared: 0.03106      worst beta_squared: 0.28163
-INFO [matcher.py:203] No improvement in last 100 iterations. Stopping.
+INFO [logger.py:36]     elapsed time: 11.3 s
+INFO [logger.py:45]     best beta_squared: 0.03349      worst beta_squared: 0.28508
+INFO [logger.py:34] Generation 5
+INFO [logger.py:35]     remaining patients: 9997
+INFO [logger.py:36]     elapsed time: 14.3 s
+INFO [logger.py:45]     best beta_squared: 0.03270      worst beta_squared: 0.21538
+INFO [logger.py:34] Generation 10
+INFO [logger.py:35]     remaining patients: 9831
+INFO [logger.py:36]     elapsed time: 17.2 s
+INFO [logger.py:45]     best beta_squared: 0.03231      worst beta_squared: 0.21812
+INFO [logger.py:34] Generation 15
+INFO [logger.py:35]     remaining patients: 8887
+INFO [logger.py:36]     elapsed time: 19.8 s
+INFO [logger.py:45]     best beta_squared: 0.03176      worst beta_squared: 0.27156
+INFO [logger.py:34] Generation 20
+INFO [logger.py:35]     remaining patients: 9010
+INFO [logger.py:36]     elapsed time: 22.6 s
+INFO [logger.py:45]     best beta_squared: 0.03072      worst beta_squared: 0.27808
+INFO [logger.py:34] Generation 25
+INFO [logger.py:35]     remaining patients: 8966
+INFO [logger.py:36]     elapsed time: 25.4 s
+INFO [logger.py:45]     best beta_squared: 0.03031      worst beta_squared: 0.28029
+INFO [logger.py:34] Generation 30
+INFO [logger.py:35]     remaining patients: 8966
+INFO [logger.py:36]     elapsed time: 28.4 s
+INFO [logger.py:45]     best beta_squared: 0.02986      worst beta_squared: 0.26833
+INFO [logger.py:34] Generation 35
+INFO [logger.py:35]     remaining patients: 8973
+INFO [logger.py:36]     elapsed time: 31.1 s
+INFO [logger.py:45]     best beta_squared: 0.02943      worst beta_squared: 0.28444
+INFO [logger.py:34] Generation 40
+INFO [logger.py:35]     remaining patients: 8926
+INFO [logger.py:36]     elapsed time: 34.0 s
+INFO [logger.py:45]     best beta_squared: 0.02901      worst beta_squared: 0.28178
+INFO [logger.py:34] Generation 45
+INFO [logger.py:35]     remaining patients: 8950
+INFO [logger.py:36]     elapsed time: 36.9 s
+INFO [logger.py:45]     best beta_squared: 0.02863      worst beta_squared: 0.28074
+INFO [logger.py:34] Generation 50
+INFO [logger.py:35]     remaining patients: 8962
+INFO [logger.py:36]     elapsed time: 39.9 s
+INFO [logger.py:45]     best beta_squared: 0.02827      worst beta_squared: 0.27728
+INFO [logger.py:34] Generation 55
+INFO [logger.py:35]     remaining patients: 8963
+INFO [logger.py:36]     elapsed time: 42.7 s
+INFO [logger.py:45]     best beta_squared: 0.02789      worst beta_squared: 0.27921
+INFO [logger.py:34] Generation 60
+INFO [logger.py:35]     remaining patients: 8916
+INFO [logger.py:36]     elapsed time: 45.5 s
+INFO [logger.py:45]     best beta_squared: 0.02761      worst beta_squared: 0.27115
+INFO [logger.py:34] Generation 65
+INFO [logger.py:35]     remaining patients: 8940
+INFO [logger.py:36]     elapsed time: 48.3 s
+INFO [logger.py:45]     best beta_squared: 0.02742      worst beta_squared: 0.27517
+INFO [logger.py:34] Generation 70
+INFO [logger.py:35]     remaining patients: 8913
+INFO [logger.py:36]     elapsed time: 51.0 s
+INFO [logger.py:45]     best beta_squared: 0.02724      worst beta_squared: 0.27567
+INFO [logger.py:34] Generation 75
+INFO [logger.py:35]     remaining patients: 8936
+INFO [logger.py:36]     elapsed time: 53.7 s
+INFO [logger.py:45]     best beta_squared: 0.02663      worst beta_squared: 0.27510
+INFO [logger.py:34] Generation 80
+INFO [logger.py:35]     remaining patients: 8959
+INFO [logger.py:36]     elapsed time: 56.6 s
+INFO [logger.py:45]     best beta_squared: 0.02649      worst beta_squared: 0.28006
+INFO [logger.py:34] Generation 85
+INFO [logger.py:35]     remaining patients: 8892
+INFO [logger.py:36]     elapsed time: 59.3 s
+INFO [logger.py:45]     best beta_squared: 0.02610      worst beta_squared: 0.27914
+INFO [logger.py:34] Generation 90
+INFO [logger.py:35]     remaining patients: 8809
+INFO [logger.py:36]     elapsed time: 62.0 s
+INFO [logger.py:45]     best beta_squared: 0.02578      worst beta_squared: 0.27395
+INFO [logger.py:34] Generation 95
+INFO [logger.py:35]     remaining patients: 8828
+INFO [logger.py:36]     elapsed time: 64.9 s
+INFO [logger.py:45]     best beta_squared: 0.02572      worst beta_squared: 0.27940
+INFO [logger.py:34] Generation 100
+INFO [logger.py:35]     remaining patients: 8784
+INFO [logger.py:36]     elapsed time: 67.8 s
+INFO [logger.py:45]     best beta_squared: 0.02537      worst beta_squared: 0.28528
+INFO [logger.py:34] Generation 105
+INFO [logger.py:35]     remaining patients: 8764
+INFO [logger.py:36]     elapsed time: 70.7 s
+INFO [logger.py:45]     best beta_squared: 0.02531      worst beta_squared: 0.27626
+INFO [logger.py:34] Generation 110
+INFO [logger.py:35]     remaining patients: 8840
+INFO [logger.py:36]     elapsed time: 73.5 s
+INFO [logger.py:45]     best beta_squared: 0.02505      worst beta_squared: 0.27775
+INFO [logger.py:34] Generation 115
+INFO [logger.py:35]     remaining patients: 8817
+INFO [logger.py:36]     elapsed time: 76.4 s
+INFO [logger.py:45]     best beta_squared: 0.02494      worst beta_squared: 0.27436
+INFO [logger.py:34] Generation 120
+INFO [logger.py:35]     remaining patients: 8834
+INFO [logger.py:36]     elapsed time: 79.2 s
+INFO [logger.py:45]     best beta_squared: 0.02471      worst beta_squared: 0.27580
+INFO [logger.py:34] Generation 125
+INFO [logger.py:35]     remaining patients: 8795
+INFO [logger.py:36]     elapsed time: 82.0 s
+INFO [logger.py:45]     best beta_squared: 0.02462      worst beta_squared: 0.27666
+INFO [logger.py:34] Generation 130
+INFO [logger.py:35]     remaining patients: 8836
+INFO [logger.py:36]     elapsed time: 84.8 s
+INFO [logger.py:45]     best beta_squared: 0.02442      worst beta_squared: 0.27567
+INFO [logger.py:34] Generation 135
+INFO [logger.py:35]     remaining patients: 8823
+INFO [logger.py:36]     elapsed time: 87.7 s
+INFO [logger.py:45]     best beta_squared: 0.02422      worst beta_squared: 0.27856
+INFO [logger.py:34] Generation 140
+INFO [logger.py:35]     remaining patients: 8773
+INFO [logger.py:36]     elapsed time: 90.5 s
+INFO [logger.py:45]     best beta_squared: 0.02398      worst beta_squared: 0.27387
+INFO [logger.py:34] Generation 145
+INFO [logger.py:35]     remaining patients: 8829
+INFO [logger.py:36]     elapsed time: 93.3 s
+INFO [logger.py:45]     best beta_squared: 0.02386      worst beta_squared: 0.27998
+INFO [logger.py:34] Generation 150
+INFO [logger.py:35]     remaining patients: 8846
+INFO [logger.py:36]     elapsed time: 96.0 s
+INFO [logger.py:45]     best beta_squared: 0.02380      worst beta_squared: 0.27211
+INFO [logger.py:34] Generation 155
+INFO [logger.py:35]     remaining patients: 8808
+INFO [logger.py:36]     elapsed time: 98.7 s
+INFO [logger.py:45]     best beta_squared: 0.02360      worst beta_squared: 0.27683
+INFO [logger.py:34] Generation 160
+INFO [logger.py:35]     remaining patients: 8760
+INFO [logger.py:36]     elapsed time: 101.4 s
+INFO [logger.py:45]     best beta_squared: 0.02348      worst beta_squared: 0.28097
+INFO [logger.py:34] Generation 165
+INFO [logger.py:35]     remaining patients: 8766
+INFO [logger.py:36]     elapsed time: 104.1 s
+INFO [logger.py:45]     best beta_squared: 0.02330      worst beta_squared: 0.27942
+INFO [logger.py:34] Generation 170
+INFO [logger.py:35]     remaining patients: 8767
+INFO [logger.py:36]     elapsed time: 106.7 s
+INFO [logger.py:45]     best beta_squared: 0.02317      worst beta_squared: 0.27736
+INFO [logger.py:34] Generation 175
+INFO [logger.py:35]     remaining patients: 8716
+INFO [logger.py:36]     elapsed time: 109.5 s
+INFO [logger.py:45]     best beta_squared: 0.02310      worst beta_squared: 0.28421
+INFO [logger.py:34] Generation 180
+INFO [logger.py:35]     remaining patients: 8753
+INFO [logger.py:36]     elapsed time: 112.2 s
+INFO [logger.py:45]     best beta_squared: 0.02294      worst beta_squared: 0.26984
+INFO [logger.py:34] Generation 185
+INFO [logger.py:35]     remaining patients: 8758
+INFO [logger.py:36]     elapsed time: 114.8 s
+INFO [logger.py:45]     best beta_squared: 0.02283      worst beta_squared: 0.28179
+INFO [logger.py:34] Generation 190
+INFO [logger.py:35]     remaining patients: 8708
+INFO [logger.py:36]     elapsed time: 117.6 s
+INFO [logger.py:45]     best beta_squared: 0.02268      worst beta_squared: 0.28192
+INFO [matcher.py:297] Time limit exceeded. Stopping.
+INFO [logger.py:34] Generation 195
+INFO [logger.py:35]     remaining patients: 8706
+INFO [logger.py:36]     elapsed time: 120.3 s
+INFO [logger.py:45]     best beta_squared: 0.02253      worst beta_squared: 0.28907
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1219,7 +1368,7 @@ INFO [matcher.py:203] No improvement in last 100 iterations. Stopping.
 <span class="n">matcher</span> <span class="o">=</span> <span class="n">matcher_gamma</span> <span class="o">=</span> <span class="n">GeneticMatcher</span><span class="p">(</span>
     <span class="n">matching_data</span> <span class="o">=</span> <span class="n">m</span><span class="p">,</span>
     <span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span><span class="p">,</span>
-    <span class="n">log_every</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">log_every</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">n_generations</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
     <span class="n">time_limit</span> <span class="o">=</span> <span class="n">time_limit</span>
 <span class="p">)</span>
@@ -1235,7 +1384,7 @@ INFO [matcher.py:203] No improvement in last 100 iterations. Stopping.
 INFO [preprocess.py:340] Discretized age with bins [18.05, 27.54, 37.04, 46.53, 56.02, 65.51, 75.0].
 INFO [preprocess.py:340] Discretized height with bins [125.01, 136.68, 148.34, 160.01, 171.67, 183.34, 195.0].
 INFO [preprocess.py:340] Discretized weight with bins [50.0, 61.67, 73.33, 85.0, 96.66, 108.33, 120.0].
-INFO [matcher.py:125] cpu
+INFO [matcher.py:197] cpu
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1246,19 +1395,17 @@ INFO [matcher.py:125] cpu
 <div class="highlight"><pre>
 {&#39;objective&#39;: &#39;gamma&#39;,
  &#39;candidate_population_size&#39;: 1000,
- &#39;n_candidate_populations&#39;: 1024,
- &#39;n_keep_best&#39;: 256,
- &#39;n_voting_populations&#39;: 256,
- &#39;n_mutation&#39;: 256,
+ &#39;n_candidate_populations&#39;: 5000,
+ &#39;n_keep_best&#39;: 1250,
+ &#39;n_voting_populations&#39;: 1250,
+ &#39;n_mutation&#39;: 1250,
  &#39;n_generations&#39;: 5000,
  &#39;n_iter_no_change&#39;: 100,
  &#39;time_limit&#39;: 120,
- &#39;max_batch_size_gb&#39;: 2,
+ &#39;max_batch_size_gb&#39;: 2.0,
  &#39;seed&#39;: 1234,
  &#39;verbose&#39;: True,
- &#39;log_every&#39;: 1000,
- &#39;initialization&#39;: {&#39;benchmarks&#39;: {&#39;propensity&#39;: &#39;include&#39;},
-  &#39;sampling&#39;: {&#39;propensity&#39;: 1.0, &#39;uniform&#39;: 1.0}}}
+ &#39;log_every&#39;: 5}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1274,227 +1421,281 @@ INFO [matcher.py:125] cpu
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [initialization.py:31] Optimizing balance with genetic algorithm ...
-INFO [initialization.py:32] Initial balance scores:
-INFO [initialization.py:37]     gamma:  0.217
-INFO [initialization.py:38] Initializing candidate populations ...
-INFO [initialization.py:86] Computing PROPENSITY 1-1 matching method ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 1/50, 0.000 min) ...
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: SGDClassifier
-INFO [matcher.py:142]   * alpha: 1.5074398973827774
-INFO [matcher.py:142]   * class_weight: None
-INFO [matcher.py:142]   * early_stopping: True
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * loss: log_loss
-INFO [matcher.py:142]   * max_iter: 1500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:143]   Score (gamma): 0.1083
-INFO [matcher.py:144]   Solution time: 0.002 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 2/50, 0.002 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [initialization.py:34] Optimizing balance with genetic algorithm ...
+INFO [initialization.py:35] Initial balance scores:
+INFO [initialization.py:40]     gamma:  0.217
+INFO [initialization.py:41] Initializing candidate populations ...
+INFO [initialization.py:89] Computing PROPENSITY 1-1 matching method ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 1/50, 0.0 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 0.05835496346821344
+INFO [matcher.py:148]   * fit_intercept: True
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (gamma): 0.0402
+INFO [matcher.py:150]   Solution time: 0.1 s
+INFO [matcher.py:185] Training model LogisticRegression (iter 2/50, 0.2 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 2.3905570899706423
+INFO [matcher.py:148]   * fit_intercept: True
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (gamma): 0.0372
+INFO [matcher.py:150]   Solution time: 0.3 s
+INFO [matcher.py:185] Training model LogisticRegression (iter 3/50, 0.4 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 4/50, 0.5 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 5/50, 0.6 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 6/50, 0.7 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 7/50, 0.7 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 8/50, 0.8 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 9/50, 0.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 10/50, 0.9 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 11/50, 1.0 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 12/50, 1.1 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 0.38798086852341396
+INFO [matcher.py:148]   * fit_intercept: True
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (gamma): 0.0353
+INFO [matcher.py:150]   Solution time: 1.2 s
+INFO [matcher.py:185] Training model SGDClassifier (iter 13/50, 1.2 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 14/50, 1.3 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 15/50, 1.4 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 16/50, 1.4 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 17/50, 1.5 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 18/50, 1.6 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 19/50, 1.6 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 20/50, 1.7 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 21/50, 1.7 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 22/50, 1.8 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 23/50, 1.8 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.05835496346821344
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (gamma): 0.0391
-INFO [matcher.py:144]   Solution time: 0.003 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 3/50, 0.003 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 16.16555309446666
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l1
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (gamma): 0.0327
+INFO [matcher.py:150]   Solution time: 3.0 s
+INFO [matcher.py:185] Training model SGDClassifier (iter 24/50, 3.1 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 25/50, 3.2 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 26/50, 3.3 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 27/50, 3.4 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:185] Training model LogisticRegression (iter 28/50, 4.6 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:185] Training model LogisticRegression (iter 29/50, 5.8 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 16.16555309446666
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (gamma): 0.0376
-INFO [matcher.py:144]   Solution time: 0.023 min
-INFO [matcher.py:179] Training model SGDClassifier (iter 4/50, 0.024 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 5/50, 0.025 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:185] Training model SGDClassifier (iter 30/50, 7.0 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 31/50, 7.0 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:185] Training model LogisticRegression (iter 32/50, 8.1 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 54.02072493419677
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (gamma): 0.0337
-INFO [matcher.py:144]   Solution time: 0.040 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 6/50, 0.040 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:185] Training model LogisticRegression (iter 33/50, 8.9 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 7/50, 0.042 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 13.179630432958701
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (gamma): 0.0306
+INFO [matcher.py:150]   Solution time: 9.6 s
+INFO [matcher.py:185] Training model LogisticRegression (iter 34/50, 9.6 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 35/50, 10.0 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 36/50, 10.1 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 37/50, 10.2 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 38/50, 10.3 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:185] Training model LogisticRegression (iter 39/50, 11.0 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 8/50, 0.043 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 9/50, 0.045 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:185] Training model SGDClassifier (iter 40/50, 11.7 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 41/50, 11.8 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:185] Training model LogisticRegression (iter 42/50, 13.0 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 43/50, 13.1 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 44/50, 13.1 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 45/50, 13.2 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 46/50, 13.4 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 47/50, 13.4 s) ...
+INFO [matcher.py:185] Training model LogisticRegression (iter 48/50, 13.5 s) ...
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 13.179630432958701
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (gamma): 0.0269
-INFO [matcher.py:144]   Solution time: 0.060 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 10/50, 0.060 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 11/50, 0.062 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 12/50, 0.063 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 13/50, 0.065 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 14/50, 0.066 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 15/50, 0.067 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 16/50, 0.068 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 17/50, 0.069 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 18/50, 0.071 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 19/50, 0.074 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 20/50, 0.089 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 21/50, 0.090 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 22/50, 0.092 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 23/50, 0.093 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 24/50, 0.094 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 25/50, 0.096 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 26/50, 0.098 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 27/50, 0.100 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 28/50, 0.102 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 29/50, 0.121 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 30/50, 0.122 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 31/50, 0.125 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 32/50, 0.126 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 33/50, 0.127 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 34/50, 0.129 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 35/50, 0.130 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 36/50, 0.150 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 37/50, 0.157 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 38/50, 0.177 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 39/50, 0.178 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 40/50, 0.180 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 41/50, 0.181 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 42/50, 0.183 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 43/50, 0.198 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 44/50, 0.218 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 45/50, 0.220 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 46/50, 0.221 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 47/50, 0.240 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
-  warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
-  warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 48/50, 0.260 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 49/50, 0.262 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 50/50, 0.263 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
-  warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 13.179630432958701
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (gamma): 0.0269
-INFO [matcher.py:144]   Solution time: 0.060 min
-INFO [initialization.py:66]     gamma:  0.027
-INFO [initialization.py:71]     Included in initial population.
+INFO [matcher.py:185] Training model LogisticRegression (iter 49/50, 14.6 s) ...
+INFO [matcher.py:185] Training model SGDClassifier (iter 50/50, 14.7 s) ...
+INFO [matcher.py:145] Best propensity score match found:
+INFO [matcher.py:146]   Model: LogisticRegression
+INFO [matcher.py:148]   * C: 13.179630432958701
+INFO [matcher.py:148]   * fit_intercept: False
+INFO [matcher.py:148]   * max_iter: 500
+INFO [matcher.py:148]   * penalty: l2
+INFO [matcher.py:148]   * solver: saga
+INFO [matcher.py:149]   Score (gamma): 0.0306
+INFO [matcher.py:150]   Solution time: 9.6 s
+INFO [initialization.py:69]     gamma:  0.031
+INFO [initialization.py:74]     Included in initial population.
 
-INFO [initialization.py:132] Sampling 512 candidate populations according to PROPENSITY distribution ...
+INFO [initialization.py:135] Sampling 2500 candidate populations according to PROPENSITY distribution ...
 
-INFO [initialization.py:132] Sampling 511 candidate populations according to UNIFORM distribution ...
+INFO [initialization.py:135] Sampling 2499 candidate populations according to UNIFORM distribution ...
 
 INFO [logger.py:34] Generation 0
 INFO [logger.py:35]     remaining patients: 10000
-INFO [logger.py:36]     elapsed time: 0.28 min
-INFO [logger.py:45]     best gamma: 0.02688     worst gamma: 0.23595
-INFO [logger.py:34] Generation 1000
-INFO [logger.py:35]     remaining patients: 7355
-INFO [logger.py:36]     elapsed time: 1.80 min
-INFO [logger.py:45]     best gamma: 0.01164     worst gamma: 0.22939
-INFO [matcher.py:211] Time limit exceeded. Stopping.
+INFO [logger.py:36]     elapsed time: 17.4 s
+INFO [logger.py:45]     best gamma: 0.03060     worst gamma: 0.23822
+INFO [logger.py:34] Generation 5
+INFO [logger.py:35]     remaining patients: 10000
+INFO [logger.py:36]     elapsed time: 20.8 s
+INFO [logger.py:45]     best gamma: 0.02995     worst gamma: 0.18754
+INFO [logger.py:34] Generation 10
+INFO [logger.py:35]     remaining patients: 9851
+INFO [logger.py:36]     elapsed time: 24.0 s
+INFO [logger.py:45]     best gamma: 0.02922     worst gamma: 0.22427
+INFO [logger.py:34] Generation 15
+INFO [logger.py:35]     remaining patients: 8682
+INFO [logger.py:36]     elapsed time: 27.0 s
+INFO [logger.py:45]     best gamma: 0.02806     worst gamma: 0.23538
+INFO [logger.py:34] Generation 20
+INFO [logger.py:35]     remaining patients: 8987
+INFO [logger.py:36]     elapsed time: 29.9 s
+INFO [logger.py:45]     best gamma: 0.02679     worst gamma: 0.23133
+INFO [logger.py:34] Generation 25
+INFO [logger.py:35]     remaining patients: 8993
+INFO [logger.py:36]     elapsed time: 32.9 s
+INFO [logger.py:45]     best gamma: 0.02618     worst gamma: 0.22781
+INFO [logger.py:34] Generation 30
+INFO [logger.py:35]     remaining patients: 8896
+INFO [logger.py:36]     elapsed time: 36.0 s
+INFO [logger.py:45]     best gamma: 0.02565     worst gamma: 0.22794
+INFO [logger.py:34] Generation 35
+INFO [logger.py:35]     remaining patients: 8924
+INFO [logger.py:36]     elapsed time: 39.3 s
+INFO [logger.py:45]     best gamma: 0.02493     worst gamma: 0.22696
+INFO [logger.py:34] Generation 40
+INFO [logger.py:35]     remaining patients: 8847
+INFO [logger.py:36]     elapsed time: 42.5 s
+INFO [logger.py:45]     best gamma: 0.02477     worst gamma: 0.23245
+INFO [logger.py:34] Generation 45
+INFO [logger.py:35]     remaining patients: 8759
+INFO [logger.py:36]     elapsed time: 45.7 s
+INFO [logger.py:45]     best gamma: 0.02439     worst gamma: 0.22443
+INFO [logger.py:34] Generation 50
+INFO [logger.py:35]     remaining patients: 8759
+INFO [logger.py:36]     elapsed time: 48.9 s
+INFO [logger.py:45]     best gamma: 0.02395     worst gamma: 0.23796
+INFO [logger.py:34] Generation 55
+INFO [logger.py:35]     remaining patients: 8784
+INFO [logger.py:36]     elapsed time: 52.1 s
+INFO [logger.py:45]     best gamma: 0.02369     worst gamma: 0.22995
+INFO [logger.py:34] Generation 60
+INFO [logger.py:35]     remaining patients: 8809
+INFO [logger.py:36]     elapsed time: 55.2 s
+INFO [logger.py:45]     best gamma: 0.02322     worst gamma: 0.23721
+INFO [logger.py:34] Generation 65
+INFO [logger.py:35]     remaining patients: 8809
+INFO [logger.py:36]     elapsed time: 58.2 s
+INFO [logger.py:45]     best gamma: 0.02289     worst gamma: 0.23431
+INFO [logger.py:34] Generation 70
+INFO [logger.py:35]     remaining patients: 8710
+INFO [logger.py:36]     elapsed time: 61.2 s
+INFO [logger.py:45]     best gamma: 0.02247     worst gamma: 0.23030
+INFO [logger.py:34] Generation 75
+INFO [logger.py:35]     remaining patients: 8759
+INFO [logger.py:36]     elapsed time: 64.2 s
+INFO [logger.py:45]     best gamma: 0.02225     worst gamma: 0.22392
+INFO [logger.py:34] Generation 80
+INFO [logger.py:35]     remaining patients: 8703
+INFO [logger.py:36]     elapsed time: 67.2 s
+INFO [logger.py:45]     best gamma: 0.02182     worst gamma: 0.23910
+INFO [logger.py:34] Generation 85
+INFO [logger.py:35]     remaining patients: 8725
+INFO [logger.py:36]     elapsed time: 70.4 s
+INFO [logger.py:45]     best gamma: 0.02149     worst gamma: 0.23431
+INFO [logger.py:34] Generation 90
+INFO [logger.py:35]     remaining patients: 8776
+INFO [logger.py:36]     elapsed time: 73.4 s
+INFO [logger.py:45]     best gamma: 0.02102     worst gamma: 0.23130
+INFO [logger.py:34] Generation 95
+INFO [logger.py:35]     remaining patients: 8723
+INFO [logger.py:36]     elapsed time: 76.4 s
+INFO [logger.py:45]     best gamma: 0.02089     worst gamma: 0.22730
+INFO [logger.py:34] Generation 100
+INFO [logger.py:35]     remaining patients: 8649
+INFO [logger.py:36]     elapsed time: 79.4 s
+INFO [logger.py:45]     best gamma: 0.02068     worst gamma: 0.23268
+INFO [logger.py:34] Generation 105
+INFO [logger.py:35]     remaining patients: 8706
+INFO [logger.py:36]     elapsed time: 82.7 s
+INFO [logger.py:45]     best gamma: 0.02027     worst gamma: 0.23636
+INFO [logger.py:34] Generation 110
+INFO [logger.py:35]     remaining patients: 8709
+INFO [logger.py:36]     elapsed time: 85.8 s
+INFO [logger.py:45]     best gamma: 0.02006     worst gamma: 0.23253
+INFO [logger.py:34] Generation 115
+INFO [logger.py:35]     remaining patients: 8656
+INFO [logger.py:36]     elapsed time: 89.1 s
+INFO [logger.py:45]     best gamma: 0.01983     worst gamma: 0.23426
+INFO [logger.py:34] Generation 120
+INFO [logger.py:35]     remaining patients: 8650
+INFO [logger.py:36]     elapsed time: 92.2 s
+INFO [logger.py:45]     best gamma: 0.01965     worst gamma: 0.23563
+INFO [logger.py:34] Generation 125
+INFO [logger.py:35]     remaining patients: 8702
+INFO [logger.py:36]     elapsed time: 95.4 s
+INFO [logger.py:45]     best gamma: 0.01935     worst gamma: 0.23257
+INFO [logger.py:34] Generation 130
+INFO [logger.py:35]     remaining patients: 8663
+INFO [logger.py:36]     elapsed time: 98.5 s
+INFO [logger.py:45]     best gamma: 0.01900     worst gamma: 0.23054
+INFO [logger.py:34] Generation 135
+INFO [logger.py:35]     remaining patients: 8693
+INFO [logger.py:36]     elapsed time: 101.5 s
+INFO [logger.py:45]     best gamma: 0.01874     worst gamma: 0.23557
+INFO [logger.py:34] Generation 140
+INFO [logger.py:35]     remaining patients: 8690
+INFO [logger.py:36]     elapsed time: 104.6 s
+INFO [logger.py:45]     best gamma: 0.01848     worst gamma: 0.23625
+INFO [logger.py:34] Generation 145
+INFO [logger.py:35]     remaining patients: 8711
+INFO [logger.py:36]     elapsed time: 107.7 s
+INFO [logger.py:45]     best gamma: 0.01830     worst gamma: 0.23238
+INFO [logger.py:34] Generation 150
+INFO [logger.py:35]     remaining patients: 8605
+INFO [logger.py:36]     elapsed time: 110.7 s
+INFO [logger.py:45]     best gamma: 0.01817     worst gamma: 0.23450
+INFO [logger.py:34] Generation 155
+INFO [logger.py:35]     remaining patients: 8612
+INFO [logger.py:36]     elapsed time: 113.8 s
+INFO [logger.py:45]     best gamma: 0.01797     worst gamma: 0.22969
+INFO [logger.py:34] Generation 160
+INFO [logger.py:35]     remaining patients: 8631
+INFO [logger.py:36]     elapsed time: 116.8 s
+INFO [logger.py:45]     best gamma: 0.01772     worst gamma: 0.23035
+INFO [logger.py:34] Generation 165
+INFO [logger.py:35]     remaining patients: 8592
+INFO [logger.py:36]     elapsed time: 119.8 s
+INFO [logger.py:45]     best gamma: 0.01769     worst gamma: 0.24253
+INFO [matcher.py:297] Time limit exceeded. Stopping.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">

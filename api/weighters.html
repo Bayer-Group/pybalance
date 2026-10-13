@@ -64,7 +64,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -75,7 +75,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#entropy-balancing-maic">Entropy Balancing &amp; MAIC</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.BaseWeighter"><code class="docutils literal notranslate"><span class="pre">BaseWeighter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.effective_sample_size"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.effective_sample_size()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.get_best_match"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.get_best_match()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.get_params"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.get_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.get_target_weights"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.get_target_weights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.get_weights"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.get_weights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.BaseWeighter.match"><code class="docutils literal notranslate"><span class="pre">BaseWeighter.match()</span></code></a></li>
 </ul>
@@ -90,12 +92,19 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#iptw-weighter">IPTW Weighter</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.IPTWWeighter"><code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.IPTWWeighter.get_params"><code class="docutils literal notranslate"><span class="pre">IPTWWeighter.get_params()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#propensity-score-weighter">Propensity Score Weighter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter.get_best_match"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter.get_best_match()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter.get_params"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter.get_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter.get_target_weights"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter.get_target_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter.get_weights"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter.get_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter.match"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter.match()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter.plot_propensity_score_distributions"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter.plot_propensity_score_distributions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter.plot_weight_distributions"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter.plot_weight_distributions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.weighting.PropensityScoreWeighter.score"><code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter.score()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.plot_iptw_propensity_distributions"><code class="docutils literal notranslate"><span class="pre">plot_iptw_propensity_distributions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybalance.weighting.propensity_score_weights"><code class="docutils literal notranslate"><span class="pre">propensity_score_weights()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#shared-utilities">Shared Utilities</a><ul>
@@ -144,7 +153,7 @@
 <h2>Entropy Balancing &amp; MAIC<a class="headerlink" href="#entropy-balancing-maic" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">BaseWeighter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample_weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#BaseWeighter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">BaseWeighter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample_weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#BaseWeighter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter" title="Permalink to this definition"></a></dt>
 <dd><p>Common interface for weighting methods. Unlike the Matcher classes
 (genetic/lp/propensity), a Weighter never drops pool patients; instead it
 assigns every pool patient a non-negative weight so that the <em>weighted</em>
@@ -167,8 +176,8 @@ matching feature.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter.effective_sample_size">
-<span class="sig-name descname"><span class="pre">effective_sample_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#BaseWeighter.effective_sample_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.effective_sample_size" title="Permalink to this definition"></a></dt>
-<dd><p>Kish’s effective sample size of the fitted weights. See
+<span class="sig-name descname"><span class="pre">effective_sample_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#BaseWeighter.effective_sample_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.effective_sample_size" title="Permalink to this definition"></a></dt>
+<dd><p>Kish’s effective sample size of the fitted pool weights. See
 <code class="docutils literal notranslate"><span class="pre">effective_sample_size()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -178,8 +187,24 @@ matching feature.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter.get_best_match">
+<span class="sig-name descname"><span class="pre">get_best_match</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#BaseWeighter.get_best_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.get_best_match" title="Permalink to this definition"></a></dt>
+<dd><p>Return a MatchingData instance in which every pool patient is retained
+and carries a new column (see weight_col) holding their weight. The
+target population (patient-level or aggregate) is passed through
+unchanged, with weight 1.0 assigned to any patient-level target rows
+unless the weighter also fits target weights. Requires match() to have
+been called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter.get_params">
-<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#BaseWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.get_params" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#BaseWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.get_params" title="Permalink to this definition"></a></dt>
 <dd><p>Return the weighter’s configuration parameters as a dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -189,8 +214,20 @@ matching feature.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter.get_target_weights">
+<span class="sig-name descname"><span class="pre">get_target_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#BaseWeighter.get_target_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.get_target_weights" title="Permalink to this definition"></a></dt>
+<dd><p>Return the fitted per-patient target weights, or None if the target is
+not reweighted (it then counts with weight 1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter.get_weights">
-<span class="sig-name descname"><span class="pre">get_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#BaseWeighter.get_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.get_weights" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#BaseWeighter.get_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.get_weights" title="Permalink to this definition"></a></dt>
 <dd><p>Return the fitted per-patient pool weights (in pool row order).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -201,12 +238,10 @@ matching feature.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pybalance.weighting.BaseWeighter.match">
-<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#BaseWeighter.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.match" title="Permalink to this definition"></a></dt>
-<dd><p>Fit (if not already fit) and return a MatchingData instance in which
-every pool patient is retained and carries a new column (see
-weight_col) holding their fitted weight. The target population
-(patient-level or aggregate) is passed through unchanged, with weight
-1.0 assigned to any patient-level target rows.</p>
+<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#BaseWeighter.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.BaseWeighter.match" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the weights (once; later calls reuse them) and return the
+weighted MatchingData. Named <code class="docutils literal notranslate"><span class="pre">match</span></code> for consistency with the other
+matchers in pybalance, although no patients are dropped.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a></p>
@@ -218,7 +253,7 @@ weight_col) holding their fitted weight. The target population
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pybalance.weighting.EntropyBalanceWeighter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">EntropyBalanceWeighter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'target'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ridge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample_weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_penalty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#EntropyBalanceWeighter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.EntropyBalanceWeighter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">EntropyBalanceWeighter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'target'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ridge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample_weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_penalty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/entropy.html#EntropyBalanceWeighter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.EntropyBalanceWeighter" title="Permalink to this definition"></a></dt>
 <dd><p>General maximum-entropy (“method of moments”) weighting: solves for
 pool weights of the form <code class="docutils literal notranslate"><span class="pre">w_i</span> <span class="pre">=</span> <span class="pre">exp(z_i</span> <span class="pre">.</span> <span class="pre">alpha)</span></code> such that the weighted
 pool matches the target. For an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code> every disclosed
@@ -271,7 +306,7 @@ constraint). Larger values enforce the limit more tightly.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pybalance.weighting.EntropyBalanceWeighter.get_params">
-<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#EntropyBalanceWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.EntropyBalanceWeighter.get_params" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/entropy.html#EntropyBalanceWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.EntropyBalanceWeighter.get_params" title="Permalink to this definition"></a></dt>
 <dd><p>Return the weighter’s configuration parameters as a dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -284,7 +319,7 @@ constraint). Larger values enforce the limit more tightly.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pybalance.weighting.MAICWeighter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">MAICWeighter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'target'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ridge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample_weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_penalty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#MAICWeighter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.MAICWeighter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">MAICWeighter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'target'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ridge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample_weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_penalty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/maic.html#MAICWeighter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.MAICWeighter" title="Permalink to this definition"></a></dt>
 <dd><p>Matching-Adjusted Indirect Comparison (MAIC; Signorovitch et al., 2010,
 “Comparative effectiveness without head-to-head trials: a method for
 matching-adjusted indirect comparisons applied to psoriasis clinical
@@ -320,7 +355,7 @@ MatchingData returned by match().</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pybalance.weighting.MAICWeighter.get_params">
-<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#MAICWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.MAICWeighter.get_params" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/maic.html#MAICWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.MAICWeighter.get_params" title="Permalink to this definition"></a></dt>
 <dd><p>Return the weighter’s configuration parameters as a dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -332,58 +367,73 @@ MatchingData returned by match().</p></li>
 </dd></dl>
 
 </section>
-<section id="iptw-weighter">
-<h2>IPTW Weighter<a class="headerlink" href="#iptw-weighter" title="Permalink to this heading"></a></h2>
+<section id="propensity-score-weighter">
+<h2>Propensity Score Weighter<a class="headerlink" href="#propensity-score-weighter" title="Permalink to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pybalance.weighting.IPTWWeighter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">IPTWWeighter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_quantiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample_weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#IPTWWeighter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.IPTWWeighter" title="Permalink to this definition"></a></dt>
-<dd><p>Inverse Probability of Treatment Weighting (IPTW; Rosenbaum &amp; Rubin,
-1983; see Austin, 2011, “An Introduction to Propensity Score Methods for
-Reducing the Effects of Confounding in Observational Studies”, for the
-ATT construction used here). Fits a propensity model <code class="docutils literal notranslate"><span class="pre">p(X)</span> <span class="pre">=</span> <span class="pre">P(target</span> <span class="pre">|</span>
-<span class="pre">X)</span></code> that classifies pool vs. target patients on their covariates, then
-reweights each pool patient by the odds <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">p)</span></code>. The target
-population keeps weight 1, so the weighted pool is reweighted onto the
-target’s covariate distribution – i.e. this is the ATT estimand with the
-target playing the role of the fixed/reference (“treated”) group, which
-matches the convention used by <code class="docutils literal notranslate"><span class="pre">MAICWeighter</span></code>/<code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code>
-and the package’s typical use case of building an external comparator
-arm that represents a trial population.</p>
-<p>Unlike <code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code>, IPTW does not guarantee exact balance
-on any particular moment: it only guarantees balance asymptotically, and
-only if the propensity model is correctly specified. It also requires a
-patient-level target (there is no pool-vs-target classification problem
-to fit against a published aggregate Table 1). Its main practical
-advantages over entropy balancing are that it scales to many covariates
-without requiring the target’s moments to be inside the pool’s convex
-hull, and that it is the most widely recognized/reported method in the
-observational literature.</p>
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">PropensityScoreWeighter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beta'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'att'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_quantiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ess_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample_weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter" title="Permalink to this definition"></a></dt>
+<dd><p>Weight patients using a propensity score model for pool vs. target
+membership. As in <code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher</span></code>, the weighter searches
+randomly over the hyperparameters of the propensity score model and keeps
+the model whose weights perform best according to the given optimization
+objective – here, the balance of the <em>weighted</em> populations. The
+propensity score is mapped to weights by <code class="docutils literal notranslate"><span class="pre">method</span></code> (see
+<code class="docutils literal notranslate"><span class="pre">propensity_score_weights()</span></code>), which plays the role of the matching
+method in <code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher</span></code>.</p>
+<p>Optimizing balance alone can favor spiky weights that rest on a handful
+of patients, so candidate models whose effective sample size falls below
+<code class="docutils literal notranslate"><span class="pre">min_ess_fraction</span></code> of either population are rejected.</p>
+<p>Requires a patient-level target (there is no pool-vs-target classification
+problem to fit against an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>matching_data</strong> (<a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.MatchingData"><em>MatchingData</em></a>) – MatchingData whose pool is to be weighted. The
-target must be patient-level (not an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>).</p></li>
-<li><p><strong>classifier</strong> (<em>Optional</em><em>[</em><em>BaseEstimator</em><em>]</em>) – A fitted-or-unfitted sklearn-compatible classifier
-exposing <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>, used to estimate <code class="docutils literal notranslate"><span class="pre">P(target</span> <span class="pre">|</span> <span class="pre">X)</span></code>. It is
-cloned before fitting, so passing a pre-fitted instance does not
-reuse its fit. Defaults to <code class="docutils literal notranslate"><span class="pre">LogisticRegression(max_iter=1000)</span></code>, the
-standard choice for propensity score estimation.</p></li>
+<li><p><strong>matching_data</strong> (<a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.MatchingData"><em>MatchingData</em></a>) – MatchingData whose pool is to be weighted.</p></li>
+<li><p><strong>objective</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="core.html#pybalance.utils.BaseBalanceCalculator" title="pybalance.utils.BaseBalanceCalculator"><em>BaseBalanceCalculator</em></a><em>]</em>) – Balance objective to optimize in the hyperparameter
+search. Can be a string referring to any balance calculator known to
+utils.balance_calculators.BalanceCalculator or an instance of
+BaseBalanceCalculator.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – How to turn propensity scores into weights: “att”, “atc”,
+“ate”, “overlap” or “matching”.</p></li>
 <li><p><strong>trim_quantiles</strong> (<em>Optional</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>]</em>) – Optional <code class="docutils literal notranslate"><span class="pre">(low,</span> <span class="pre">high)</span></code> quantiles (e.g. <code class="docutils literal notranslate"><span class="pre">(0.01,</span>
-<span class="pre">0.99)</span></code>) at which to clip the fitted weights. Extreme weights (driven
-by pool patients whose covariates make them look almost certainly
-pool or almost certainly target) are the main practical failure mode
-of IPTW; trimming trades a little bias for a large reduction in
-variance. Left unset (<code class="docutils literal notranslate"><span class="pre">None</span></code>) by default so the raw weights are
-returned untouched.</p></li>
+<span class="pre">0.99)</span></code>) at which to clip the weights of each population before
+scoring. Trades a little bias for lower variance when extreme weights
+occur, e.g. with “att” or “ate”.</p></li>
+<li><p><strong>min_ess_fraction</strong> (<em>float</em>) – Reject candidate models whose pool or target
+effective sample size is below this fraction of the population size.</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em>) – Maximum number of hyperparameters to try before returning
+the best weights.</p></li>
+<li><p><strong>time_limit</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – Restrict hyperparameter search based on time. No new
+model will be trained after time_limit seconds have passed (def: 300
+sec).</p></li>
 <li><p><strong>weight_col</strong> (<em>str</em>) – Name of the column used to store weights on the
 MatchingData returned by match().</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em>) – Whether to log fitting diagnostics.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Whether to log diagnostic information during training.</p></li>
+<li><p><strong>seed</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Seed for the hyperparameter search and the classifiers. Set
+it to make weighting reproducible; if None, results vary between runs.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pybalance.weighting.IPTWWeighter.get_params">
-<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#IPTWWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.IPTWWeighter.get_params" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter.get_best_match">
+<span class="sig-name descname"><span class="pre">get_best_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter.get_best_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter.get_best_match" title="Permalink to this definition"></a></dt>
+<dd><p>Return a MatchingData instance in which every pool and target patient
+is retained and carries a new column (see weight_col) holding their
+weight under <code class="docutils literal notranslate"><span class="pre">method</span></code> (default: the method the model was selected
+for). Passing another method reuses the fitted model without searching
+again, but note the model was selected to optimize the balance of the
+method given at construction. Does not change the fitted state.
+Requires match() to have been called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter.get_params" title="Permalink to this definition"></a></dt>
 <dd><p>Return the weighter’s configuration parameters as a dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -392,24 +442,116 @@ MatchingData returned by match().</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter.get_target_weights">
+<span class="sig-name descname"><span class="pre">get_target_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter.get_target_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter.get_target_weights" title="Permalink to this definition"></a></dt>
+<dd><p>Target weights from the fitted model for <code class="docutils literal notranslate"><span class="pre">method</span></code>; see get_weights().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter.get_weights">
+<span class="sig-name descname"><span class="pre">get_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter.get_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter.get_weights" title="Permalink to this definition"></a></dt>
+<dd><p>Pool weights from the fitted model for <code class="docutils literal notranslate"><span class="pre">method</span></code> (default: the method
+the model was selected for). Does not change the fitted state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter.match">
+<span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter.match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter.match" title="Permalink to this definition"></a></dt>
+<dd><p>Search for the best propensity model (once; later calls reuse it) and
+return the weighted MatchingData; see get_best_match() for <code class="docutils literal notranslate"><span class="pre">method</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#pybalance.utils.MatchingData" title="pybalance.utils.matching_data.MatchingData"><em>MatchingData</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter.plot_propensity_score_distributions">
+<span class="sig-name descname"><span class="pre">plot_propensity_score_distributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter.plot_propensity_score_distributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter.plot_propensity_score_distributions" title="Permalink to this definition"></a></dt>
+<dd><p>Plot histograms of the estimated propensity score for the pool and
+target populations, before vs. after weighting – the weighting
+analogue of <code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher.plot_propensity_score_distributions()</span></code>.</p>
+<p>Unlike a Matcher, a Weighter never drops patients, so there is no matched
+subset to compare against; instead, the “before” panel shows every
+patient counted equally and the “after” panel shows the same propensity
+scores counted by their weight. A successful fit should show the
+“after” histograms move towards each other.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>method</strong> (<em>str</em><em> | </em><em>None</em>) – Weighting method to plot (default: the method the model
+was selected for).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter.plot_weight_distributions">
+<span class="sig-name descname"><span class="pre">plot_weight_distributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter.plot_weight_distributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter.plot_weight_distributions" title="Permalink to this definition"></a></dt>
+<dd><p>Plot histograms of the fitted weights of the pool and target
+populations. The effective sample size of each population is shown in
+its panel title; a long right tail or a low effective sample size
+indicates that a few patients dominate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>method</strong> (<em>str</em><em> | </em><em>None</em>) – Weighting method to plot (default: the method the model
+was selected for).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.weighting.PropensityScoreWeighter.score">
+<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#PropensityScoreWeighter.score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.PropensityScoreWeighter.score" title="Permalink to this definition"></a></dt>
+<dd><p>Balance objective (lower is better) of the weighted populations for
+<code class="docutils literal notranslate"><span class="pre">method</span></code>; see get_weights().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pybalance.weighting.plot_iptw_propensity_distributions">
-<span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">plot_iptw_propensity_distributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weighter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#plot_iptw_propensity_distributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.plot_iptw_propensity_distributions" title="Permalink to this definition"></a></dt>
-<dd><p>Plot histograms of the estimated propensity score for the pool and target
-populations, before vs. after IPTW weighting – the weighting analogue of
-<code class="docutils literal notranslate"><span class="pre">pybalance.propensity.plot_propensity_score_match_distributions</span></code>.</p>
-<p>Unlike a Matcher, a Weighter never drops patients, so there is no matched
-subset to compare against; instead, the “before” panel shows every pool
-patient counted equally and the “after” panel shows the same propensity
-scores counted by their fitted IPTW weight (the target always keeps
-weight 1). A successful fit should show the “after” pool histogram move
-towards the target’s.</p>
+<dt class="sig sig-object py" id="pybalance.weighting.propensity_score_weights">
+<span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">propensity_score_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps_pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ps_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'att'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/propensity.html#propensity_score_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.propensity_score_weights" title="Permalink to this definition"></a></dt>
+<dd><p>Map propensity scores <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">P(target</span> <span class="pre">|</span> <span class="pre">X)</span></code> to weights for the pool and
+target patients. The weighting analogue of
+<code class="docutils literal notranslate"><span class="pre">pybalance.propensity.propensity_score_match</span></code>.</p>
+<ul class="simple">
+<li><p>“att”: pool weighted by the odds <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">/</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">p)</span></code>, target weight 1. The
+pool is reweighted onto the target (Rosenbaum &amp; Rubin, 1983; Austin,
+2011).</p></li>
+<li><p>“atc”: the reverse: target reweighted onto the pool, pool weight 1.</p></li>
+<li><p>“ate”: inverse probability weights for both populations, which
+reweights each onto their union.</p></li>
+<li><p>“overlap”: pool weighted by <code class="docutils literal notranslate"><span class="pre">p</span></code>, target by <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">p</span></code> (Li, Morgan &amp;
+Zaslavsky, 2018). Emphasizes patients who could belong to either
+population; weights are bounded in [0, 1] and, with an unregularized
+logistic model, covariate means are balanced exactly.</p></li>
+<li><p>“matching”: <code class="docutils literal notranslate"><span class="pre">min(p,</span> <span class="pre">1</span> <span class="pre">-</span> <span class="pre">p)</span></code> over the inverse probability weight (Li &amp;
+Greiner, 2013), a smoother analogue of 1:1 matching.</p></li>
+</ul>
+<p>Propensity scores should be clipped away from 0 and 1 by the caller.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>weighter</strong> (<a class="reference internal" href="#pybalance.weighting.IPTWWeighter" title="pybalance.weighting.IPTWWeighter"><em>IPTWWeighter</em></a>) – A fitted <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code>, i.e. one on which match() has
-already been called.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple <code class="docutils literal notranslate"><span class="pre">(pool_weights,</span> <span class="pre">target_weights)</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple</em>[<em>ndarray</em>, <em>ndarray</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -419,7 +561,7 @@ already been called.</p>
 <h2>Shared Utilities<a class="headerlink" href="#shared-utilities" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pybalance.weighting.effective_sample_size">
-<span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">effective_sample_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#effective_sample_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.effective_sample_size" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">effective_sample_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#effective_sample_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.effective_sample_size" title="Permalink to this definition"></a></dt>
 <dd><p>Kish’s effective sample size: <code class="docutils literal notranslate"><span class="pre">(sum</span> <span class="pre">w)**2</span> <span class="pre">/</span> <span class="pre">sum(w**2)</span></code>. Invariant to the
 overall scale of the weights. A large drop relative to <code class="docutils literal notranslate"><span class="pre">len(weights)</span></code>
 indicates the reweighting is relying heavily on a small number of pool
@@ -435,18 +577,22 @@ covariates).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pybalance.weighting.weighted_balance_table">
-<span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">weighted_balance_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weighter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/matcher.html#weighted_balance_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.weighted_balance_table" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pybalance.weighting.</span></span><span class="sig-name descname"><span class="pre">weighted_balance_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weighter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/weighting/base.html#weighted_balance_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.weighting.weighted_balance_table" title="Permalink to this definition"></a></dt>
 <dd><p>Return a table comparing each balanced feature’s weighted (and, for
 reference, unweighted) pool moment to the target moment – a quick
-post-hoc check of how well match() balanced the pool. For
+post-hoc check of how well the fitted weights balanced the pool. For
 EntropyBalanceWeighter/MAICWeighter, residuals should be ~0 for every
-constrained row; for IPTWWeighter, which does not solve for exact
+constrained row; for PropensityScoreWeighter, which does not solve for exact
 balance, this is instead a diagnostic of how much balance improved
 relative to the unweighted pool.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>weighter</strong> (<a class="reference internal" href="#pybalance.weighting.BaseWeighter" title="pybalance.weighting.matcher.BaseWeighter"><em>BaseWeighter</em></a>) – A fitted EntropyBalanceWeighter/MAICWeighter/IPTWWeighter,
-i.e. one on which match() has already been called.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>weighter</strong> (<a class="reference internal" href="#pybalance.weighting.BaseWeighter" title="pybalance.weighting.base.BaseWeighter"><em>BaseWeighter</em></a>) – A fitted EntropyBalanceWeighter/MAICWeighter/PropensityScoreWeighter,
+i.e. one on which match() has already been called.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em> | </em><em>None</em>) – For a PropensityScoreWeighter, the weighting method to
+tabulate (default: the method the model was selected for).</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><em>DataFrame</em></p>

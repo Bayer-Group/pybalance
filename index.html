@@ -63,7 +63,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -126,7 +126,7 @@ the underlying problem formulation.</p>
 propensity score matching, plus matching against an aggregate (published
 Table 1) target.</p></li>
 <li><p>Weighting: Matching-Adjusted Indirect Comparison (MAIC), general entropy
-balancing, and propensity-score (IPTW) weighting.</p></li>
+balancing, and propensity-score (IPTW and overlap) weighting.</p></li>
 <li><p>A variety of balance calculators for defining and measuring balance.</p></li>
 <li><p>Visualization tools for inspecting covariate balance before/after.</p></li>
 <li><p>Dataset simulation utilities for testing and demos.</p></li>
@@ -164,11 +164,12 @@ through the <a class="reference internal" href="02_demos.html"><span class="doc"
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="demos/core_02_balance_calculators.html">Balance Calculators</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Fit-Balance-Calculator">Fit Balance Calculator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Create-Balance-Calculator">Create Balance Calculator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Balance-between-pool-and-target">Balance between pool and target</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Balance-between-subset-of-pool-and-target">Balance between subset of pool and target</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Balance-between-several-subsets-simultaneously">Balance between several subsets simultaneously</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Basic-Genetic-Optimizer">Basic Genetic Optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Feature-weights">Feature weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/core_02_balance_calculators.html#Beta-vs.-gamma">Beta vs. gamma</a></li>
 </ul>
 </li>
 </ul>
@@ -178,13 +179,13 @@ through the <a class="reference internal" href="02_demos.html"><span class="doc"
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="demos/matching_01_propensity.html">Propensity Score Matcher</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="demos/matching_01_propensity.html#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/matching_01_propensity.html#Improve-upon-PropensityScoreMatcher-solution-with-ConstraintSatisfactionMatcher">Improve upon PropensityScoreMatcher solution with ConstraintSatisfactionMatcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="demos/matching_02_linear_program.html">Constraint Satisfaction Matcher</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="demos/matching_02_linear_program.html#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demos/matching_02_linear_program.html#Optimize-Beta-With-Cross-Terms-Added">Optimize Beta With Cross Terms Added</a></li>
 <li class="toctree-l2"><a class="reference internal" href="demos/matching_02_linear_program.html#Optimize-Gamma-(Area-Between-CDFs)">Optimize Gamma (Area Between CDFs)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/matching_02_linear_program.html#Improve-Upon-Propensity-Score-Matching">Improve Upon Propensity Score Matching</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="demos/matching_03_cardinality.html">Cardinality matching</a><ul>
@@ -212,12 +213,13 @@ through the <a class="reference internal" href="02_demos.html"><span class="doc"
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#Synthetic-data:-two-genuinely-different,-patient-level-populations">Synthetic data: two genuinely different, patient-level populations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#Fit-IPTWWeighter">Fit <code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#Checking-overlap:-propensity-score-and-weight-distributions">Checking overlap: propensity score and weight distributions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#Trimming-extreme-weights">Trimming extreme weights</a></li>
-<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_iptw.html#Takeaways">Takeaways</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/weighting_01_propensity.html">Propensity Score Weighting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_propensity.html#Synthetic-data:-two-genuinely-different,-patient-level-populations">Synthetic data: two genuinely different, patient-level populations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_propensity.html#Weighting-with-PropensityScoreWeighter">Weighting with <code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_propensity.html#Checking-overlap:-propensity-score-and-weight-distributions">Checking overlap: propensity score and weight distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_propensity.html#Choosing-a-method:-overlap-weights">Choosing a method: overlap weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_propensity.html#Trimming-extreme-weights">Trimming extreme weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos/weighting_01_propensity.html#Takeaways">Takeaways</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a><ul>
@@ -248,7 +250,7 @@ through the <a class="reference internal" href="02_demos.html"><span class="doc"
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/weighters.html">Weighters</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/weighters.html#entropy-balancing-maic">Entropy Balancing &amp; MAIC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/weighters.html#iptw-weighter">IPTW Weighter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/weighters.html#propensity-score-weighter">Propensity Score Weighter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/weighters.html#shared-utilities">Shared Utilities</a></li>
 </ul>
 </li>

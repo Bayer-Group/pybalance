@@ -23,7 +23,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Inverse Probability of Treatment Weighting (IPTW)" href="weighting_01_iptw.html" />
+    <link rel="next" title="Propensity Score Weighting" href="weighting_01_propensity.html" />
     <link rel="prev" title="Genetic Matcher" href="matching_04_genetic.html" /> 
 </head>
 
@@ -77,7 +77,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -1138,7 +1138,7 @@ matches the resulting rate, so you never compute the 0/1 column yourself. Here <
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/pybalance/sim/data/aggregate_target_quantiles.csv
+~/src/matching-fork/venv/lib/python3.12/site-packages/pybalance/sim/data/aggregate_target_quantiles.csv
 
 feature,statistic,parameter,value
 ,n,,100
@@ -1765,7 +1765,7 @@ instead and plot the proportion, as in the table.) The solver may log a note tha
 <li><p>Features in the <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code> headers that the target does not disclose are left unconstrained but still reported by <code class="docutils literal notranslate"><span class="pre">describe()</span></code>, so you can see how matching changed them.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AggregateTarget.categoric</span></code> rates can be <strong>partially disclosed</strong>: each disclosed level is a constraint and an omitted level simply has none.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AggregateConstraintSatisfactionMatcher</span></code> always uses <code class="docutils literal notranslate"><span class="pre">AggregateTargetBalanceCalculator</span></code> – there’s no <code class="docutils literal notranslate"><span class="pre">objective</span></code> to choose. <code class="docutils literal notranslate"><span class="pre">GeneticMatcher</span></code>, <code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher</span></code> and <code class="docutils literal notranslate"><span class="pre">ConstraintSatisfactionMatcher</span></code> also accept <code class="docutils literal notranslate"><span class="pre">objective=&quot;aggregate_beta&quot;</span></code> (or a prebuilt <code class="docutils literal notranslate"><span class="pre">AggregateTargetBalanceCalculator</span></code> instance) directly, since they already accept any <code class="docutils literal notranslate"><span class="pre">BaseBalanceCalculator</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code>/<code class="docutils literal notranslate"><span class="pre">IPTWWeighter</span></code> are the remaining holdouts: they still hardcode the mean/std <code class="docutils literal notranslate"><span class="pre">&quot;beta&quot;</span></code> objective and don’t yet build an <code class="docutils literal notranslate"><span class="pre">AggregateTargetBalanceCalculator</span></code> themselves. That’s not silently wrong – a target with a disclosed <code class="docutils literal notranslate"><span class="pre">median</span></code>/<code class="docutils literal notranslate"><span class="pre">quantile</span></code> makes <code class="docutils literal notranslate"><span class="pre">compute_aggregate_feature_moments</span></code> raise a clear error there today, rather than matching the wrong (raw, non-dichotomized) column.</p></li>
+<li><p>The weighters also accept an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>: <code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code>/<code class="docutils literal notranslate"><span class="pre">MAICWeighter</span></code> use the same <code class="docutils literal notranslate"><span class="pre">AggregateTargetBalanceCalculator</span></code> internally, so every disclosed statistic (including medians and quantiles) becomes its own constraint. <code class="docutils literal notranslate"><span class="pre">PropensityScoreWeighter</span></code> is the exception: it fits a pool-vs-target classifier and so needs a patient-level target.</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
@@ -1783,7 +1783,7 @@ instead and plot the proportion, as in the table.) The solver may log a note tha
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="matching_04_genetic.html" class="btn btn-neutral float-left" title="Genetic Matcher" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="weighting_01_iptw.html" class="btn btn-neutral float-right" title="Inverse Probability of Treatment Weighting (IPTW)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="weighting_01_propensity.html" class="btn btn-neutral float-right" title="Propensity Score Weighting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

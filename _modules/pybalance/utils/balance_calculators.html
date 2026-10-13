@@ -61,7 +61,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -179,6 +179,23 @@
         <span class="k">return</span> <span class="n">output</span>
 
     <span class="k">return</span> <span class="n">_f</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_weighted_moments</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Weighted mean and standard deviation over the patient axis. x has shape</span>
+<span class="sd">    n_candidates x n_patients x n_features and w broadcasts against</span>
+<span class="sd">    n_candidates x n_patients. The variance uses the reliability-weights</span>
+<span class="sd">    correction, which reduces to the unbiased (ddof=1) estimate for equal</span>
+<span class="sd">    weights, and moments are invariant to the overall scale of w.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sum_w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">sum_w</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">sum_w</span> <span class="o">-</span> <span class="p">(</span><span class="n">w</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">sum_w</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BaseBalanceCalculator"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseBalanceCalculator">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BaseBalanceCalculator</span><span class="p">:</span>
@@ -354,7 +371,9 @@
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset_populations</span><span class="p">,</span> <span class="n">full_population_data</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subset_populations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">subset_populations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">full_population_data</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subset_populations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
             <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">subset_populations</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subset_populations</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
@@ -391,8 +410,10 @@
     <span class="nd">@reshape_output</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">distance</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">target_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pool_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute overall distance (aka &quot;mismatch&quot;, aka &quot;loss&quot;) between input</span>
@@ -406,34 +427,73 @@
 <span class="sd">            array should be an array of shape n_candidate_populations x</span>
 <span class="sd">            candidate_population_size that indexes the patient pool (passed</span>
 <span class="sd">            during __init__()). The first dimension may be omitted if only one</span>
-<span class="sd">            subset population is present.</span>
+<span class="sd">            subset population is present. If None, the full pool is used.</span>
 <span class="sd">        :target_subsets: Subsets of the target population. If an index array, must</span>
 <span class="sd">            have same last dimension as pool_subsets.</span>
+<span class="sd">        :pool_weights: Optional non-negative patient weights, one per patient of</span>
+<span class="sd">            the (sub)population in pool_subsets (or of the full pool if</span>
+<span class="sd">            pool_subsets is None), with shape n_patients or</span>
+<span class="sd">            n_candidate_populations x n_patients. Feature means and standard</span>
+<span class="sd">            deviations are then weighted, which allows scoring reweighted</span>
+<span class="sd">            (rather than subsetted) populations. Invariant to weight scale.</span>
+<span class="sd">        :target_weights: Same as pool_weights, for the target. Not supported for</span>
+<span class="sd">            an AggregateTarget, whose moments are fixed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">per_feature_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
+        <span class="n">per_feature_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span>
+            <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">,</span> <span class="n">pool_weights</span><span class="p">,</span> <span class="n">target_weights</span>
+        <span class="p">)</span>
         <span class="c1"># Since feature_weights sum to 1, sum is actually a weighted mean</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feature_weights</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">per_feature_loss</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
         <span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">balance</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pool_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pool_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span>
+            <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">,</span> <span class="n">pool_weights</span><span class="p">,</span> <span class="n">target_weights</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_moments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">features</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">features</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weights</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> weights for </span><span class="si">{</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> patients!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_weighted_moments</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BaseBalanceCalculator.per_feature_loss"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BaseBalanceCalculator.per_feature_loss">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">per_feature_loss</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">target_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pool_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute mismatch (aka &quot;distance&quot;, aka &quot;loss&quot;) on a per-feature basis for</span>
 <span class="sd">        a set of candidate populations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_features</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">target_subsets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pool_mean</span><span class="p">,</span> <span class="n">pool_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moments</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">pool_weights</span><span class="p">)</span>
+        <span class="n">weighted</span> <span class="o">=</span> <span class="n">pool_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">target_subsets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;The target is an AggregateTarget with fixed moments, so &quot;</span>
+                    <span class="s2">&quot;target subsets/weights are not supported.&quot;</span>
+                <span class="p">)</span>
             <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_features</span><span class="p">(</span><span class="n">target_subsets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
-            <span class="n">target_std</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">target_mean</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">pool</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">target_mean</span><span class="p">,</span> <span class="n">target_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moments</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">target_weights</span><span class="p">)</span>
+            <span class="n">n_pool</span><span class="p">,</span> <span class="n">n_target</span> <span class="o">=</span> <span class="n">pool_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">target_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">n_pool</span> <span class="o">!=</span> <span class="n">n_target</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">weighted</span> <span class="ow">and</span> <span class="mi">1</span> <span class="ow">in</span> <span class="p">(</span><span class="n">n_pool</span><span class="p">,</span> <span class="n">n_target</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Number of subset populations must be same for pool and target!&quot;</span>
                 <span class="p">)</span>
@@ -452,9 +512,9 @@
         <span class="c1"># __init__() of the possibility of this arising.</span>
         <span class="n">norm</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">standardize_difference</span><span class="p">:</span>
-            <span class="n">norm</span> <span class="o">*=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">target_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-6</span>
+            <span class="n">norm</span> <span class="o">*=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pool_std</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">target_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-6</span>
 
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">((</span><span class="n">pool</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">((</span><span class="n">pool_mean</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="BetaBalance"><a class="viewcode-back" href="../../../api/core.html#pybalance.utils.BetaBalance">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BetaBalance</span><span class="p">(</span><span class="n">BaseBalanceCalculator</span><span class="p">):</span>
@@ -691,10 +751,14 @@
     <span class="nd">@reshape_output</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">distance</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">pool_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">target_subsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pool_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
-        <span class="n">per_feature_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span>
+        <span class="n">per_feature_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_feature_loss</span><span class="p">(</span>
+            <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">,</span> <span class="n">pool_weights</span><span class="p">,</span> <span class="n">target_weights</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feature_weights</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">per_feature_loss</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
@@ -873,7 +937,24 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_populations</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">_to_list</span><span class="p">(</span><span class="n">candidate_populations</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">distance</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pool_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pool_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># Weighted populations are a single reweighting of the full pool/target</span>
+        <span class="c1"># (or of one subset), so there is nothing to batch.</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">pool_subsets</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">pool_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span>
+                <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">,</span> <span class="n">pool_weights</span><span class="p">,</span> <span class="n">target_weights</span>
+            <span class="p">)</span>
+
         <span class="c1"># If the user passes a pandas DataFrame, the DataFrame is assumed to</span>
         <span class="c1"># represent feature data for only one population and no need for</span>
         <span class="c1"># batching; just pass on to the base class. Otherwise, assume</span>
@@ -925,8 +1006,16 @@
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">distances</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">balance</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pool_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_subsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pool_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span>
+            <span class="n">pool_subsets</span><span class="p">,</span> <span class="n">target_subsets</span><span class="p">,</span> <span class="n">pool_weights</span><span class="p">,</span> <span class="n">target_weights</span>
+        <span class="p">)</span></div>
 
 
 <span class="c1">#</span>

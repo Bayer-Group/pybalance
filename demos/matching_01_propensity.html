@@ -61,7 +61,6 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Propensity Score Matcher</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Optimize-Beta-(Mean-Absolute-SMD)">Optimize Beta (Mean Absolute SMD)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Improve-upon-PropensityScoreMatcher-solution-with-ConstraintSatisfactionMatcher">Improve upon PropensityScoreMatcher solution with ConstraintSatisfactionMatcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
@@ -71,7 +70,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -114,9 +113,13 @@
              
   <section id="Propensity-Score-Matcher">
 <h1>Propensity Score Matcher<a class="headerlink" href="#Propensity-Score-Matcher" title="Permalink to this heading"></a></h1>
-<p>In this notebook, we show the basic usage of the PropensityScoreMatcher. Unlike the GeneticMatcher and ConstraintSatisfactionMatcher, the PropensityScoreMatcher does not directly optimize a particular balance score. Instead, the PropensityScoreMatcher uses the given objective as a measure of “correctness” of the propensity score model. The matcher tries a (possibly large) number of potential models and returns the model with the best score according to the given metric. In doing this, we are
-essentially automating an often manual process of hyperparameter optimization that accompanies propensity score matching.</p>
-<p>We show that the hyperparameter search still leaves unoptimized balance by apply a ConstraintSatisfactionMatcher to the resulting population from the PropensityScoreMatcher. The residual unoptimzed balance highlights a major limitation of propensity score matching in general.</p>
+<p>In this notebook, we show the basic usage of the PropensityScoreMatcher. The propensity score <a class="reference external" href="https://doi.org/10.1093/biomet/70.1.41">(Rosenbaum &amp; Rubin, 1983)</a> is the probability of belonging to the target population given baseline covariates:</p>
+<p><span class="math">\begin{equation}
+e(x) = P(Z = 1 \mid X = x)
+\end{equation}</span></p>
+<p>where <span class="math notranslate nohighlight">\(X\)</span> are the covariates and <span class="math notranslate nohighlight">\(Z = 1\)</span> indicates membership in the target. Patients are matched on similar estimated scores.</p>
+<p>Unlike the GeneticMatcher and ConstraintSatisfactionMatcher, the PropensityScoreMatcher does not directly optimize a particular balance score. Instead, it uses the given objective as a measure of “correctness” of the propensity score model, tries a (possibly large) number of potential models, and returns the one with the best score. In doing this, we automate the often manual hyperparameter optimization that accompanies propensity score matching. Because balance is not optimized directly,
+residual imbalance often remains; see the linear program demo for how to improve upon a propensity score match.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -129,7 +132,7 @@ essentially automating an often manual process of hyperparameter optimization th
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.sim</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_toy_dataset</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.propensity</span><span class="w"> </span><span class="kn">import</span> <span class="n">PropensityScoreMatcher</span><span class="p">,</span> <span class="n">plot_propensity_score_match_distributions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.propensity</span><span class="w"> </span><span class="kn">import</span> <span class="n">PropensityScoreMatcher</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">plot_numeric_features</span><span class="p">,</span>
     <span class="n">plot_categoric_features</span><span class="p">,</span>
@@ -392,7 +395,8 @@ essentially automating an often manual process of hyperparameter optimization th
  &#39;caliper&#39;: None,
  &#39;max_iter&#39;: 100,
  &#39;time_limit&#39;: 300,
- &#39;method&#39;: &#39;greedy&#39;}
+ &#39;method&#39;: &#39;greedy&#39;,
+ &#39;seed&#39;: None}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -408,340 +412,322 @@ essentially automating an often manual process of hyperparameter optimization th
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:179] Training model LogisticRegression (iter 1/100, 0.000 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 1/100, 0.0 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.023702966007283093
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l2
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0444
-INFO [matcher.py:144]   Solution time: 0.002 min
-INFO [matcher.py:179] Training model SGDClassifier (iter 2/100, 0.002 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 3/100, 0.003 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 4/100, 0.004 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:219] Best propensity score match found:
+INFO [matcher.py:220]   Model: LogisticRegression
+INFO [matcher.py:222]   * C: 6.310110586108835
+INFO [matcher.py:222]   * fit_intercept: False
+INFO [matcher.py:222]   * max_iter: 500
+INFO [matcher.py:222]   * penalty: l1
+INFO [matcher.py:222]   * solver: saga
+INFO [matcher.py:223]   Score (beta): 0.0346
+INFO [matcher.py:224]   Solution time: 0.7 s
+INFO [matcher.py:267] Training model LogisticRegression (iter 2/100, 0.8 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 23.61454798133838
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0373
-INFO [matcher.py:144]   Solution time: 0.017 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 5/100, 0.017 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 3/100, 0.9 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 4/100, 0.9 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 5/100, 1.0 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 6/100, 1.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 6/100, 0.021 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 7/100, 1.2 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 7/100, 0.022 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model LogisticRegression (iter 8/100, 1.3 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 8/100, 0.035 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 9/100, 1.8 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model SGDClassifier (iter 10/100, 2.0 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 11/100, 2.0 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 12/100, 2.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 9/100, 0.036 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 2.490445640066153
-INFO [matcher.py:142]   * fit_intercept: True
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0345
-INFO [matcher.py:144]   Solution time: 0.039 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 10/100, 0.039 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 13/100, 2.9 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model SGDClassifier (iter 14/100, 3.0 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 15/100, 3.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model LogisticRegression (iter 16/100, 3.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 11/100, 0.053 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 17/100, 3.2 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 18/100, 3.3 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model LogisticRegression (iter 19/100, 3.3 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model SGDClassifier (iter 20/100, 3.4 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 21/100, 3.5 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 12/100, 0.066 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 13/100, 0.070 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 14/100, 0.070 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 22/100, 3.6 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 23/100, 3.7 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 15/100, 0.072 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 16/100, 0.073 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 24/100, 4.0 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 25/100, 4.1 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 26/100, 4.2 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 27/100, 4.3 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 28/100, 4.5 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 29/100, 4.6 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 17/100, 0.074 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 18/100, 0.075 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 30/100, 4.7 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 19/100, 0.076 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 20/100, 0.079 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 31/100, 4.9 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 21/100, 0.080 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model SGDClassifier (iter 32/100, 5.1 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 33/100, 5.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 22/100, 0.090 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model SGDClassifier (iter 34/100, 5.5 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 35/100, 5.6 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 36/100, 5.7 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 23/100, 0.100 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.28866833556559457
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0311
-INFO [matcher.py:144]   Solution time: 0.113 min
-INFO [matcher.py:179] Training model SGDClassifier (iter 24/100, 0.113 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 25/100, 0.114 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 37/100, 6.5 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 38/100, 6.7 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model SGDClassifier (iter 39/100, 6.7 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 40/100, 6.8 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 26/100, 0.127 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 27/100, 0.128 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 28/100, 0.129 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 29/100, 0.131 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 41/100, 7.6 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 30/100, 0.136 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 31/100, 0.137 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 32/100, 0.138 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 33/100, 0.139 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 34/100, 0.140 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 35/100, 0.141 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:219] Best propensity score match found:
+INFO [matcher.py:220]   Model: LogisticRegression
+INFO [matcher.py:222]   * C: 0.6191810056908827
+INFO [matcher.py:222]   * fit_intercept: False
+INFO [matcher.py:222]   * max_iter: 500
+INFO [matcher.py:222]   * penalty: l1
+INFO [matcher.py:222]   * solver: saga
+INFO [matcher.py:223]   Score (beta): 0.0329
+INFO [matcher.py:224]   Solution time: 8.5 s
+INFO [matcher.py:267] Training model SGDClassifier (iter 42/100, 8.5 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 43/100, 8.6 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 44/100, 9.0 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 45/100, 9.2 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 46/100, 9.2 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 47/100, 9.3 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 48/100, 9.4 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model LogisticRegression (iter 49/100, 9.5 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 36/100, 0.142 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 37/100, 0.143 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 38/100, 0.144 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 39/100, 0.162 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 40/100, 0.162 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model LogisticRegression (iter 50/100, 10.2 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 41/100, 0.164 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 42/100, 0.165 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 43/100, 0.166 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model LogisticRegression (iter 51/100, 10.6 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model SGDClassifier (iter 52/100, 10.7 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 53/100, 10.8 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 54/100, 10.8 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 55/100, 11.0 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 56/100, 11.1 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 57/100, 11.2 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 58/100, 11.2 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 44/100, 0.179 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model LogisticRegression (iter 59/100, 12.0 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 45/100, 0.192 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 46/100, 0.193 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model SGDClassifier (iter 60/100, 12.8 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 61/100, 13.0 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 62/100, 13.0 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 47/100, 0.206 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 48/100, 0.207 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 63/100, 13.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 49/100, 0.212 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 50/100, 0.213 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 51/100, 0.215 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 64/100, 13.2 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 65/100, 13.3 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 66/100, 13.4 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 67/100, 13.4 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 68/100, 13.5 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 52/100, 0.217 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model LogisticRegression (iter 69/100, 14.3 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 53/100, 0.221 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 54/100, 0.223 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 55/100, 0.224 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 56/100, 0.225 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 57/100, 0.226 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:219] Best propensity score match found:
+INFO [matcher.py:220]   Model: LogisticRegression
+INFO [matcher.py:222]   * C: 0.28866833556559457
+INFO [matcher.py:222]   * fit_intercept: False
+INFO [matcher.py:222]   * max_iter: 500
+INFO [matcher.py:222]   * penalty: l1
+INFO [matcher.py:222]   * solver: saga
+INFO [matcher.py:223]   Score (beta): 0.0325
+INFO [matcher.py:224]   Solution time: 15.0 s
+INFO [matcher.py:267] Training model LogisticRegression (iter 70/100, 15.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model SGDClassifier (iter 71/100, 15.7 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 72/100, 15.7 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 58/100, 0.239 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 59/100, 0.240 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 60/100, 0.241 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 61/100, 0.242 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 62/100, 0.243 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 63/100, 0.244 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 73/100, 15.8 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 64/100, 0.246 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 74/100, 15.9 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 75/100, 15.9 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 76/100, 16.0 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 65/100, 0.247 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 66/100, 0.248 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 77/100, 16.1 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 78/100, 16.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 67/100, 0.249 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 68/100, 0.250 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 79/100, 16.5 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 69/100, 0.252 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 70/100, 0.254 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model LogisticRegression (iter 80/100, 17.2 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.6191810056908827
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0307
-INFO [matcher.py:144]   Solution time: 0.267 min
-INFO [matcher.py:179] Training model LogisticRegression (iter 71/100, 0.267 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 81/100, 17.4 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 72/100, 0.271 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 73/100, 0.272 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 74/100, 0.273 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model SGDClassifier (iter 82/100, 17.5 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 83/100, 17.6 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model SGDClassifier (iter 84/100, 17.7 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 85/100, 17.8 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 86/100, 17.9 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 87/100, 18.0 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 75/100, 0.287 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 76/100, 0.290 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 88/100, 18.7 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 89/100, 18.8 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 77/100, 0.291 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 78/100, 0.292 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 79/100, 0.293 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 80/100, 0.294 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 90/100, 19.6 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 91/100, 19.7 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model LogisticRegression (iter 81/100, 0.305 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model LogisticRegression (iter 92/100, 20.1 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model LogisticRegression (iter 93/100, 20.5 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 82/100, 0.318 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 83/100, 0.319 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 84/100, 0.320 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 85/100, 0.321 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 86/100, 0.322 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 87/100, 0.323 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 88/100, 0.324 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 89/100, 0.325 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+INFO [matcher.py:267] Training model SGDClassifier (iter 94/100, 21.1 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 95/100, 21.3 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model SGDClassifier (iter 96/100, 21.3 s) ...
+INFO [matcher.py:267] Training model SGDClassifier (iter 97/100, 21.4 s) ...
+INFO [matcher.py:267] Training model LogisticRegression (iter 98/100, 21.5 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 90/100, 0.331 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 91/100, 0.332 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 92/100, 0.333 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 93/100, 0.334 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 94/100, 0.335 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 95/100, 0.336 min) ...
-INFO [matcher.py:179] Training model LogisticRegression (iter 96/100, 0.337 min) ...
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
+sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:1407: UserWarning: Inconsistent values: penalty=l1 with l1_ratio=0.0. penalty is deprecated. Please use l1_ratio only.
+INFO [matcher.py:267] Training model LogisticRegression (iter 99/100, 22.2 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/sklearn/linear_model/_sag.py:348: ConvergenceWarning: The max_iter was reached which means the coef_ did not converge
+INFO [matcher.py:267] Training model LogisticRegression (iter 100/100, 22.5 s) ...
+sklearn/linear_model/_logistic.py:1381: FutureWarning: &#39;penalty&#39; was deprecated in version 1.8 and will be removed in 1.10. To avoid this warning, leave &#39;penalty&#39; set to its default value and use &#39;l1_ratio&#39; or &#39;C&#39; instead. Use l1_ratio=0 instead of penalty=&#39;l2&#39;, l1_ratio=1 instead of penalty=&#39;l1&#39;, l1_ratio set to a float between 0 and 1 instead of penalty=&#39;elasticnet&#39;, and C=np.inf instead of penalty=None.
   warnings.warn(
-INFO [matcher.py:179] Training model SGDClassifier (iter 97/100, 0.351 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 98/100, 0.352 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 99/100, 0.353 min) ...
-INFO [matcher.py:179] Training model SGDClassifier (iter 100/100, 0.354 min) ...
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.6191810056908827
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0307
-INFO [matcher.py:144]   Solution time: 0.267 min
+INFO [matcher.py:219] Best propensity score match found:
+INFO [matcher.py:220]   Model: LogisticRegression
+INFO [matcher.py:222]   * C: 0.28866833556559457
+INFO [matcher.py:222]   * fit_intercept: False
+INFO [matcher.py:222]   * max_iter: 500
+INFO [matcher.py:222]   * penalty: l1
+INFO [matcher.py:222]   * solver: saga
+INFO [matcher.py:223]   Score (beta): 0.0325
+INFO [matcher.py:224]   Solution time: 15.0 s
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -789,79 +775,79 @@ INFO [matcher.py:144]   Solution time: 0.267 min
   </thead>
   <tbody>
     <tr>
-      <th>5781</th>
-      <td>74.382687</td>
-      <td>194.082038</td>
-      <td>118.760023</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>5</td>
-      <td>pool</td>
+      <th>6790</th>
+      <td>22.679417</td>
+      <td>136.691851</td>
+      <td>66.809082</td>
+      <td>1.0</td>
       <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>5781</td>
-    </tr>
-    <tr>
-      <th>6714</th>
-      <td>66.581290</td>
-      <td>178.545534</td>
-      <td>102.566840</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>2</td>
-      <td>pool</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>6714</td>
-    </tr>
-    <tr>
-      <th>9937</th>
-      <td>61.860293</td>
-      <td>159.449219</td>
-      <td>108.945960</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>4</td>
+      <td>3</td>
       <td>pool</td>
       <td>1</td>
       <td>0</td>
       <td>0</td>
       <td>1</td>
-      <td>9937</td>
+      <td>6790</td>
     </tr>
     <tr>
-      <th>8223</th>
-      <td>46.656414</td>
-      <td>140.392554</td>
-      <td>65.453208</td>
+      <th>9008</th>
+      <td>54.977454</td>
+      <td>151.931111</td>
+      <td>85.475196</td>
       <td>1.0</td>
       <td>2</td>
-      <td>4</td>
-      <td>pool</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>8223</td>
-    </tr>
-    <tr>
-      <th>962</th>
-      <td>52.829914</td>
-      <td>137.725077</td>
-      <td>93.206007</td>
-      <td>0.0</td>
-      <td>1</td>
       <td>2</td>
       <td>pool</td>
       <td>1</td>
       <td>1</td>
       <td>0</td>
+      <td>1</td>
+      <td>9008</td>
+    </tr>
+    <tr>
+      <th>6914</th>
+      <td>67.271482</td>
+      <td>165.463117</td>
+      <td>68.851654</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>pool</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>6914</td>
+    </tr>
+    <tr>
+      <th>4709</th>
+      <td>57.941426</td>
+      <td>165.439594</td>
+      <td>106.897960</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>pool</td>
+      <td>1</td>
       <td>0</td>
-      <td>962</td>
+      <td>1</td>
+      <td>0</td>
+      <td>4709</td>
+    </tr>
+    <tr>
+      <th>2133</th>
+      <td>30.647807</td>
+      <td>127.534778</td>
+      <td>82.919112</td>
+      <td>1.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>pool</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2133</td>
     </tr>
     <tr>
       <th>...</th>
@@ -963,8 +949,8 @@ INFO [matcher.py:144]   Solution time: 0.267 min
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="n">plot_propensity_score_match_distributions</span><span class="p">(</span><span class="n">matcher</span><span class="p">)</span>
-<br/></pre></div>
+<span class="n">matcher</span><span class="o">.</span><span class="n">plot_propensity_score_distributions</span><span class="p">()</span>
+</pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -973,7 +959,7 @@ INFO [matcher.py:144]   Solution time: 0.267 min
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;seaborn.axisgrid.FacetGrid at 0x157858dd0&gt;
+&lt;seaborn.axisgrid.FacetGrid at 0x13cea1370&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1005,15 +991,15 @@ INFO [matcher.py:144]   Solution time: 0.267 min
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO [matcher.py:139] Best propensity score match found:
-INFO [matcher.py:140]   Model: LogisticRegression
-INFO [matcher.py:142]   * C: 0.6191810056908827
-INFO [matcher.py:142]   * fit_intercept: False
-INFO [matcher.py:142]   * max_iter: 500
-INFO [matcher.py:142]   * penalty: l1
-INFO [matcher.py:142]   * solver: saga
-INFO [matcher.py:143]   Score (beta): 0.0307
-INFO [matcher.py:144]   Solution time: 0.267 min
+INFO [matcher.py:219] Best propensity score match found:
+INFO [matcher.py:220]   Model: LogisticRegression
+INFO [matcher.py:222]   * C: 0.28866833556559457
+INFO [matcher.py:222]   * fit_intercept: False
+INFO [matcher.py:222]   * max_iter: 500
+INFO [matcher.py:222]   * penalty: l1
+INFO [matcher.py:222]   * solver: saga
+INFO [matcher.py:223]   Score (beta): 0.0325
+INFO [matcher.py:224]   Solution time: 15.0 s
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1035,431 +1021,6 @@ INFO [matcher.py:144]   Solution time: 0.267 min
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/demos_matching_01_propensity_8_3.png" src="../_images/demos_matching_01_propensity_8_3.png" />
-</div>
-</div>
-</section>
-<section id="Improve-upon-PropensityScoreMatcher-solution-with-ConstraintSatisfactionMatcher">
-<h2>Improve upon PropensityScoreMatcher solution with ConstraintSatisfactionMatcher<a class="headerlink" href="#Improve-upon-PropensityScoreMatcher-solution-with-ConstraintSatisfactionMatcher" title="Permalink to this heading"></a></h2>
-<p>Because the PropensityScoreMatcher doesn’t directly optimize balance, it only achieves good balance when we find the right propensity score model. Depending on how we’ve parameterized the space of possible propensity score models, we may in fact never find the right model. This leaves us often with residual confounding that cannot be removed via propensity score matching. Here we show that the ConstraintSatisfactionMatcher is able to find a significantly better matched solution compared to the
-propensity score approach.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.lp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstraintSatisfactionMatcher</span>
-<span class="n">matcher</span> <span class="o">=</span> <span class="n">ConstraintSatisfactionMatcher</span><span class="p">(</span>
-    <span class="n">m</span><span class="p">,</span>
-    <span class="n">time_limit</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-    <span class="n">objective</span><span class="o">=</span><span class="n">objective</span><span class="p">,</span>
-    <span class="n">ps_hinting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">matcher</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO [matcher.py:66] Scaling features by factor 240.00 in order to use integer solver with &lt;= 0.2898% loss.
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{&#39;objective&#39;: &#39;beta&#39;,
- &#39;pool_size&#39;: 1000,
- &#39;target_size&#39;: 1000,
- &#39;max_mismatch&#39;: None,
- &#39;time_limit&#39;: 60,
- &#39;num_workers&#39;: 4,
- &#39;ps_hinting&#39;: False,
- &#39;verbose&#39;: True}
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-INFO [matcher.py:499] Solving for match population with pool size = 1000 and target size = 1000, optimizing balance (no max_mismatch cap).
-INFO [matcher.py:503] Matching on 15 dimensions ...
-INFO [matcher.py:510] Building model variables and constraints ...
-INFO [matcher.py:519] Calculating bounds on feature variables ...
-INFO [matcher.py:609] Applying size constraints on pool and target ...
-INFO [matcher.py:239] Solving with 4 workers ...
-INFO [matcher.py:91] Initial balance score: 0.2449
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 1, time = 0.02 m
-INFO [matcher.py:102] Objective:        480270000.0
-INFO [matcher.py:123] Balance (beta):   0.2421
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 2, time = 0.03 m
-INFO [matcher.py:102] Objective:        479744000.0
-INFO [matcher.py:123] Balance (beta):   0.2418
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 3, time = 0.04 m
-INFO [matcher.py:102] Objective:        479679000.0
-INFO [matcher.py:123] Balance (beta):   0.2418
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 4, time = 0.07 m
-INFO [matcher.py:102] Objective:        479629000.0
-INFO [matcher.py:123] Balance (beta):   0.2417
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 5, time = 0.08 m
-INFO [matcher.py:102] Objective:        479552000.0
-INFO [matcher.py:123] Balance (beta):   0.2417
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 6, time = 0.08 m
-INFO [matcher.py:102] Objective:        479486000.0
-INFO [matcher.py:123] Balance (beta):   0.2416
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 7, time = 0.08 m
-INFO [matcher.py:102] Objective:        479423000.0
-INFO [matcher.py:123] Balance (beta):   0.2416
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 8, time = 0.10 m
-INFO [matcher.py:102] Objective:        29842000.0
-INFO [matcher.py:123] Balance (beta):   0.0165
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 9, time = 0.13 m
-INFO [matcher.py:102] Objective:        29840000.0
-INFO [matcher.py:123] Balance (beta):   0.0166
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 10, time = 0.15 m
-INFO [matcher.py:102] Objective:        29819000.0
-INFO [matcher.py:123] Balance (beta):   0.0165
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 11, time = 0.19 m
-INFO [matcher.py:102] Objective:        29801000.0
-INFO [matcher.py:123] Balance (beta):   0.0165
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 12, time = 0.21 m
-INFO [matcher.py:102] Objective:        29777000.0
-INFO [matcher.py:123] Balance (beta):   0.0140
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 13, time = 0.42 m
-INFO [matcher.py:102] Objective:        29771000.0
-INFO [matcher.py:123] Balance (beta):   0.0140
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:97] =========================================
-INFO [matcher.py:98] Solution 14, time = 0.70 m
-INFO [matcher.py:102] Objective:        29767000.0
-INFO [matcher.py:123] Balance (beta):   0.0136
-INFO [matcher.py:128] Patients (pool):  1000
-INFO [matcher.py:130] Patients (target):        1000
-INFO [matcher.py:146]
-INFO [matcher.py:252] Status = FEASIBLE
-INFO [matcher.py:253] Number of solutions found: 14
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-        <b>Headers Numeric: </b><br>
-        ['age', 'height', 'weight']<br><br>
-        <b>Headers Categoric: </b><br>
-        ['gender', 'haircolor', 'country', 'binary_0', 'binary_1', 'binary_2', 'binary_3'] <br><br>
-        <b>Populations</b> <br>
-        ['pool', 'target'] <br>
-        <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>age</th>
-      <th>height</th>
-      <th>weight</th>
-      <th>gender</th>
-      <th>haircolor</th>
-      <th>country</th>
-      <th>population</th>
-      <th>binary_0</th>
-      <th>binary_1</th>
-      <th>binary_2</th>
-      <th>binary_3</th>
-      <th>patient_id</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>37.519341</td>
-      <td>178.337875</td>
-      <td>57.424543</td>
-      <td>0.0</td>
-      <td>1</td>
-      <td>4</td>
-      <td>target</td>
-      <td>1</td>
-      <td>1</td>
-      <td>1</td>
-      <td>1</td>
-      <td>10000</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>23.722325</td>
-      <td>128.347114</td>
-      <td>102.183004</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>2</td>
-      <td>target</td>
-      <td>0</td>
-      <td>1</td>
-      <td>0</td>
-      <td>1</td>
-      <td>10001</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>64.523502</td>
-      <td>144.600598</td>
-      <td>90.061948</td>
-      <td>1.0</td>
-      <td>2</td>
-      <td>4</td>
-      <td>target</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>10002</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>25.377578</td>
-      <td>177.986337</td>
-      <td>82.076883</td>
-      <td>0.0</td>
-      <td>0</td>
-      <td>2</td>
-      <td>target</td>
-      <td>1</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>10003</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>26.922515</td>
-      <td>155.633760</td>
-      <td>76.929413</td>
-      <td>1.0</td>
-      <td>2</td>
-      <td>5</td>
-      <td>target</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>1</td>
-      <td>10004</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>9935</th>
-      <td>63.955700</td>
-      <td>164.060497</td>
-      <td>101.344670</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>3</td>
-      <td>pool</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>1</td>
-      <td>9935</td>
-    </tr>
-    <tr>
-      <th>9944</th>
-      <td>38.089602</td>
-      <td>174.116424</td>
-      <td>90.463362</td>
-      <td>0.0</td>
-      <td>1</td>
-      <td>5</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>1</td>
-      <td>1</td>
-      <td>9944</td>
-    </tr>
-    <tr>
-      <th>9950</th>
-      <td>42.340454</td>
-      <td>154.759178</td>
-      <td>113.770268</td>
-      <td>1.0</td>
-      <td>2</td>
-      <td>5</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>9950</td>
-    </tr>
-    <tr>
-      <th>9960</th>
-      <td>58.773727</td>
-      <td>158.792184</td>
-      <td>80.576978</td>
-      <td>1.0</td>
-      <td>0</td>
-      <td>5</td>
-      <td>pool</td>
-      <td>0</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>9960</td>
-    </tr>
-    <tr>
-      <th>9983</th>
-      <td>65.077128</td>
-      <td>175.593470</td>
-      <td>75.612613</td>
-      <td>0.0</td>
-      <td>2</td>
-      <td>4</td>
-      <td>pool</td>
-      <td>1</td>
-      <td>1</td>
-      <td>0</td>
-      <td>1</td>
-      <td>9983</td>
-    </tr>
-  </tbody>
-</table>
-<p>2000 rows × 12 columns</p>
-</div></div>
-</div>
-<p>As one can already see from the reported balance metric, the ConstraintSatificationMatcher finds a much better solution. We also confirm this result visually below.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="n">match</span> <span class="o">=</span> <span class="n">matcher</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span>
-<span class="n">m_data</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="s1">&#39;pool&#39;</span><span class="p">)</span>
-<span class="n">m_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m_data</span><span class="p">[</span><span class="s1">&#39;population&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; (prematch)&#39;</span>
-<span class="k">match</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m_data</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_per_feature_loss</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">debin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_numeric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">])</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">plot_categoric_features</span><span class="p">(</span><span class="n">match</span><span class="p">,</span>  <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pool (prematch)&#39;</span><span class="p">,</span> <span class="s1">&#39;pool&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/demos_matching_01_propensity_14_0.png" src="../_images/demos_matching_01_propensity_14_0.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/demos_matching_01_propensity_14_1.png" src="../_images/demos_matching_01_propensity_14_1.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/demos_matching_01_propensity_14_2.png" src="../_images/demos_matching_01_propensity_14_2.png" />
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
 </div>
 </div>
 </section>

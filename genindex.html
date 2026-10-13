@@ -61,7 +61,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demos/weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -247,6 +247,12 @@
 </li>
       <li><a href="api/matchers.html#pybalance.genetic.GeneticMatcher">GeneticMatcher (class in pybalance.genetic)</a>
 </li>
+      <li><a href="api/weighters.html#pybalance.weighting.BaseWeighter.get_best_match">get_best_match() (pybalance.weighting.BaseWeighter method)</a>
+
+      <ul>
+        <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter.get_best_match">(pybalance.weighting.PropensityScoreWeighter method)</a>
+</li>
+      </ul></li>
       <li><a href="api/matchers.html#pybalance.genetic.get_global_defaults">get_global_defaults() (in module pybalance.genetic)</a>
 </li>
       <li><a href="api/matchers.html#pybalance.genetic.GeneticMatcher.get_params">get_params() (pybalance.genetic.GeneticMatcher method)</a>
@@ -262,17 +268,27 @@
 </li>
         <li><a href="api/weighters.html#pybalance.weighting.EntropyBalanceWeighter.get_params">(pybalance.weighting.EntropyBalanceWeighter method)</a>
 </li>
-        <li><a href="api/weighters.html#pybalance.weighting.IPTWWeighter.get_params">(pybalance.weighting.IPTWWeighter method)</a>
-</li>
         <li><a href="api/weighters.html#pybalance.weighting.MAICWeighter.get_params">(pybalance.weighting.MAICWeighter method)</a>
+</li>
+        <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter.get_params">(pybalance.weighting.PropensityScoreWeighter method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/core.html#pybalance.utils.MatchingData.get_population">get_population() (pybalance.utils.MatchingData method)</a>
 </li>
-      <li><a href="api/weighters.html#pybalance.weighting.BaseWeighter.get_weights">get_weights() (pybalance.weighting.BaseWeighter method)</a>
+      <li><a href="api/weighters.html#pybalance.weighting.BaseWeighter.get_target_weights">get_target_weights() (pybalance.weighting.BaseWeighter method)</a>
+
+      <ul>
+        <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter.get_target_weights">(pybalance.weighting.PropensityScoreWeighter method)</a>
 </li>
+      </ul></li>
+      <li><a href="api/weighters.html#pybalance.weighting.BaseWeighter.get_weights">get_weights() (pybalance.weighting.BaseWeighter method)</a>
+
+      <ul>
+        <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter.get_weights">(pybalance.weighting.PropensityScoreWeighter method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -288,10 +304,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/core.html#pybalance.utils.infer_matching_headers">infer_matching_headers() (in module pybalance.utils)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/weighters.html#pybalance.weighting.IPTWWeighter">IPTWWeighter (class in pybalance.weighting)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -320,6 +332,8 @@
 </li>
         <li><a href="api/weighters.html#pybalance.weighting.BaseWeighter.match">(pybalance.weighting.BaseWeighter method)</a>
 </li>
+        <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter.match">(pybalance.weighting.PropensityScoreWeighter method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -347,25 +361,33 @@
 </li>
       <li><a href="api/visualization.html#pybalance.visualization.plot_categoric_features">plot_categoric_features() (in module pybalance.visualization)</a>
 </li>
-      <li><a href="api/weighters.html#pybalance.weighting.plot_iptw_propensity_distributions">plot_iptw_propensity_distributions() (in module pybalance.weighting)</a>
-</li>
       <li><a href="api/visualization.html#pybalance.visualization.plot_joint_numeric_categoric_distributions">plot_joint_numeric_categoric_distributions() (in module pybalance.visualization)</a>
 </li>
       <li><a href="api/visualization.html#pybalance.visualization.plot_joint_numeric_distributions">plot_joint_numeric_distributions() (in module pybalance.visualization)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/visualization.html#pybalance.visualization.plot_numeric_features">plot_numeric_features() (in module pybalance.visualization)</a>
 </li>
       <li><a href="api/visualization.html#pybalance.visualization.plot_per_feature_loss">plot_per_feature_loss() (in module pybalance.visualization)</a>
 </li>
-      <li><a href="api/matchers.html#pybalance.propensity.plot_propensity_score_match_distributions">plot_propensity_score_match_distributions() (in module pybalance.propensity)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/matchers.html#pybalance.propensity.PropensityScoreMatcher.plot_propensity_score_distributions">plot_propensity_score_distributions() (pybalance.propensity.PropensityScoreMatcher method)</a>
+
+      <ul>
+        <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter.plot_propensity_score_distributions">(pybalance.weighting.PropensityScoreWeighter method)</a>
 </li>
+      </ul></li>
       <li><a href="api/matchers.html#pybalance.propensity.plot_propensity_score_match_pairs">plot_propensity_score_match_pairs() (in module pybalance.propensity)</a>
+</li>
+      <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter.plot_weight_distributions">plot_weight_distributions() (pybalance.weighting.PropensityScoreWeighter method)</a>
 </li>
       <li><a href="api/core.html#pybalance.utils.MatchingData.populations">populations (pybalance.utils.MatchingData property)</a>
 </li>
+      <li><a href="api/weighters.html#pybalance.weighting.propensity_score_weights">propensity_score_weights() (in module pybalance.weighting)</a>
+</li>
       <li><a href="api/matchers.html#pybalance.propensity.PropensityScoreMatcher">PropensityScoreMatcher (class in pybalance.propensity)</a>
+</li>
+      <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter">PropensityScoreWeighter (class in pybalance.weighting)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -377,6 +399,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/weighters.html#pybalance.weighting.PropensityScoreWeighter.score">score() (pybalance.weighting.PropensityScoreWeighter method)</a>
+</li>
       <li><a href="api/core.html#pybalance.utils.split_target_pool">split_target_pool() (in module pybalance.utils)</a>
 </li>
   </ul></td>

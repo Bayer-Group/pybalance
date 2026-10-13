@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Core Utilities" href="../api/core.html" />
-    <link rel="prev" title="Inverse Probability of Treatment Weighting (IPTW)" href="weighting_01_iptw.html" /> 
+    <link rel="prev" title="Propensity Score Weighting" href="weighting_01_propensity.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -67,7 +67,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Weighting with MAIC / entropy balancing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#A-patient-level-(synthetic)-pool">A patient-level (synthetic) pool</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Specifying-means-only">Specifying means only</a></li>
@@ -121,8 +121,7 @@
              
   <section id="Weighting-with-MAIC-/-entropy-balancing">
 <h1>Weighting with MAIC / entropy balancing<a class="headerlink" href="#Weighting-with-MAIC-/-entropy-balancing" title="Permalink to this heading"></a></h1>
-<p>Every matcher elsewhere in <code class="docutils literal notranslate"><span class="pre">pybalance</span></code> (genetic, LP, propensity) works by <strong>selecting a subset</strong> of the pool. <code class="docutils literal notranslate"><span class="pre">pybalance.weighting</span></code> instead <strong>reweights every pool patient</strong>, so nothing is dropped – some patients just count for more (or less) than others. This is the standard approach for <strong>Matching-Adjusted Indirect Comparison (MAIC)</strong> (Signorovitch et al., 2010): reweighting a trial’s patient-level data (“IPD”) so its weighted covariate moments match a comparator’s <strong>published,
-aggregate-only</strong> statistics (e.g. a Table 1 of means and proportions), enabling an indirect treatment comparison when the comparator’s own patient-level data isn’t available.</p>
+<p>This notebook uses the weighters in <code class="docutils literal notranslate"><span class="pre">pybalance.weighting</span></code> (see the propensity score weighting demo for the general idea) for <strong>Matching-Adjusted Indirect Comparison (MAIC)</strong> (Signorovitch et al., 2010): reweighting a trial’s patient-level data (“IPD”) so its weighted covariate moments match a comparator’s <strong>published, aggregate-only</strong> statistics (e.g. a Table 1 of means and proportions). This enables an indirect treatment comparison when the comparator’s own patient-level data isn’t available.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">MAICWeighter</span></code> – the classic MAIC formulation: matches the disclosed <strong>first moments</strong> (means, category rates, and the rate above a disclosed median/quantile).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter</span></code> – the general form MAIC is a special case of: optionally <em>also</em> balances the <strong>variance</strong> of numeric features whose target discloses a mean and a std.</p></li>
@@ -133,8 +132,7 @@ aggregate-only</strong> statistics (e.g. a Table 1 of means and proportions), en
 <li><p><strong>means and stds</strong>, which adds a variance constraint;</p></li>
 <li><p><strong>medians and other quantiles instead of means</strong>, plus a soft <strong>max</strong>.</p></li>
 </ol>
-<p>As there, only disclosed statistics are constrained. Features the target says nothing about (here <code class="docutils literal notranslate"><span class="pre">height</span></code> and <code class="docutils literal notranslate"><span class="pre">country</span></code>) are left free, but we keep them in the <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code> so we can still see how reweighting changes them. A last section covers what happens when the target lies outside the pool’s support.</p>
-<p>Both weighters also work with a patient-level target, and both return an ordinary <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code>, just with every pool row now carrying a fitted weight column.</p>
+<p>As there, only disclosed statistics are constrained. Features the target says nothing about (here <code class="docutils literal notranslate"><span class="pre">height</span></code> and <code class="docutils literal notranslate"><span class="pre">country</span></code>) are left free, but we keep them in the <code class="docutils literal notranslate"><span class="pre">MatchingData</span></code> so we can still see how reweighting changes them. A last section covers what happens when the target lies outside the pool’s support. Both weighters also work with a patient-level target.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -159,7 +157,7 @@ aggregate-only</strong> statistics (e.g. a Table 1 of means and proportions), en
 
 <span class="o">%</span><span class="k">matplotlib</span> inline
 
-<span class="c1"># show convergence / effective-sample-size diagnostics logged during fit()</span>
+<span class="c1"># show convergence / effective-sample-size diagnostics logged during match()</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -488,7 +486,7 @@ MAICWeighter converged in 6 iterations. Effective sample size: 377.7 / 1000 pool
 </div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">age</span></code>, <code class="docutils literal notranslate"><span class="pre">weight</span></code> and <code class="docutils literal notranslate"><span class="pre">gender</span></code> land right on their targets in the weighted column. <code class="docutils literal notranslate"><span class="pre">height</span></code> and the <code class="docutils literal notranslate"><span class="pre">country</span></code> levels have no target (<code class="docutils literal notranslate"><span class="pre">NaN</span></code>) – nothing constrains them – but we can still see how they moved as a side effect of reweighting.</p>
-<p>The <strong>effective sample size (ESS)</strong>, <span class="math notranslate nohighlight">\(\left(\sum_i w_i\right)^2 / \sum_i w_i^2\)</span>, summarizes how “spread out” the weights are: it equals the pool size when all weights are equal, and shrinks towards 1 as more and more of the total weight concentrates on fewer patients. A large drop from the raw pool size is the standard MAIC red flag that the reweighting is relying heavily on a small, possibly unrepresentative, slice of the pool – worth showing alongside any MAIC result.</p>
+<p>The <strong>effective sample size (ESS)</strong>, introduced in the propensity score weighting demo, is the standard red flag worth showing alongside any MAIC result: a large drop from the raw pool size means the reweighting relies heavily on a small, possibly unrepresentative, slice of the pool.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -788,7 +786,7 @@ EntropyBalanceWeighter converged in 6 iterations. Effective sample size: 639.1 /
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-/Users/gmema/src/matching-fork/venv/lib/python3.12/site-packages/pybalance/sim/data/aggregate_target_quantiles.csv
+pybalance/sim/data/aggregate_target_quantiles.csv
 
 feature,statistic,parameter,value
 ,n,,100
@@ -1285,7 +1283,7 @@ an <code class="docutils literal notranslate"><span class="pre">AggregateTarget<
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-MAICWeighter did not converge within 200 iterations (max constraint violation = 0.296). Weights may not exactly balance the requested moments; consider increasing max_iter/ridge, or check for unmatchable (e.g. near-extreme or non-overlapping) covariates.
+MAICWeighter did not converge within 200 iterations (max constraint violation = 0.4863). Weights may not exactly balance the requested moments; consider increasing max_iter/ridge, or check for unmatchable (e.g. near-extreme or non-overlapping) covariates.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1334,7 +1332,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>0.450000</td>
       <td>0.517000</td>
-      <td>0.464052</td>
+      <td>0.693159</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1342,7 +1340,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>0.250000</td>
       <td>0.108000</td>
-      <td>0.340190</td>
+      <td>0.294749</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1350,7 +1348,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>0.200000</td>
       <td>0.224000</td>
-      <td>0.080990</td>
+      <td>0.319517</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1358,7 +1356,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>0.110000</td>
       <td>0.274000</td>
-      <td>0.143957</td>
+      <td>0.034837</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1366,7 +1364,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>0.200000</td>
       <td>0.284000</td>
-      <td>0.254031</td>
+      <td>0.336770</td>
     </tr>
     <tr>
       <th>5</th>
@@ -1374,7 +1372,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>0.150000</td>
       <td>0.110000</td>
-      <td>0.180831</td>
+      <td>0.014126</td>
     </tr>
     <tr>
       <th>6</th>
@@ -1382,7 +1380,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>50.795975</td>
       <td>55.520107</td>
-      <td>51.570918</td>
+      <td>43.507245</td>
     </tr>
     <tr>
       <th>7</th>
@@ -1390,7 +1388,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>82.079033</td>
       <td>88.016510</td>
-      <td>81.907367</td>
+      <td>77.781079</td>
     </tr>
     <tr>
       <th>8</th>
@@ -1398,7 +1396,7 @@ country rate in target: {0: 0.09, 1: 0.25, 2: 0.2, 3: 0.11, 4: 0.2, 5: 0.15}
       <td>mean</td>
       <td>153.795044</td>
       <td>160.308334</td>
-      <td>154.426966</td>
+      <td>148.028941</td>
     </tr>
   </tbody>
 </table>
@@ -1423,15 +1421,15 @@ categories either, but degrades more gracefully – see the aggregate-matching d
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Converged: False
-Max constraint violation: 0.296
-Effective sample size: 443.4 / 1000 pool patients
+Max constraint violation: 0.486
+Effective sample size: 222.6 / 1000 pool patients
 </pre></div></div>
 </div>
 </section>
 <section id="Takeaways">
 <h2>Takeaways<a class="headerlink" href="#Takeaways" title="Permalink to this heading"></a></h2>
 <ul class="simple">
-<li><p>Weighting keeps <strong>every</strong> pool patient, unlike the subset-selection matchers elsewhere in <code class="docutils literal notranslate"><span class="pre">pybalance</span></code> – some patients just count for more or less. <code class="docutils literal notranslate"><span class="pre">MAICWeighter</span></code> is the classic mean-only MAIC formulation; <code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter(match_variance=True)</span></code> generalizes it to also balance disclosed variances.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAICWeighter</span></code> is the classic mean-only MAIC formulation; <code class="docutils literal notranslate"><span class="pre">EntropyBalanceWeighter(match_variance=True)</span></code> generalizes it to also balance disclosed variances.</p></li>
 <li><p>Against an <code class="docutils literal notranslate"><span class="pre">AggregateTarget</span></code>, every disclosed statistic is its own constraint and nothing else is constrained: a numeric <strong>mean</strong>, each categoric <strong>rate</strong>, and the rate above each disclosed <strong>median/quantile</strong> (the feature is dichotomized at the disclosed value). Features and categoric levels the target doesn’t disclose are left free, and <code class="docutils literal notranslate"><span class="pre">weighted_balance_table</span></code> still reports them (with no target) so you can see how reweighting moved them.</p></li>
 <li><p>Balancing a <strong>std</strong> needs the mean as well, since the variance is taken around it. A std without a mean isn’t a moment constraint reweighting can solve (use the subset-selection matchers).</p></li>
 <li><p><strong>``min`` and ``max``</strong> are soft here too: exactly zero weight above a max is out of reach for positive weights, so the weight above it is only penalized (<code class="docutils literal notranslate"><span class="pre">limit_penalty</span></code>) and shrinks, rather than vanishing.</p></li>
@@ -1445,7 +1443,7 @@ Effective sample size: 443.4 / 1000 pool patients
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="weighting_01_iptw.html" class="btn btn-neutral float-left" title="Inverse Probability of Treatment Weighting (IPTW)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="weighting_01_propensity.html" class="btn btn-neutral float-left" title="Propensity Score Weighting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../api/core.html" class="btn btn-neutral float-right" title="Core Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

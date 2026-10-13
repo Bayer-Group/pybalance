@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybalance.weighting.base &mdash; PyBalance</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=860ec0ee"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            PyBalance
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../00_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../01_installation.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../02_demos.html">Demos</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/core_01_matching_data.html">Matching Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/core_02_balance_calculators.html">Balance Calculators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Matching</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_01_propensity.html">Propensity Score Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_02_linear_program.html">Constraint Satisfaction Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_03_cardinality.html">Cardinality matching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_04_genetic.html">Genetic Matcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/matching_05_aggregate.html">Matching a pool to an aggregate target</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/weighting_01_propensity.html">Propensity Score Weighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/core.html">Core Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/matchers.html">Matchers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/weighters.html">Weighters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/simulation.html">Simulation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../04_license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../05_help.html">Help</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PyBalance</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybalance.weighting.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybalance.weighting.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybalance.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">MatchingData</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_fitted</span><span class="p">(</span><span class="n">weighter</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">weighter</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Weighter has no weights yet: call match() first.&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="effective_sample_size"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.effective_sample_size">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">effective_sample_size</span><span class="p">(</span><span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Kish&#39;s effective sample size: ``(sum w)**2 / sum(w**2)``. Invariant to the</span>
+<span class="sd">    overall scale of the weights. A large drop relative to ``len(weights)``</span>
+<span class="sd">    indicates the reweighting is relying heavily on a small number of pool</span>
+<span class="sd">    patients to match the target, and results should be interpreted</span>
+<span class="sd">    cautiously (e.g. the target may lie outside the range of the pool&#39;s</span>
+<span class="sd">    covariates).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="BaseWeighter"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.BaseWeighter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BaseWeighter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Common interface for weighting methods. Unlike the Matcher classes</span>
+<span class="sd">    (genetic/lp/propensity), a Weighter never drops pool patients; instead it</span>
+<span class="sd">    assigns every pool patient a non-negative weight so that the *weighted*</span>
+<span class="sd">    pool resembles the target on the moments of interest. This is the</span>
+<span class="sd">    standard approach for indirect/external comparisons when excluding</span>
+<span class="sd">    patients is undesirable or infeasible -- e.g. small pools, or a target</span>
+<span class="sd">    known only through published aggregate statistics.</span>
+
+<span class="sd">    :param matching_data: MatchingData whose pool is to be weighted. The</span>
+<span class="sd">        target can be either patient-level or an ``AggregateTarget`` (e.g. a</span>
+<span class="sd">        published Table 1).</span>
+<span class="sd">    :param weight_col: Name of the column used to store weights on the</span>
+<span class="sd">        MatchingData returned by match(). Must not collide with an existing</span>
+<span class="sd">        matching feature.</span>
+<span class="sd">    :param verbose: Whether to log fitting diagnostics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">matching_data</span><span class="p">:</span> <span class="n">MatchingData</span><span class="p">,</span>
+        <span class="n">weight_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sample_weight&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">weight_col</span> <span class="ow">in</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;weight_col=</span><span class="si">{</span><span class="n">weight_col</span><span class="si">!r}</span><span class="s2"> collides with an existing matching &quot;</span>
+                <span class="s2">&quot;feature. Pass a different weight_col.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span> <span class="o">=</span> <span class="n">matching_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight_col</span> <span class="o">=</span> <span class="n">weight_col</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Only set by weighters that also reweight a patient-level target.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="BaseWeighter.get_params"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.BaseWeighter.get_params">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the weighter&#39;s configuration parameters as a dict.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute self.weights (and, if the weighter also reweights the target,</span>
+<span class="sd">        self.target_weights) and self.diagnostics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="BaseWeighter.get_weights"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.BaseWeighter.get_weights">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the fitted per-patient pool weights (in pool row order).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span></div>
+
+<div class="viewcode-block" id="BaseWeighter.get_target_weights"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.BaseWeighter.get_target_weights">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_target_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the fitted per-patient target weights, or None if the target is</span>
+<span class="sd">        not reweighted (it then counts with weight 1).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span></div>
+
+<div class="viewcode-block" id="BaseWeighter.effective_sample_size"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.BaseWeighter.effective_sample_size">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">effective_sample_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Kish&#39;s effective sample size of the fitted pool weights. See</span>
+<span class="sd">        ``effective_sample_size()``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">effective_sample_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseWeighter.get_best_match"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.BaseWeighter.get_best_match">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_best_match</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a MatchingData instance in which every pool patient is retained</span>
+<span class="sd">        and carries a new column (see weight_col) holding their weight. The</span>
+<span class="sd">        target population (patient-level or aggregate) is passed through</span>
+<span class="sd">        unchanged, with weight 1.0 assigned to any patient-level target rows</span>
+<span class="sd">        unless the weighter also fits target weights. Requires match() to have</span>
+<span class="sd">        been called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_check_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_with_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_weights</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseWeighter.match"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.BaseWeighter.match">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the weights (once; later calls reuse them) and return the</span>
+<span class="sd">        weighted MatchingData. Named ``match`` for consistency with the other</span>
+<span class="sd">        matchers in pybalance, although no patients are dropped.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_match</span><span class="p">()</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_with_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool_weights</span><span class="p">,</span> <span class="n">target_weights</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MatchingData</span><span class="p">:</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching_data</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">pool_name</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">pool</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pool_weights</span>
+
+        <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">has_aggregate_target</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span>
+                <span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">,</span>
+                <span class="n">target</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">aggregate_target</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">population_col</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">population_col</span><span class="p">,</span>
+                <span class="n">pool_name</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">pool_name</span><span class="p">,</span>
+                <span class="n">target_name</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">target_name</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">target</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_population</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">target_name</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_col</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">target_weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">target_weights</span>
+        <span class="k">return</span> <span class="n">MatchingData</span><span class="p">(</span>
+            <span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">,</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">population_col</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">population_col</span><span class="p">,</span>
+            <span class="n">pool_name</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">pool_name</span><span class="p">,</span>
+            <span class="n">target_name</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">target_name</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="weighted_balance_table"><a class="viewcode-back" href="../../../api/weighters.html#pybalance.weighting.weighted_balance_table">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">weighted_balance_table</span><span class="p">(</span>
+    <span class="n">weighter</span><span class="p">:</span> <span class="n">BaseWeighter</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a table comparing each balanced feature&#39;s weighted (and, for</span>
+<span class="sd">    reference, unweighted) pool moment to the target moment -- a quick</span>
+<span class="sd">    post-hoc check of how well the fitted weights balanced the pool. For</span>
+<span class="sd">    EntropyBalanceWeighter/MAICWeighter, residuals should be ~0 for every</span>
+<span class="sd">    constrained row; for PropensityScoreWeighter, which does not solve for exact</span>
+<span class="sd">    balance, this is instead a diagnostic of how much balance improved</span>
+<span class="sd">    relative to the unweighted pool.</span>
+
+<span class="sd">    :param weighter: A fitted EntropyBalanceWeighter/MAICWeighter/PropensityScoreWeighter,</span>
+<span class="sd">        i.e. one on which match() has already been called.</span>
+<span class="sd">    :param method: For a PropensityScoreWeighter, the weighting method to</span>
+<span class="sd">        tabulate (default: the method the model was selected for).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_fitted</span><span class="p">(</span><span class="n">weighter</span><span class="p">)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">}</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">target_weights</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">get_target_weights</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">target_mean</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target_mean</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">target_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
+            <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+            <span class="n">weights</span><span class="o">=</span><span class="n">target_weights</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">target_std</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">target_std</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">out_features</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">output_headers</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>
+
+    <span class="n">variance_features</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">set</span><span class="p">(</span><span class="n">weighter</span><span class="o">.</span><span class="n">_numeric_features_with_disclosed_std</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">weighter</span><span class="p">,</span> <span class="s2">&quot;match_variance&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="n">constrained</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">constrained</span>
+    <span class="n">disclosed</span> <span class="o">=</span> <span class="n">weighter</span><span class="o">.</span><span class="n">balance_calculator</span><span class="o">.</span><span class="n">disclosed</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">out_features</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">disclosed</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">constrained</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+            <span class="k">continue</span>  <span class="c1"># a level implied by the others</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+                <span class="s2">&quot;moment&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+                <span class="c1"># undisclosed: nothing to compare to, but still worth seeing move</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">target_mean</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">if</span> <span class="n">disclosed</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                <span class="s2">&quot;unweighted_pool&quot;</span><span class="p">:</span> <span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;weighted_pool&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">variance_features</span><span class="p">:</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+                    <span class="s2">&quot;moment&quot;</span><span class="p">:</span> <span class="s2">&quot;variance&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="n">target_std</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="s2">&quot;unweighted_pool&quot;</span><span class="p">:</span> <span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">(),</span>
+                    <span class="s2">&quot;weighted_pool&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">pool</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024 - Bayer AG - Stephen Privitera, Hooman Sedghamiz, Alex Hartenstein, Abhishek Choudhary.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

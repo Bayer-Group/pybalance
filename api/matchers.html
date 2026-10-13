@@ -64,7 +64,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Demos - Weighting</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../demos/weighting_01_iptw.html">Inverse Probability of Treatment Weighting (IPTW)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demos/weighting_01_propensity.html">Propensity Score Weighting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../demos/weighting_02_maic.html">Weighting with MAIC / entropy balancing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -75,9 +75,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.propensity.PropensityScoreMatcher"><code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.propensity.PropensityScoreMatcher.get_params"><code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher.get_params()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pybalance.propensity.PropensityScoreMatcher.match"><code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher.match()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybalance.propensity.PropensityScoreMatcher.plot_propensity_score_distributions"><code class="docutils literal notranslate"><span class="pre">PropensityScoreMatcher.plot_propensity_score_distributions()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#pybalance.propensity.plot_propensity_score_match_distributions"><code class="docutils literal notranslate"><span class="pre">plot_propensity_score_match_distributions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pybalance.propensity.plot_propensity_score_match_pairs"><code class="docutils literal notranslate"><span class="pre">plot_propensity_score_match_pairs()</span></code></a></li>
 </ul>
 </li>
@@ -197,18 +197,14 @@ instance containing the matched pool and target populations.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pybalance.propensity.PropensityScoreMatcher.plot_propensity_score_distributions">
+<span class="sig-name descname"><span class="pre">plot_propensity_score_distributions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/propensity/matcher.html#PropensityScoreMatcher.plot_propensity_score_distributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.propensity.PropensityScoreMatcher.plot_propensity_score_distributions" title="Permalink to this definition"></a></dt>
+<dd><p>Plot histograms of the estimated propensity score for pool and target
+populations pre- and post-matching. Requires match() to have been
+called.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="pybalance.propensity.plot_propensity_score_match_distributions">
-<span class="sig-prename descclassname"><span class="pre">pybalance.propensity.</span></span><span class="sig-name descname"><span class="pre">plot_propensity_score_match_distributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matcher</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pybalance/propensity/matcher.html#plot_propensity_score_match_distributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybalance.propensity.plot_propensity_score_match_distributions" title="Permalink to this definition"></a></dt>
-<dd><p>Plot histograms of the estimated propensity score for pool and target
-populations pre- and post-matching.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>matcher</strong> (<a class="reference internal" href="#pybalance.propensity.PropensityScoreMatcher" title="pybalance.propensity.matcher.PropensityScoreMatcher"><em>PropensityScoreMatcher</em></a>) – Fitted PropensityScoreMatcher model.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
