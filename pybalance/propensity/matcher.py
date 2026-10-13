@@ -45,7 +45,7 @@ class PropensityModelSearch:
     DEFAULT_HYPERPARAM_SPACE = {
         LogisticRegression: {
             "C": loguniform(a=0.01, b=100),
-            "penalty": ["l1", "l2"],
+            "l1_ratio": [0, 1],
             "solver": ["saga"],
             "fit_intercept": [True, False],
             "max_iter": [500],

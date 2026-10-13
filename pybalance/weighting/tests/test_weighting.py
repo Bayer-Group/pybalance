@@ -373,7 +373,7 @@ def test_min_ess_fraction_rejects_spiky_candidates():
     strict.hyperparam_space = {
         LogisticRegression: {
             "C": [100.0],
-            "penalty": ["l2"],
+            "l1_ratio": [0],
             "solver": ["saga"],
             "fit_intercept": [True],
             "max_iter": [500],
